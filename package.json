@@ -1,0 +1,12 @@
+{
+  "name": "terrascope",
+  "version": "1.0.0",
+  "description": "ESG & Renewable Feasibility Analysis — King Lake, Alabama",
+  "private": true,
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "dev": "python3 -m http.server 5173"
+  },
+  "keywords": ["esg", "renewable", "geospatial", "king-lake", "alabama", "nrel", "nasa-smap"],
+  "license": "MIT"
+}

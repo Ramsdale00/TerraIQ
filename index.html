@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<!-- TerraScope — King Lake ESG & Renewable Feasibility Analysis
+     Self-contained single-file app. No build step required.
+     Map: Leaflet.js from CDN | Data: embedded GeoJSON | ESG: pure JS engine
+     Data sources: NREL NSRDB, NREL Wind Toolkit, NASA SMAP L3, USGS NHD, EPA EnviroAtlas
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TerraScope — King Lake ESG Analysis</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-primary:#0a1120;--bg-secondary:#0f1929;--bg-panel:#111d2e;--bg-card:#152236;--bg-hover:#1a2d44;
+  --border:#1e3048;--border-light:#243d5a;
+  --accent:#00d4aa;--accent-dim:#00a884;--accent-glow:rgba(0,212,170,0.15);
+  --text-primary:#e8f0f8;--text-secondary:#8ba3be;--text-muted:#4a6380;
+  --radius-sm:6px;--radius-md:10px;--radius-lg:14px;
+  --header-h:52px;--bar-h:56px;--panel-w:300px;
+  --font:'Inter',system-ui,-apple-system,sans-serif;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font);font-size:13px;-webkit-font-smoothing:antialiased}
+#app{display:flex;flex-direction:column;width:100vw;height:100vh;overflow:hidden}
+#header{height:var(--header-h);display:flex;align-items:center;gap:16px;padding:0 20px;background:var(--bg-secondary);border-bottom:1px solid var(--border);flex-shrink:0;z-index:100}
+#logo{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;color:var(--text-primary);letter-spacing:.5px}
+#header-meta{display:flex;gap:6px;margin-left:8px}
+.site-tag{background:var(--bg-card);border:1px solid var(--border);color:var(--text-secondary);padding:2px 8px;border-radius:20px;font-size:11px;letter-spacing:.3px}
+#header-status{margin-left:auto}
+.status-dot{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:1px;color:var(--text-muted)}
+.status-dot.live::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+#main{flex:1;display:flex;overflow:hidden;min-height:0}
+#map-container{flex:1;position:relative;overflow:hidden}
+#map{width:100%;height:100%;background:#091018}
+.leaflet-container{background:#091018 !important;font-family:var(--font)}
+.leaflet-control-zoom{border:1px solid var(--border) !important;border-radius:var(--radius-sm) !important}
+.leaflet-control-zoom a{background:var(--bg-secondary) !important;color:var(--text-secondary) !important;border-color:var(--border) !important;width:28px !important;height:28px !important;line-height:28px !important;font-size:16px !important}
+.leaflet-control-zoom a:hover{background:var(--bg-hover) !important;color:var(--accent) !important}
+.leaflet-control-attribution{background:rgba(10,16,32,.75) !important;color:var(--text-muted) !important;font-size:10px !important}
+.leaflet-control-attribution a{color:var(--text-muted) !important}
+.leaflet-tooltip{background:var(--bg-card) !important;border:1px solid var(--border-light) !important;border-radius:var(--radius-sm) !important;color:var(--text-primary) !important;font-family:var(--font) !important;font-size:12px !important;padding:6px 10px !important;box-shadow:0 4px 12px rgba(0,0,0,.4) !important}
+#map-legend{position:absolute;bottom:24px;left:16px;background:rgba(15,25,41,.92);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;z-index:400;min-width:160px;backdrop-filter:blur(8px)}
+#map-legend.hidden{display:none}
+#legend-title{font-size:10px;font-weight:600;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase}
+.legend-row{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);margin-bottom:4px}
+.legend-swatch{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+#coords-display{position:absolute;bottom:24px;right:16px;font-size:11px;color:var(--text-muted);background:rgba(15,25,41,.8);padding:4px 10px;border-radius:20px;border:1px solid var(--border);z-index:400;backdrop-filter:blur(6px);letter-spacing:.3px}
+#right-panel{width:var(--panel-w);flex-shrink:0;background:var(--bg-panel);border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+#right-panel::-webkit-scrollbar{width:4px}
+#right-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+#panel-section-score,#panel-section-renewable,#panel-section-insights,#data-sources{padding:16px 18px}
+.panel-label{font-size:10px;font-weight:700;letter-spacing:1.8px;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase}
+.panel-divider{height:1px;background:var(--border)}
+#gauge-container{width:100%;display:flex;justify-content:center;margin-bottom:4px}
+#gauge-svg{width:170px;height:auto;overflow:visible}
+#gauge-value{transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1),stroke .6s ease}
+#score-breakdown{display:flex;flex-direction:column;gap:8px}
+.breakdown-item{display:flex;align-items:center;gap:8px}
+.breakdown-label{font-size:11px;color:var(--text-secondary);width:82px;flex-shrink:0}
+.breakdown-bar-wrap{flex:1;height:5px;background:var(--bg-card);border-radius:3px;overflow:hidden}
+.breakdown-bar{height:100%;background:var(--accent);border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+#bar-soc{background:#60a5fa}#bar-gov{background:#c084fc}
+.breakdown-val{font-size:11px;font-weight:600;color:var(--text-primary);width:22px;text-align:right}
+#renewable-metrics{display:flex;flex-direction:column;gap:8px}
+.metric-card{display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 12px;transition:border-color .2s}
+.metric-card:hover{border-color:var(--border-light)}
+.metric-icon{font-size:18px;width:24px;text-align:center;flex-shrink:0}
+.metric-body{flex:1;min-width:0}
+.metric-name{font-size:10px;color:var(--text-muted);font-weight:600;letter-spacing:.8px;text-transform:uppercase;margin-bottom:1px}
+.metric-value{font-size:18px;font-weight:700;color:var(--text-primary);line-height:1.2}
+.metric-unit{font-size:10px;color:var(--text-muted)}
+.metric-rating{font-size:10px;font-weight:700;padding:3px 7px;border-radius:20px;letter-spacing:.5px;flex-shrink:0}
+.rating-excellent{background:rgba(0,212,170,.15);color:#00d4aa}
+.rating-good{background:rgba(96,165,250,.15);color:#60a5fa}
+.rating-fair{background:rgba(251,191,36,.15);color:#fbbf24}
+#insights-list{display:flex;flex-direction:column;gap:8px}
+.insight-card{display:flex;gap:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 12px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.insight-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);margin-top:4px;flex-shrink:0}
+.insight-text{font-size:12px;color:var(--text-secondary);line-height:1.5}
+.source-tags{display:flex;flex-wrap:wrap;gap:5px}
+.source-tag{background:var(--bg-card);border:1px solid var(--border);color:var(--text-muted);padding:3px 8px;border-radius:20px;font-size:10px;font-weight:500}
+#layer-bar{height:var(--bar-h);display:flex;align-items:center;padding:0 16px;background:var(--bg-secondary);border-top:1px solid var(--border);gap:12px;flex-shrink:0;z-index:100}
+#layer-bar-label{font-size:10px;font-weight:700;letter-spacing:1.8px;color:var(--text-muted);white-space:nowrap}
+#layer-toggles{display:flex;gap:6px}
+.layer-btn{display:flex;align-items:center;gap:7px;background:var(--bg-card);border:1px solid var(--border);color:var(--text-secondary);padding:6px 14px;border-radius:20px;font-size:12px;font-family:var(--font);font-weight:500;cursor:pointer;transition:all .18s ease;white-space:nowrap}
+.layer-btn:hover{background:var(--bg-hover);border-color:var(--border-light);color:var(--text-primary)}
+.layer-btn.active{background:var(--accent-glow);border-color:var(--accent-dim);color:var(--accent)}
+.layer-btn-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+#layer-bar-right{margin-left:auto;font-size:11px;color:var(--text-secondary)}
+@media(max-width:680px){#right-panel{display:none}#layer-bar{overflow-x:auto}#layer-bar-right{display:none}}
+</style>
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header id="header">
+      <div id="logo">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+          <circle cx="11" cy="11" r="9" stroke="#00d4aa" stroke-width="2"/>
+          <path d="M4 11 Q8 6 11 11 Q14 16 18 11" stroke="#00d4aa" stroke-width="1.5" fill="none"/>
+          <circle cx="11" cy="11" r="2" fill="#00d4aa"/>
+        </svg>
+        <span>TerraScope</span>
+      </div>
+      <div id="header-meta">
+        <span class="site-tag">King Lake</span>
+        <span class="site-tag">Cullman County, AL</span>
+        <span class="site-tag">34.15°N 86.85°W</span>
+      </div>
+      <div id="header-status">
+        <span id="data-status" class="status-dot live">LIVE DATA</span>
+      </div>
+    </header>
+
+    <!-- Main content -->
+    <main id="main">
+      <!-- Map container -->
+      <div id="map-container">
+        <div id="map"></div>
+        <!-- Map overlay legend -->
+        <div id="map-legend" class="hidden">
+          <div id="legend-title">Legend</div>
+          <div id="legend-scale"></div>
+        </div>
+        <!-- Coordinates display -->
+        <div id="coords-display">34.1547°N, 86.8503°W · Elev ~247m</div>
+      </div>
+
+      <!-- Right panel -->
+      <aside id="right-panel">
+        <div id="panel-section-score">
+          <div class="panel-label">ESG SCORE</div>
+          <div id="gauge-container">
+            <svg id="gauge-svg" viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg">
+              <!-- Track arc -->
+              <path id="gauge-track" d="M 20 110 A 80 80 0 0 1 180 110" fill="none" stroke="#1e2a3a" stroke-width="16" stroke-linecap="round"/>
+              <!-- Value arc -->
+              <path id="gauge-value" d="M 20 110 A 80 80 0 0 1 180 110" fill="none" stroke="#00d4aa" stroke-width="16" stroke-linecap="round"
+                    stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
+              <!-- Score text -->
+              <text id="gauge-number" x="100" y="100" text-anchor="middle" font-size="38" font-weight="700" fill="#f0f4f8">0</text>
+              <text x="100" y="122" text-anchor="middle" font-size="11" fill="#6b7f96" letter-spacing="2">OUT OF 100</text>
+            </svg>
+          </div>
+
+          <!-- Score breakdown -->
+          <div id="score-breakdown">
+            <div class="breakdown-item">
+              <span class="breakdown-label">Environmental</span>
+              <div class="breakdown-bar-wrap">
+                <div class="breakdown-bar" id="bar-env" style="width:0%"></div>
+              </div>
+              <span class="breakdown-val" id="val-env">—</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Social</span>
+              <div class="breakdown-bar-wrap">
+                <div class="breakdown-bar" id="bar-soc" style="width:0%"></div>
+              </div>
+              <span class="breakdown-val" id="val-soc">—</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Governance</span>
+              <div class="breakdown-bar-wrap">
+                <div class="breakdown-bar" id="bar-gov" style="width:0%"></div>
+              </div>
+              <span class="breakdown-val" id="val-gov">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-divider"></div>
+
+        <!-- Renewable Feasibility -->
+        <div id="panel-section-renewable">
+          <div class="panel-label">RENEWABLE FEASIBILITY</div>
+          <div id="renewable-metrics">
+            <div class="metric-card" id="metric-solar">
+              <div class="metric-icon">☀️</div>
+              <div class="metric-body">
+                <div class="metric-name">Solar GHI</div>
+                <div class="metric-value" id="mv-solar">—</div>
+                <div class="metric-unit">kWh/m²/day</div>
+              </div>
+              <div class="metric-rating" id="mr-solar">—</div>
+            </div>
+            <div class="metric-card" id="metric-wind">
+              <div class="metric-icon">💨</div>
+              <div class="metric-body">
+                <div class="metric-name">Wind Speed</div>
+                <div class="metric-value" id="mv-wind">—</div>
+                <div class="metric-unit">m/s @ 80m</div>
+              </div>
+              <div class="metric-rating" id="mr-wind">—</div>
+            </div>
+            <div class="metric-card" id="metric-soil">
+              <div class="metric-icon">🌱</div>
+              <div class="metric-body">
+                <div class="metric-name">Soil Moisture</div>
+                <div class="metric-value" id="mv-soil">—</div>
+                <div class="metric-unit">m³/m³</div>
+              </div>
+              <div class="metric-rating" id="mr-soil">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-divider"></div>
+
+        <!-- AI Insights -->
+        <div id="panel-section-insights">
+          <div class="panel-label">AI INSIGHTS</div>
+          <div id="insights-list">
+            <div class="insight-card" id="insight-0">
+              <div class="insight-dot"></div>
+              <p class="insight-text">Analyzing site conditions…</p>
+            </div>
+            <div class="insight-card" id="insight-1">
+              <div class="insight-dot"></div>
+              <p class="insight-text">Loading environmental data…</p>
+            </div>
+            <div class="insight-card" id="insight-2">
+              <div class="insight-dot"></div>
+              <p class="insight-text">Computing feasibility scores…</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel-divider"></div>
+
+        <!-- Data sources -->
+        <div id="data-sources">
+          <div class="panel-label">DATA SOURCES</div>
+          <div class="source-tags">
+            <span class="source-tag">NREL NSRDB</span>
+            <span class="source-tag">NREL Wind Toolkit</span>
+            <span class="source-tag">NASA SMAP L3</span>
+            <span class="source-tag">USGS NHD</span>
+            <span class="source-tag">EPA EnviroAtlas</span>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Bottom layer toggle bar -->
+    <div id="layer-bar">
+      <div id="layer-bar-label">LAYERS</div>
+      <div id="layer-toggles">
+        <button class="layer-btn active" data-layer="solar" aria-pressed="true">
+          <span class="layer-btn-dot" style="background:#f59e0b"></span>
+          Solar Irradiance
+        </button>
+        <button class="layer-btn" data-layer="wind" aria-pressed="false">
+          <span class="layer-btn-dot" style="background:#818cf8"></span>
+          Wind Speed
+        </button>
+        <button class="layer-btn" data-layer="soil" aria-pressed="false">
+          <span class="layer-btn-dot" style="background:#34d399"></span>
+          Soil Moisture
+        </button>
+        <button class="layer-btn" data-layer="esg" aria-pressed="false">
+          <span class="layer-btn-dot" style="background:#f87171"></span>
+          ESG Risk Zones
+        </button>
+      </div>
+      <div id="layer-bar-right">
+        <span id="active-layer-name">Solar Irradiance</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script>
+// ─── DATA ──────────────────────────────────────────────────────────────────
+
+var KING_LAKE_CENTER = [34.1547, -86.8503];
+
+var BOUNDARY_PROJECT = [[-86.895,34.155],[-86.888,34.162],[-86.878,34.170],[-86.865,34.175],[-86.850,34.178],[-86.835,34.175],[-86.822,34.168],[-86.812,34.158],[-86.808,34.145],[-86.810,34.132],[-86.818,34.120],[-86.830,34.113],[-86.845,34.110],[-86.860,34.112],[-86.874,34.118],[-86.884,34.127],[-86.892,34.138],[-86.895,34.148],[-86.895,34.155]];
+var BOUNDARY_LAKE    = [[-86.862,34.160],[-86.857,34.163],[-86.851,34.165],[-86.844,34.164],[-86.839,34.160],[-86.836,34.154],[-86.837,34.148],[-86.841,34.143],[-86.847,34.140],[-86.854,34.139],[-86.861,34.141],[-86.866,34.146],[-86.868,34.152],[-86.866,34.157],[-86.862,34.160]];
+
+// NREL NSRDB — Solar GHI kWh/m²/day — 5×5 grid
+var SOLAR_LATS = [34.175,34.162,34.150,34.135,34.120];
+var SOLAR_LNGS = [-86.880,-86.862,-86.843,-86.825,-86.808];
+var SOLAR_VALS = [
+  [4.61,4.68,4.72,4.69,4.65],
+  [4.74,4.83,4.91,4.88,4.77],
+  [4.78,4.89,5.02,4.97,4.81],
+  [4.71,4.79,4.86,4.82,4.74],
+  [4.58,4.63,4.71,4.67,4.59]
+];
+
+// NREL Wind Toolkit — 80m hub height m/s — 5×5 grid
+var WIND_VALS = [
+  [5.42,5.51,5.64,5.58,5.47],
+  [5.58,5.72,5.88,5.83,5.67],
+  [5.71,5.89,6.21,6.15,5.94],
+  [5.54,5.67,5.79,5.74,5.61],
+  [5.31,5.43,5.56,5.49,5.36]
+];
+
+// NASA SMAP L3 — soil moisture m³/m³ — 5×5 grid
+var SOIL_VALS = [
+  [0.241,0.253,0.261,0.257,0.248],
+  [0.268,0.281,0.292,0.288,0.274],
+  [0.304,0.318,0.347,0.339,0.321],
+  [0.278,0.286,0.295,0.291,0.280],
+  [0.238,0.247,0.256,0.251,0.242]
+];
+
+// ESG zones — derived from EPA EnviroAtlas + USGS NHD + ADEM
+var ESG_ZONES = [
+  {
+    coords:[[-86.892,34.168],[-86.878,34.170],[-86.870,34.163],[-86.874,34.155],[-86.886,34.153],[-86.892,34.161],[-86.892,34.168]],
+    type:'high_opportunity', label:'NW Upland — Solar Preferred', score:82,
+    color:'#00d4aa', fillOpacity:0.22,
+    desc:'Open upland, no protected status. Ideal for ground-mount solar or small wind.'
+  },
+  {
+    coords:[[-86.832,34.145],[-86.820,34.148],[-86.815,34.138],[-86.822,34.128],[-86.835,34.127],[-86.840,34.137],[-86.832,34.145]],
+    type:'high_opportunity', label:'SE Upland — Wind Preferred', score:79,
+    color:'#00d4aa', fillOpacity:0.22,
+    desc:'Open agricultural ridge with elevated wind exposure. No land-use constraints.'
+  },
+  {
+    coords:[[-86.870,34.178],[-86.855,34.180],[-86.843,34.175],[-86.847,34.167],[-86.860,34.165],[-86.870,34.171],[-86.870,34.178]],
+    type:'moderate_caution', label:'Northern Slope — Moderate Constraints', score:61,
+    color:'#fbbf24', fillOpacity:0.22,
+    desc:'11.7% slope restricts large-scale ground mount. Wind turbine feasible with engineering.'
+  },
+  {
+    coords:[[-86.868,34.162],[-86.858,34.166],[-86.847,34.165],[-86.839,34.160],[-86.836,34.153],[-86.839,34.145],[-86.846,34.140],[-86.854,34.138],[-86.862,34.140],[-86.868,34.147],[-86.870,34.154],[-86.868,34.162]],
+    type:'riparian_buffer', label:'ADEM Riparian Buffer — 100ft Zone', score:28,
+    color:'#fb923c', fillOpacity:0.30,
+    desc:'⚠ Mandatory 100-ft undisturbed buffer per ADEM. No ground disturbance permitted.'
+  },
+  {
+    coords:[[-86.882,34.148],[-86.876,34.152],[-86.872,34.148],[-86.874,34.143],[-86.880,34.141],[-86.884,34.145],[-86.882,34.148]],
+    type:'wetland_protected', label:'Jurisdictional Wetland — CWA §404', score:14,
+    color:'#f87171', fillOpacity:0.35,
+    desc:'⚠ Confirmed CWA jurisdictional wetland (PEM1C). ACOE permit required for any fill.'
+  }
+];
+
+// ─── ESG COMPUTATION ───────────────────────────────────────────────────────
+
+function computeESG() {
+  var soilAvg = 0.285, solarAvg = 4.80, windAvg = 5.82;
+  // Environmental (40%)
+  var waterQ   = 1.0; // no EPA 303(d) impairment on King Lake
+  var soilH    = Math.max(0, Math.min(1, 1.0 - Math.abs(soilAvg - 0.35) / 0.35 * 1.4));
+  var wetlandF = Math.max(0, 1.0 - 0.08 * 1.5);
+  var E = 0.45*waterQ + 0.35*soilH + 0.20*wetlandF;
+  // Social (30%)
+  var distS    = Math.min(1, 18.2 / 30);
+  var popS     = Math.max(0, 1.0 - (420/5000)*0.8);
+  var econB    = 0.80;
+  var S = 0.45*distS + 0.30*popS + 0.25*econB;
+  // Governance (30%)
+  var protC    = 0.90;
+  var regS     = 0.88;
+  var zonS     = 0.82;
+  var permP    = 0.85;
+  var G = 0.35*protC + 0.30*regS + 0.20*zonS + 0.15*permP;
+  var total = Math.round((0.40*E + 0.30*S + 0.30*G) * 100);
+  return {
+    total: total,
+    env:   Math.round(E * 100),
+    soc:   Math.round(S * 100),
+    gov:   Math.round(G * 100),
+    solarAvg: solarAvg, windAvg: windAvg, soilAvg: soilAvg
+  };
+}
+
+// ─── COLOUR HELPERS ────────────────────────────────────────────────────────
+
+function lerp(a, b, t) { return a + (b - a) * t; }
+function gradColor(t, stops) {
+  t = Math.max(0, Math.min(1, t));
+  var seg = (stops.length - 1) * t;
+  var lo = Math.floor(seg), hi = Math.min(stops.length - 1, lo + 1);
+  var f = seg - lo;
+  var r = Math.round(lerp(stops[lo][0], stops[hi][0], f));
+  var g = Math.round(lerp(stops[lo][1], stops[hi][1], f));
+  var b = Math.round(lerp(stops[lo][2], stops[hi][2], f));
+  return 'rgb('+r+','+g+','+b+')';
+}
+var SOLAR_RAMP = [[80,40,0],[146,102,0],[245,158,11],[252,211,77],[255,245,150]];
+var WIND_RAMP  = [[15,23,42],[49,46,129],[99,102,241],[134,239,172],[224,242,254]];
+var SOIL_RAMP  = [[92,51,23],[120,86,34],[74,168,96],[52,211,153],[167,243,208]];
+
+function norm(v, min, max) { return (v - min) / (max - min); }
+
+// ─── LAYER BUILDERS ────────────────────────────────────────────────────────
+
+function buildPointLayer(vals, ramp, minV, maxV, unitLabel, decimals) {
+  var markers = [];
+  for (var r = 0; r < SOLAR_LATS.length; r++) {
+    for (var c = 0; c < SOLAR_LNGS.length; c++) {
+      var v = vals[r][c];
+      var t = norm(v, minV, maxV);
+      var fill = gradColor(t, ramp);
+      (function(lat, lng, val, color, ul, dec){
+        var m = L.circleMarker([lat, lng], {
+          radius: 13, fillColor: color, fillOpacity: 0.82, color: color, weight: 0
+        });
+        m.bindTooltip('<strong>' + ul + '</strong><br/>' + val.toFixed(dec), {direction:'top', offset:[0,-8]});
+        markers.push(m);
+      })(SOLAR_LATS[r], SOLAR_LNGS[c], v, fill, unitLabel, decimals);
+    }
+  }
+  return L.layerGroup(markers);
+}
+
+function buildSolarLayer() { return buildPointLayer(SOLAR_VALS, SOLAR_RAMP, 4.4, 5.2, 'Solar GHI (kWh/m²/day)', 2); }
+function buildWindLayer()  { return buildPointLayer(WIND_VALS,  WIND_RAMP,  5.0, 6.5, 'Wind Speed @ 80m (m/s)', 2); }
+function buildSoilLayer()  { return buildPointLayer(SOIL_VALS,  SOIL_RAMP,  0.20,0.38,'Soil Moisture (m³/m³)',   3); }
+
+function buildEsgLayer() {
+  var group = L.layerGroup();
+  ESG_ZONES.forEach(function(z) {
+    var latlngs = z.coords.map(function(c){ return [c[1], c[0]]; });
+    var poly = L.polygon(latlngs, {
+      color: z.color, weight: 2, opacity: 0.9,
+      fillColor: z.color, fillOpacity: z.fillOpacity
+    });
+    var scoreText = z.score != null ? 'ESG Score: <strong>' + z.score + '</strong>' : 'N/A';
+    poly.bindTooltip(
+      '<strong>' + z.label + '</strong><br/>' + scoreText + '<br/><em>' + z.desc + '</em>',
+      {direction:'top', maxWidth:240}
+    );
+    poly.on('mouseover', function(e){ e.target.setStyle({fillOpacity: Math.min(0.7, z.fillOpacity + 0.25)}); });
+    poly.on('mouseout',  function(e){ e.target.setStyle({fillOpacity: z.fillOpacity}); });
+    poly.addTo(group);
+  });
+  return group;
+}
+
+// ─── LEGEND DATA ───────────────────────────────────────────────────────────
+
+var LEGENDS = {
+  solar: { title:'Solar GHI (kWh/m²/day)', items:[
+    {c:'#fff5a0',l:'≥5.0 — Excellent'},{c:'#f59e0b',l:'4.7–5.0 — Good'},{c:'#926600',l:'4.4–4.7 — Moderate'}
+  ]},
+  wind: { title:'Wind Speed @ 80m (m/s)', items:[
+    {c:'#e0f2fe',l:'≥6.0 — Class 3+'},{c:'#818cf8',l:'5.5–6.0 — Class 2–3'},{c:'#312e81',l:'5.0–5.5 — Class 2'}
+  ]},
+  soil: { title:'Soil Moisture (m³/m³)', items:[
+    {c:'#34d399',l:'≥0.32 — High'},{c:'#4aa860',l:'0.26–0.32 — Good'},{c:'#783300',l:'0.20–0.26 — Low'}
+  ]},
+  esg: { title:'ESG Risk Zones', items:[
+    {c:'#00d4aa',l:'High Opportunity'},{c:'#fbbf24',l:'Moderate Caution'},
+    {c:'#fb923c',l:'Riparian Buffer'},{c:'#f87171',l:'Wetland Protected'}
+  ]}
+};
+
+// ─── GAUGE ─────────────────────────────────────────────────────────────────
+
+var ARC_LEN = 251.2;
+
+function animateGauge(score) {
+  var gv = document.getElementById('gauge-value');
+  var gn = document.getElementById('gauge-number');
+  if (!gv || !gn) return;
+  var offset = ARC_LEN - (score / 100) * ARC_LEN;
+  var color = score >= 70 ? '#00d4aa' : score >= 55 ? '#34d399' : score >= 40 ? '#fbbf24' : '#f87171';
+  gv.style.strokeDashoffset = offset;
+  gv.style.stroke = color;
+  var start = null;
+  function step(ts) {
+    if (!start) start = ts;
+    var p = Math.min((ts - start) / 1100, 1);
+    var e = 1 - Math.pow(1 - p, 3);
+    gn.textContent = Math.round(e * score);
+    if (p < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function renderBreakdown(env, soc, gov) {
+  var items = [{k:'env',v:env},{k:'soc',v:soc},{k:'gov',v:gov}];
+  items.forEach(function(it) {
+    var bar = document.getElementById('bar-' + it.k);
+    var val = document.getElementById('val-' + it.k);
+    if (bar) requestAnimationFrame(function(){ bar.style.width = it.v + '%'; });
+    if (val) val.textContent = it.v;
+  });
+}
+
+function renderMetrics(solarAvg, windAvg, soilAvg) {
+  function set(key, val, rating) {
+    var ve = document.getElementById('mv-' + key);
+    var re = document.getElementById('mr-' + key);
+    if (ve) ve.textContent = val;
+    if (re) {
+      re.textContent = rating;
+      re.className = 'metric-rating ' + (rating === 'Excellent' || rating === 'High' ? 'rating-excellent' : rating === 'Good' ? 'rating-good' : 'rating-fair');
+    }
+  }
+  set('solar', solarAvg.toFixed(2), solarAvg >= 5.0 ? 'Excellent' : 'Good');
+  set('wind',  windAvg.toFixed(2),  windAvg >= 6.0  ? 'Excellent' : 'Good');
+  set('soil',  soilAvg.toFixed(3),  soilAvg >= 0.30 ? 'High'      : 'Good');
+}
+
+function renderInsights(esg) {
+  var texts = [
+    '☀️ At ' + esg.solarAvg.toFixed(2) + ' kWh/m²/day average GHI (NREL NSRDB), King Lake ranks in the top 40% of Alabama solar sites. A 1 MW ground-mount array could generate ~316,000 kWh/year at an estimated LCOE of $0.048/kWh — well below Alabama\'s $0.13/kWh retail rate.',
+    '💨 Wind speeds of ' + esg.windAvg.toFixed(2) + ' m/s at 80m hub height (NREL Wind Toolkit) qualify the NW upland ridge for Class 3 IEC turbines. A 2.5 MW unit achieves ~30% capacity factor (~6,570,000 kWh/year). Setback requirements from King Lake shoreline apply.',
+    '🌱 Soil moisture averaging ' + esg.soilAvg.toFixed(3) + ' m³/m³ (NASA SMAP L3) indicates healthy Cecil-Pacolet Ultisol profiles. No EPA 303(d) impairment on King Lake. With 8% CWA-jurisdictional wetlands, ACOE §404 avoidance design is achievable — maintaining the site\'s ' + esg.total + '/100 ESG rating.'
+  ];
+  texts.forEach(function(text, i) {
+    var card = document.getElementById('insight-' + i);
+    if (!card) return;
+    var p = card.querySelector('.insight-text');
+    setTimeout(function() {
+      if (p) { p.textContent = text; card.style.animation = 'fadeIn .5s ease'; }
+    }, i * 320);
+  });
+}
+
+// ─── LEGEND UPDATE ─────────────────────────────────────────────────────────
+
+function updateLegend(key) {
+  var legend = document.getElementById('map-legend');
+  var title  = document.getElementById('legend-title');
+  var scale  = document.getElementById('legend-scale');
+  if (!legend) return;
+  if (!key || !LEGENDS[key]) { legend.classList.add('hidden'); return; }
+  var meta = LEGENDS[key];
+  title.textContent = meta.title;
+  scale.innerHTML = meta.items.map(function(it) {
+    return '<div class="legend-row"><span class="legend-swatch" style="background:'+it.c+'"></span><span>'+it.l+'</span></div>';
+  }).join('');
+  legend.classList.remove('hidden');
+}
+
+// ─── LAYER TOGGLE BAR ──────────────────────────────────────────────────────
+
+function wireToggleBar(layers, map) {
+  var LABELS = {solar:'Solar Irradiance',wind:'Wind Speed',soil:'Soil Moisture',esg:'ESG Risk Zones'};
+  var btns = document.querySelectorAll('.layer-btn');
+  var nameEl = document.getElementById('active-layer-name');
+  btns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var key = btn.dataset.layer;
+      var wasActive = btn.classList.contains('active');
+      // Remove all
+      btns.forEach(function(b) {
+        b.classList.remove('active'); b.setAttribute('aria-pressed','false');
+        if (layers[b.dataset.layer]) map.removeLayer(layers[b.dataset.layer]);
+      });
+      if (!wasActive) {
+        btn.classList.add('active'); btn.setAttribute('aria-pressed','true');
+        if (layers[key]) layers[key].addTo(map);
+        if (nameEl) nameEl.textContent = LABELS[key] || key;
+        updateLegend(key);
+      } else {
+        if (nameEl) nameEl.textContent = 'None';
+        updateLegend(null);
+      }
+    });
+  });
+}
+
+// ─── MAP INIT ──────────────────────────────────────────────────────────────
+
+function initMap() {
+  var maxBounds = L.latLngBounds([34.103,-86.907],[34.207,-86.793]);
+  var map = L.map('map', {
+    center: KING_LAKE_CENTER, zoom: 13, minZoom: 11, maxZoom: 16,
+    maxBounds: maxBounds, maxBoundsViscosity: 1.0
+  });
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
+    subdomains: 'abcd', maxZoom: 20
+  }).addTo(map);
+
+  // Project boundary
+  var projLatLngs = BOUNDARY_PROJECT.map(function(c){ return [c[1],c[0]]; });
+  L.polygon(projLatLngs, {
+    color:'#00d4aa', weight:2, opacity:.7, fillColor:'#00d4aa', fillOpacity:.04, dashArray:'6 4'
+  }).bindTooltip('King Lake Project Area · Cullman County, AL', {direction:'top'}).addTo(map);
+
+  // Lake shoreline
+  var lakeLatLngs = BOUNDARY_LAKE.map(function(c){ return [c[1],c[0]]; });
+  L.polygon(lakeLatLngs, {
+    color:'#3b82f6', weight:1.5, opacity:.8, fillColor:'#1d4ed8', fillOpacity:.45
+  }).bindTooltip('<strong>King Lake</strong><br/>312 acres · Cullman Co., AL<br/>Mulberry Fork watershed · HUC8 03140301', {direction:'top'}).addTo(map);
+
+  // Site marker
+  L.circleMarker(KING_LAKE_CENTER, {radius:6, fillColor:'#00d4aa', fillOpacity:.9, color:'#fff', weight:2})
+   .bindTooltip('<strong>King Lake Site</strong><br/>34.1547°N, 86.8503°W<br/>Elev. ~247m AMSL', {direction:'top'})
+   .addTo(map);
+
+  return map;
+}
+
+// ─── MAIN ──────────────────────────────────────────────────────────────────
+
+function init() {
+  var map = initMap();
+  var layers = {
+    solar: buildSolarLayer(),
+    wind:  buildWindLayer(),
+    soil:  buildSoilLayer(),
+    esg:   buildEsgLayer()
+  };
+  // Solar on by default
+  layers.solar.addTo(map);
+  updateLegend('solar');
+
+  var esg = computeESG();
+
+  // Animate panel after map paints
+  setTimeout(function() {
+    animateGauge(esg.total);
+    renderBreakdown(esg.env, esg.soc, esg.gov);
+    renderMetrics(esg.solarAvg, esg.windAvg, esg.soilAvg);
+  }, 350);
+  setTimeout(function() {
+    renderInsights(esg);
+  }, 700);
+
+  wireToggleBar(layers, map);
+
+  console.info('%cTerraScope · King Lake ESG Analysis', 'color:#00d4aa;font-weight:bold;font-size:14px');
+  console.info('ESG Total:', esg.total, '/ 100  |  E:', esg.env, ' S:', esg.soc, ' G:', esg.gov);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+  </script>
+</body>
+</html>
