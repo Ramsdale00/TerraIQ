@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Atlas Interactive Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; height: 100vh; display: flex; flex-direction: column; background: #1a1a1a; color: #fff; }
+        #header { padding: 10px 20px; background: #2c3e50; box-shadow: 0 2px 5px rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: space-between; align-items: center; }
+        #header h1 { margin: 0; font-size: 1.2rem; color: #f1c40f; }
+        #container { display: flex; flex: 1; overflow: hidden; }
+        #map { flex: 1; height: 100%; }
+        #sidebar { width: 350px; background: #222; padding: 20px; overflow-y: auto; box-shadow: -2px 0 5px rgba(0,0,0,0.3); }
+        .result-item { margin-bottom: 20px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .result-item h3 { margin: 0 0 5px 0; font-size: 1rem; color: #3498db; }
+        .result-item p { margin: 0; font-size: 0.9rem; color: #ccc; }
+        .value { font-size: 1.2rem; font-weight: bold; color: #2ecc71; margin-top: 5px; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 30px; height: 30px; animation: spin 2s linear infinite; display: none; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .monthly-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        .month-box { background: #333; padding: 5px; text-align: center; border-radius: 4px; font-size: 0.8rem; }
+        .month-name { color: #888; display: block; }
+        .month-val { font-weight: bold; color: #e67e22; }
+        .instructions { background: #34495e; padding: 10px; border-radius: 5px; margin-bottom: 20px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div id="header">
+        <h1>🔆 USA Solar Atlas Explorer</h1>
+        <div id="status">Click on the map to analyze solar potential</div>
+    </div>
+    <div id="container">
+        <div id="map"></div>
+        <div id="sidebar">
+            <div id="initial-msg" class="instructions">
+                <strong>How to use:</strong><br>
+                Click anywhere on the map within the USA to fetch real-time solar data from the dataset.
+            </div>
+            <div id="loader" class="loader"></div>
+            <div id="results" style="display: none;">
+                <div class="result-item">
+                    <h3>Location</h3>
+                    <p id="res-coords"></p>
+                </div>
+                <div id="yearly-results"></div>
+                <div class="result-item">
+                    <h3>Monthly PV Power Output</h3>
+                    <div id="monthly-results" class="monthly-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([37.8, -96], 4);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        let marker;
+
+        map.on('click', async (e) => {
+            const { lat, lng } = e.latlng;
+            
+            if (marker) map.removeLayer(marker);
+            marker = L.marker([lat, lng]).addTo(map);
+
+            document.getElementById('initial-msg').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('status').innerText = `Analyzing ${lat.toFixed(4)}, ${lng.toFixed(4)}...`;
+
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/analyze?lat=${lat}&lon=${lng}`);
+                if (!response.ok) {
+                    const err = await response.json();
+                    throw new Error(err.detail || 'Failed to fetch data');
+                }
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                alert(error.message);
+                document.getElementById('status').innerText = 'Error fetching data. Try clicking within USA.';
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+            }
+        });
+
+        function displayResults(data) {
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('res-coords').innerText = `Lat: ${data.coordinates.lat.toFixed(4)}, Lon: ${data.coordinates.lon.toFixed(4)}`;
+            document.getElementById('status').innerText = 'Analysis Complete';
+
+            const yearlyDiv = document.getElementById('yearly-results');
+            yearlyDiv.innerHTML = '';
+
+            // Section: Solar
+            if (data.solar && Object.keys(data.solar.yearly_averages).length > 0) {
+                const sHeader = document.createElement('h2');
+                sHeader.innerHTML = '☀️ Solar Potential';
+                sHeader.style.fontSize = '1.2rem';
+                sHeader.style.color = '#f1c40f';
+                sHeader.style.marginTop = '20px';
+                yearlyDiv.appendChild(sHeader);
+
+                for (const [key, val] of Object.entries(data.solar.yearly_averages)) {
+                    if (val.value === null) continue;
+                    const item = document.createElement('div');
+                    item.className = 'result-item';
+                    item.innerHTML = `
+                        <h3>${val.description}</h3>
+                        <div class="value">${val.value.toFixed(2)} <span style="font-size: 0.8rem; font-weight: normal;">${getUnit(key)}</span></div>
+                    `;
+                    yearlyDiv.appendChild(item);
+                }
+            }
+
+            // Section: Wind
+            if (data.wind && Object.keys(data.wind).length > 0) {
+                const wHeader = document.createElement('h2');
+                wHeader.innerHTML = '🌬️ Wind Potential';
+                wHeader.style.fontSize = '1.2rem';
+                wHeader.style.color = '#3498db';
+                wHeader.style.marginTop = '30px';
+                yearlyDiv.appendChild(wHeader);
+
+                for (const [key, info] of Object.entries(data.wind)) {
+                    const item = document.createElement('div');
+                    item.className = 'result-item';
+                    
+                    let heightsHtml = '<div style="display: flex; gap: 8px; margin-top: 10px;">';
+                    for (const height of ['100m', '150m', '200m']) {
+                        const val = info.heights[height];
+                        heightsHtml += `
+                            <div style="background: #2a2a2a; padding: 8px 4px; border-radius: 6px; flex: 1; text-align: center; border: 1px solid #444;">
+                                <span style="font-size: 0.7rem; color: #999; display: block; border-bottom: 1px solid #333; margin-bottom: 4px; padding-bottom: 2px;">${height}</span>
+                                <span style="color: #2ecc71; font-weight: bold; font-size: 1rem; display: block;">${val !== null ? val.toFixed(2) : '-'}</span>
+                                <span style="font-size: 0.65rem; color: #888;">${info.unit}</span>
+                            </div>
+                        `;
+                    }
+                    heightsHtml += '</div>';
+
+                    item.innerHTML = `
+                        <h3>${info.description}</h3>
+                        ${heightsHtml}
+                    `;
+                    yearlyDiv.appendChild(item);
+                }
+            }
+
+            // Section: Monthly Solar
+            const monthlyResultsContainer = document.querySelector('.result-item:has(#monthly-results)');
+            if (monthlyResultsContainer) {
+                const monthlyDiv = document.getElementById('monthly-results');
+                monthlyDiv.innerHTML = '';
+                if (data.solar && data.solar.monthly_pvout) {
+                    for (const [month, val] of Object.entries(data.solar.monthly_pvout)) {
+                        const box = document.createElement('div');
+                        box.className = 'month-box';
+                        box.innerHTML = `
+                            <span class="month-name">${month}</span>
+                            <span class="month-val">${val ? val.toFixed(1) : '-'}</span>
+                        `;
+                        monthlyDiv.appendChild(box);
+                    }
+                }
+            }
+        }
+
+        function getUnit(key) {
+            if (key === 'OPTA') return '°';
+            if (key === 'TEMP') return '°C';
+            if (key === 'PVOUT') return 'kWh/kWp/day';
+            return 'kWh/m²/day';
+        }
+    </script>
+</body>
+</html>
