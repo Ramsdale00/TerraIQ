@@ -227,6 +227,19 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
 .aip-spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 .aip-coord-header{font-size:11px;font-weight:800;color:var(--text-primary);margin-bottom:10px;display:flex;align-items:center;gap:6px}
 .aip-error{font-size:11px;color:#f87171;margin-top:4px}
+/* ── Atlas search bar ────────────────────────────────────────────────── */
+#atlas-search-wrap{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:600;width:340px;max-width:calc(100% - 32px)}
+#atlas-search-box{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.97);border:1px solid var(--border);border-radius:24px;padding:8px 14px;box-shadow:0 2px 12px rgba(0,0,0,.15);backdrop-filter:blur(8px)}
+#atlas-search-input{flex:1;border:none;outline:none;background:transparent;font-size:13px;font-family:var(--font);color:var(--text-primary)}
+#atlas-search-input::placeholder{color:var(--text-muted)}
+#atlas-search-clear{background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:13px;padding:0;line-height:1;flex-shrink:0}
+#atlas-search-clear:hover{color:var(--text-secondary)}
+#atlas-search-results{background:rgba(255,255,255,.97);border:1px solid var(--border);border-radius:var(--radius-md);margin-top:6px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.12);display:none}
+.asr-item{padding:9px 14px;font-size:12px;cursor:pointer;border-bottom:1px solid var(--border)}
+.asr-item:last-child{border-bottom:none}
+.asr-item:hover{background:var(--bg-hover)}
+.asr-item strong{color:var(--text-primary);display:block;margin-bottom:1px}
+.asr-item span{color:var(--text-muted)}
 /* ── Atlas wind toggle button ────────────────────────────────────────── */
 #atlas-wind-toggle{display:flex;align-items:center;gap:7px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text-secondary);padding:7px 14px;border-radius:20px;font-size:12px;font-family:var(--font);font-weight:500;cursor:pointer;letter-spacing:.2px;transition:all .18s;white-space:nowrap}
 #atlas-wind-toggle:hover{background:var(--bg-primary);border-color:var(--border-light);color:var(--text-primary)}
@@ -297,6 +310,15 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
         <!-- US Map -->
         <div id="us-map-container">
           <div id="us-map"></div>
+          <!-- Search bar overlay -->
+          <div id="atlas-search-wrap">
+            <div id="atlas-search-box">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;color:var(--text-muted)"><circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <input id="atlas-search-input" type="text" placeholder="Search city, address, or coordinates…" autocomplete="off" spellcheck="false" />
+              <button id="atlas-search-clear" style="display:none" title="Clear search">&#x2715;</button>
+            </div>
+            <div id="atlas-search-results"></div>
+          </div>
           <!-- Floating CTA -->
           <button id="atlas-cta-btn" onclick="showCaseStudy()">View King Lake Case Study &rarr;</button>
           <!-- Floating legend -->
@@ -315,16 +337,16 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
             <div class="panel-label">US SOLAR RESOURCE</div>
             <div class="ap-stats">
               <div class="ap-stat-card">
-                <div class="ap-stat-value">177 GW</div>
-                <div class="ap-stat-label">Installed Solar Capacity (EIA 2024)</div>
+                <div class="ap-stat-value">210 GW</div>
+                <div class="ap-stat-label">Installed Solar Capacity (EIA 2025 est.)</div>
               </div>
               <div class="ap-stat-card">
                 <div class="ap-stat-value">6.5</div>
                 <div class="ap-stat-label">Peak GHI — SW Desert (kWh/m&sup2;/day)</div>
               </div>
               <div class="ap-stat-card">
-                <div class="ap-stat-value">California</div>
-                <div class="ap-stat-label">Top Solar State (40 GW installed)</div>
+                <div class="ap-stat-value">Texas</div>
+                <div class="ap-stat-label">Top Solar State (~45 GW utility-scale)</div>
               </div>
               <div class="ap-stat-card">
                 <div class="ap-stat-value accent" style="color:var(--accent)">1 Active</div>
@@ -629,7 +651,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
     <div id="cl-footer">
       <button id="cl-export-btn" onclick="exportChecklist()">
         <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3M3 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Export Report
+        Export PDF
       </button>
       <span id="cl-item-count"></span>
     </div>
@@ -1055,28 +1077,7 @@ function initAtlasMap() {
     { maxZoom: 19, opacity: 0.75 }
   ).addTo(map);
 
-  // Draw regional solar zones
-  US_SOLAR_ZONES.forEach(function(zone) {
-    var rect = L.rectangle(zone.bounds, {
-      color: zone.color, weight: 1.5, opacity: 0.8,
-      fillColor: zone.color, fillOpacity: zone.fillOpacity
-    });
-    rect.bindTooltip(
-      '<strong>' + zone.label + '</strong><br/>' +
-      'Avg GHI: <strong>' + zone.ghi + ' kWh/m²/day</strong> &mdash; ' + zone.rating + '<br/>' +
-      '<em style="color:var(--text-muted)">' + zone.states + '</em>',
-      {direction: 'top', maxWidth: 230}
-    );
-    rect.on('mouseover', function(e) {
-      e.target.setStyle({fillOpacity: Math.min(0.55, zone.fillOpacity + 0.22), weight: 2.5});
-      _showAtlasInfo(zone);
-    });
-    rect.on('mouseout', function(e) {
-      e.target.setStyle({fillOpacity: zone.fillOpacity, weight: 1.5});
-    });
-    rect.on('click', function() { _showAtlasInfo(zone); });
-    rect.addTo(map);
-  });
+  // Zone rectangles removed — map click fires _fetchLocationData for live lat/lon data
 
   // Live lat/lon click handler — fetch real solar + wind data for any clicked point
   map.on('click', function(e) {
@@ -1117,22 +1118,6 @@ function initAtlasMap() {
    .addTo(map);
 
   return map;
-}
-
-function _showAtlasInfo(zone) {
-  var p = document.getElementById('atlas-info-panel');
-  if (!p) return;
-  p.innerHTML =
-    '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase">SOLAR REGION</div>' +
-    '<div style="font-size:14px;font-weight:800;color:var(--text-primary);margin-bottom:2px">' + zone.label + '</div>' +
-    '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">' + zone.states + '</div>' +
-    '<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px">' +
-      '<span style="font-size:28px;font-weight:800;color:' + zone.color + '">' + zone.ghi + '</span>' +
-      '<span style="font-size:10px;color:var(--text-muted)">kWh/m²/day avg GHI</span>' +
-    '</div>' +
-    '<div style="display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(0,0,0,.06);color:var(--text-secondary);margin-bottom:8px">' + zone.rating + '</div>' +
-    '<div style="font-size:11px;color:var(--text-secondary);line-height:1.55">' + zone.detail + '</div>';
-  p.style.display = 'block';
 }
 
 // ─── ATLAS LAT/LON CLICK — LIVE DATA FETCH ────────────────────────────────
@@ -1390,11 +1375,87 @@ function showAtlas() {
 
 // ─── MAIN ──────────────────────────────────────────────────────────────────
 
+// ─── ATLAS LOCATION SEARCH ────────────────────────────────────────────────
+
+function initAtlasSearch(map) {
+  var input    = document.getElementById('atlas-search-input');
+  var results  = document.getElementById('atlas-search-results');
+  var clearBtn = document.getElementById('atlas-search-clear');
+  var _timer   = null;
+  var _marker  = null;
+
+  input.addEventListener('input', function() {
+    clearBtn.style.display = input.value ? 'block' : 'none';
+    clearTimeout(_timer);
+    var q = input.value.trim();
+    if (q.length < 3) { results.style.display = 'none'; return; }
+    _timer = setTimeout(function() { _doSearch(q); }, 400);
+  });
+
+  clearBtn.addEventListener('click', function() {
+    input.value = ''; clearBtn.style.display = 'none';
+    results.style.display = 'none';
+    if (_marker) { map.removeLayer(_marker); _marker = null; }
+  });
+
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { results.style.display = 'none'; input.blur(); }
+  });
+
+  document.addEventListener('click', function(e) {
+    var wrap = document.getElementById('atlas-search-wrap');
+    if (wrap && !wrap.contains(e.target)) results.style.display = 'none';
+  });
+
+  function _doSearch(q) {
+    results.innerHTML = '<div class="asr-item"><span>Searching…</span></div>';
+    results.style.display = 'block';
+    fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(q) +
+          '&format=json&limit=5&addressdetails=1')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data || !data.length) {
+          results.innerHTML = '<div class="asr-item"><span>No results found</span></div>';
+          return;
+        }
+        results.innerHTML = data.map(function(item, idx) {
+          var parts = item.display_name.split(',');
+          var name  = parts.slice(0, 2).join(',').trim();
+          var sub   = parts.slice(2, 4).join(',').trim();
+          var lat   = (+item.lat).toFixed(4), lon = Math.abs(+item.lon).toFixed(4);
+          return '<div class="asr-item" data-lat="' + item.lat + '" data-lon="' + item.lon + '">' +
+            '<strong>' + name + '</strong>' +
+            (sub ? '<span style="font-size:10px">' + sub + '</span>' : '') +
+            '<span style="font-size:10px;color:var(--text-muted);float:right">' + lat + '°N ' + lon + '°W</span>' +
+            '</div>';
+        }).join('');
+        results.querySelectorAll('.asr-item').forEach(function(el) {
+          el.addEventListener('click', function() {
+            var lat = +el.dataset.lat, lon = +el.dataset.lon;
+            map.setView([lat, lon], 6, {animate: true});
+            if (_marker) map.removeLayer(_marker);
+            _marker = L.circleMarker([lat, lon], {
+              radius: 7, fillColor: '#009e7d', fillOpacity: 0.9, color: '#fff', weight: 2
+            }).addTo(map);
+            input.value = el.querySelector('strong').textContent.trim();
+            clearBtn.style.display = 'block';
+            results.style.display = 'none';
+            setTimeout(function() { _fetchLocationData(lat, lon); }, 350);
+          });
+        });
+      })
+      .catch(function() {
+        results.innerHTML = '<div class="asr-item"><span>Search unavailable — check connection</span></div>';
+      });
+  }
+}
+
 function initAtlas() {
   // Initialise USA Solar Atlas map (View 1 — visible on page load)
   _atlasMap = initAtlasMap();
+  initAtlasSearch(_atlasMap);
   console.info('%cUSA Solar Atlas Explorer — TerraIQ', 'color:#009e7d;font-weight:bold;font-size:14px');
-  console.info('King Lake Case Study available. Click the pulsing marker or the header button to open it.');
+  console.info('Click anywhere on the map for live solar & wind data. Search bar available for navigation.');
 }
 
 if (document.readyState === 'loading') {
@@ -1596,30 +1657,150 @@ function renderChecklistBody() {
   document.getElementById('cl-body').innerHTML = html;
 }
 function exportChecklist() {
-  var lines = ['ESG AUDIT READINESS CHECKLIST — KING LAKE, PASCO COUNTY, FLORIDA','='.repeat(65),''];
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert('PDF library not loaded yet — please wait a moment and try again.');
+    return;
+  }
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
+  var pageW  = doc.internal.pageSize.getWidth();
+  var pageH  = doc.internal.pageSize.getHeight();
+  var margin = 40;
+
+  // ── Teal header bar ──────────────────────────────────────────────────
+  doc.setFillColor(0, 158, 125);
+  doc.rect(0, 0, pageW, 56, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(15); doc.setTextColor(255, 255, 255);
+  doc.text('TerraIQ — ESG Audit Readiness Checklist', margin, 23);
+  doc.setFontSize(9); doc.setFont('helvetica', 'normal');
+  doc.text('King Lake  ·  Pasco County, Florida  ·  28.2906°N, 82.2918°W  ·  263 acres', margin, 40);
+
+  // ── Summary stats ────────────────────────────────────────────────────
   var counts = {compliant:0,'in-progress':0,'not-started':0};
   var total = 0;
+  Object.keys(CL_DATA).forEach(function(k) {
+    CL_DATA[k].items.forEach(function(it) { counts[it.status]++; total++; });
+  });
+  var readiness = Math.round(((counts.compliant + counts['in-progress'] * 0.5) / total) * 100);
+  var dateStr   = new Date().toLocaleDateString('en-US', {year:'numeric', month:'long', day:'numeric'});
+
+  var sy = 72;
+  doc.setTextColor(30, 30, 30); doc.setFontSize(8.5);
+  doc.setFont('helvetica', 'bold');
+  doc.text('Generated: ' + dateStr, margin, sy);
+  doc.text('Readiness: ' + readiness + '%', pageW / 2, sy, {align:'center'});
+  doc.text(counts.compliant + ' Compliant  |  ' + counts['in-progress'] + ' In Progress  |  ' + counts['not-started'] + ' Not Started',
+           pageW - margin, sy, {align:'right'});
+
+  // Readiness progress bar
+  var by = sy + 9;
+  doc.setFillColor(220, 228, 236);
+  doc.roundedRect(margin, by, pageW - margin * 2, 8, 3, 3, 'F');
+  doc.setFillColor(0, 158, 125);
+  doc.roundedRect(margin, by, (pageW - margin * 2) * (readiness / 100), 8, 3, 3, 'F');
+
+  var curY = by + 22;
+
+  // ── Section tables ───────────────────────────────────────────────────
+  var STATUS_COLORS = {
+    'compliant':    [0, 158, 100],
+    'in-progress':  [180, 120, 0],
+    'not-started':  [200, 60, 60]
+  };
+  var STATUS_LABELS = {
+    'compliant':   'COMPLIANT',
+    'in-progress': 'IN PROGRESS',
+    'not-started': 'NOT STARTED'
+  };
+  var SEC_COLORS = {
+    env:  [0, 140, 110],
+    soc:  [37, 99, 235],
+    gov:  [124, 58, 237],
+    doc:  [100, 116, 139]
+  };
+
   Object.keys(CL_DATA).forEach(function(secKey) {
     var sec = CL_DATA[secKey];
-    lines.push('\n── ' + sec.label.toUpperCase() + ' ──');
-    sec.items.forEach(function(it) {
-      var sym = it.status==='compliant'?'[COMPLIANT]':it.status==='in-progress'?'[IN PROGRESS]':'[NOT STARTED]';
-      lines.push(sym + ' ' + it.id + ': ' + it.title);
-      lines.push('   Metric: ' + it.metric);
-      lines.push('   Source: ' + it.source + ' | Framework: ' + it.framework);
-      lines.push('');
-      counts[it.status]++;
-      total++;
+    var secComp = sec.items.filter(function(i){ return i.status === 'compliant'; }).length;
+    var secCol  = SEC_COLORS[secKey] || [80, 80, 80];
+
+    // Section header band
+    doc.autoTable({
+      startY: curY,
+      head: [[sec.label.toUpperCase() + '   (' + secComp + '/' + sec.items.length + ' compliant)']],
+      body: [],
+      theme: 'plain',
+      headStyles: {
+        fillColor: secCol, textColor: [255,255,255],
+        fontSize: 8.5, fontStyle: 'bold',
+        cellPadding: {top:5, bottom:5, left:margin - 40, right:4}
+      },
+      margin: {left: margin - 40, right: margin - 40},
+      tableWidth: pageW - (margin - 40) * 2
     });
+    curY = doc.lastAutoTable.finalY;
+
+    // Item rows
+    var rows = sec.items.map(function(it) {
+      return [it.id, it.title, STATUS_LABELS[it.status] || it.status.toUpperCase(), it.metric, it.source];
+    });
+    doc.autoTable({
+      startY: curY,
+      head: [['#', 'Title', 'Status', 'Metric / Value', 'Source']],
+      body: rows,
+      theme: 'grid',
+      styles: {
+        fontSize: 7, cellPadding: {top:4, bottom:4, left:4, right:4},
+        overflow: 'linebreak', textColor: [30, 30, 30], valign: 'top'
+      },
+      headStyles: {
+        fillColor: [240, 244, 248], textColor: [70, 90, 110],
+        fontStyle: 'bold', fontSize: 7.5
+      },
+      columnStyles: {
+        0: {cellWidth: 22, halign: 'center'},
+        1: {cellWidth: 118, fontStyle: 'bold'},
+        2: {cellWidth: 70, halign: 'center'},
+        3: {cellWidth: 185, fontSize: 6.5},
+        4: {cellWidth: 90,  fontSize: 6.5}
+      },
+      didParseCell: function(data) {
+        if (data.column.index === 2 && data.section === 'body') {
+          var it = sec.items[data.row.index];
+          if (!it) return;
+          var col = STATUS_COLORS[it.status] || [120, 120, 120];
+          data.cell.styles.textColor = col;
+          data.cell.styles.fontStyle = 'bold';
+        }
+      },
+      didDrawCell: function(data) {
+        // Shade alternating rows lightly
+        if (data.section === 'body' && data.row.index % 2 === 0 && data.column.index === 0) {
+          doc.setFillColor(250, 251, 253);
+        }
+      },
+      margin: {left: margin - 40, right: margin - 40}
+    });
+    curY = doc.lastAutoTable.finalY + 14;
   });
-  var r = Math.round(((counts.compliant + counts['in-progress']*0.5)/total)*100);
-  lines.splice(2,0,'Generated: '+new Date().toLocaleDateString()+' | Readiness: '+r+'% | '+counts.compliant+' compliant, '+counts['in-progress']+' in-progress, '+counts['not-started']+' not started');
-  var blob = new Blob([lines.join('\n')],{type:'text/plain'});
-  var a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'TerraScope_ESG_AuditReadiness_KingLake.txt';
-  a.click();
+
+  // ── Footer on every page ─────────────────────────────────────────────
+  var totalPages = doc.internal.getNumberOfPages();
+  for (var pg = 1; pg <= totalPages; pg++) {
+    doc.setPage(pg);
+    doc.setDrawColor(200, 210, 220);
+    doc.line(margin - 40, pageH - 28, pageW - (margin - 40), pageH - 28);
+    doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(150, 160, 175);
+    doc.text('TerraIQ  ·  King Lake, Pasco County, FL  ·  GRI  ·  SASB  ·  TCFD  ·  IFRS S2',
+             margin - 40, pageH - 16);
+    doc.text('Page ' + pg + ' / ' + totalPages, pageW - (margin - 40), pageH - 16, {align:'right'});
+  }
+
+  doc.save('TerraIQ_ESG_AuditReadiness_KingLake.pdf');
 }
   </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js" crossorigin="anonymous"></script>
 </body>
 </html>
