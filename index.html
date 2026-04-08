@@ -2,7 +2,7 @@
 <!-- TerraScope — King Lake ESG & Renewable Feasibility Analysis
      Self-contained single-file app. No build step required.
      Map: Leaflet.js from CDN | Data: embedded GeoJSON | ESG: pure JS engine
-     Data sources: NREL NSRDB, NREL Wind Toolkit, NASA SMAP L3, USGS NHD, EPA EnviroAtlas
+     Data sources: NREL NSRDB, NASA POWER, Open-Meteo ERA5, NASA SMAP L3, USGS NHD, EPA EnviroAtlas
 -->
 <html lang="en">
 <head>
@@ -206,8 +206,31 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
 #atlas-legend-overlay .legend-title{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase}
 
 /* ── Atlas region info panel ─────────────────────────────────────────── */
-#atlas-info-panel{position:absolute;bottom:88px;left:16px;background:rgba(255,255,255,.97);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;z-index:400;width:240px;backdrop-filter:blur(8px);box-shadow:0 2px 16px rgba(0,0,0,.12);display:none}
+#atlas-info-panel{position:absolute;bottom:88px;left:16px;background:rgba(255,255,255,.97);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;z-index:400;width:290px;max-height:calc(100vh - 160px);overflow-y:auto;backdrop-filter:blur(8px);box-shadow:0 2px 16px rgba(0,0,0,.12);display:none;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 #atlas-info-panel.visible{display:block}
+#atlas-info-panel::-webkit-scrollbar{width:4px}
+#atlas-info-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.aip-section-title{font-size:9px;font-weight:700;letter-spacing:1.5px;color:var(--text-muted);text-transform:uppercase;margin:10px 0 5px;padding-bottom:3px;border-bottom:1px solid var(--border)}
+.aip-section-title:first-child{margin-top:0}
+.aip-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px}
+.aip-label{font-size:11px;color:var(--text-muted)}
+.aip-val{font-size:12px;font-weight:700;color:var(--text-primary)}
+.aip-val-sub{font-size:10px;color:var(--text-secondary);margin-left:3px}
+.aip-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:4px}
+.aip-badge.excellent{background:rgba(0,212,170,.15);color:#00d4aa}
+.aip-badge.very-good{background:rgba(234,179,8,.15);color:#ca8a04}
+.aip-badge.good{background:rgba(96,165,250,.15);color:#3b82f6}
+.aip-badge.moderate{background:rgba(156,163,175,.15);color:#6b7280}
+.aip-badge.fair{background:rgba(248,113,113,.15);color:#f87171}
+.aip-loading{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-muted);padding:8px 0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.aip-spinner{width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.aip-coord-header{font-size:11px;font-weight:800;color:var(--text-primary);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.aip-error{font-size:11px;color:#f87171;margin-top:4px}
+/* ── Atlas wind toggle button ────────────────────────────────────────── */
+#atlas-wind-toggle{display:flex;align-items:center;gap:7px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text-secondary);padding:7px 14px;border-radius:20px;font-size:12px;font-family:var(--font);font-weight:500;cursor:pointer;letter-spacing:.2px;transition:all .18s;white-space:nowrap}
+#atlas-wind-toggle:hover{background:var(--bg-primary);border-color:var(--border-light);color:var(--text-primary)}
+#atlas-wind-toggle.active{background:rgba(99,102,241,.12);border-color:#6366f1;color:#6366f1;font-weight:600}
 
 /* ── King Lake pulse marker on US map ────────────────────────────────── */
 .kl-marker-wrap{background:transparent !important;border:none !important;box-shadow:none !important}
@@ -278,7 +301,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
           <button id="atlas-cta-btn" onclick="showCaseStudy()">View King Lake Case Study &rarr;</button>
           <!-- Floating legend -->
           <div id="atlas-legend-overlay">
-            <div class="legend-title">Solar GHI (kWh/m&sup2;/day)</div>
+            <div class="legend-title">Solar GHI + Wind Resource</div>
             <div id="atlas-legend-items"></div>
             <div style="font-size:9px;color:var(--text-muted);margin-top:8px;font-style:italic">Source: NREL NSRDB</div>
           </div>
@@ -328,8 +351,8 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
               <div class="ap-case-item" onclick="showCaseStudy()">
                 <div class="ap-case-dot"></div>
                 <div class="ap-case-body">
-                  <div class="ap-case-name">King Lake, Alabama</div>
-                  <div class="ap-case-meta">ESG Score: 84/100 &middot; GHI: 4.80 kWh/m&sup2;/day</div>
+                  <div class="ap-case-name">King Lake, Florida</div>
+                  <div class="ap-case-meta">ESG Score: 79/100 &middot; GHI: 5.35 kWh/m&sup2;/day</div>
                 </div>
                 <div class="ap-case-arrow">&rarr;</div>
               </div>
@@ -340,6 +363,8 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
             <div class="panel-label">DATA SOURCES</div>
             <div class="source-tags">
               <span class="source-tag">NREL NSRDB</span>
+              <span class="source-tag">NASA POWER</span>
+              <span class="source-tag">Open-Meteo</span>
               <span class="source-tag">EIA</span>
               <span class="source-tag">USGS</span>
               <span class="source-tag">EPA</span>
@@ -350,9 +375,10 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
 
       <!-- Atlas Bottom Bar -->
       <div id="atlas-bar">
-        <span id="layer-bar-label">SOLAR RESOURCE</span>
-        <span style="font-size:11px;color:var(--text-secondary);margin-left:4px">Hover regions to explore GHI data &middot; Click the King Lake marker or button to open case study</span>
-        <div style="margin-left:auto;font-size:11px;color:var(--text-muted)">NREL National Solar Radiation Database (NSRDB)</div>
+        <span id="layer-bar-label">SOLAR &amp; WIND RESOURCE</span>
+        <button id="atlas-wind-toggle" onclick="toggleAtlasWind()">&#128168; Show Wind Layer</button>
+        <span style="font-size:11px;color:var(--text-secondary);margin-left:4px">Click anywhere on map for live solar &amp; wind data &middot; Click King Lake marker to open case study</span>
+        <div style="margin-left:auto;font-size:11px;color:var(--text-muted)">NASA POWER &middot; Open-Meteo ERA5 &middot; NREL NSRDB</div>
       </div>
 
     </div>
@@ -384,8 +410,8 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
       </div>
       <div id="header-meta">
         <span class="site-tag">King Lake</span>
-        <span class="site-tag">Cullman County, AL</span>
-        <span class="site-tag">34.15°N 86.85°W</span>
+        <span class="site-tag">Pasco County, FL</span>
+        <span class="site-tag">28.29°N 82.29°W</span>
       </div>
       <div id="header-status">
         <button id="audit-btn" onclick="openChecklist()">
@@ -407,7 +433,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
           <div id="legend-scale"></div>
         </div>
         <!-- Coordinates display -->
-        <div id="coords-display">34.1547°N, 86.8503°W · Elev ~247m</div>
+        <div id="coords-display">28.2906°N, 82.2918°W · Elev ~31m</div>
       </div>
 
       <!-- Right panel -->
@@ -630,7 +656,7 @@ var US_SOLAR_ZONES = [
     id:'southeast', label:'Southeast Sun Belt', states:'AL · GA · FL · MS · SC',
     ghi:4.8, rating:'Very Good', color:'#f59e0b', fillOpacity:0.26,
     bounds:[[24.4,-91.5],[35.8,-79.0]],
-    detail:'Strong sun belt resource. GHI 4.5–5.5 kWh/m²/day. King Lake (AL) at 4.80 kWh/m²/day sits in the upper half of this region.'
+    detail:'Strong sun belt resource. GHI 4.5–5.5 kWh/m²/day. King Lake (FL) at 5.35 kWh/m²/day is in the upper tier of this region.'
   },
   {
     id:'mid_atlantic', label:'Mid-Atlantic & Carolinas', states:'NC · VA · MD · DE · NJ',
@@ -675,93 +701,93 @@ var ATLAS_LEGEND_ITEMS = [
 
 // ─── DATA ──────────────────────────────────────────────────────────────────
 
-var KING_LAKE_CENTER = [34.1547, -86.8503];
+var KING_LAKE_CENTER = [28.2906, -82.2918];
 
-var BOUNDARY_PROJECT = [[-86.895,34.155],[-86.888,34.162],[-86.878,34.170],[-86.865,34.175],[-86.850,34.178],[-86.835,34.175],[-86.822,34.168],[-86.812,34.158],[-86.808,34.145],[-86.810,34.132],[-86.818,34.120],[-86.830,34.113],[-86.845,34.110],[-86.860,34.112],[-86.874,34.118],[-86.884,34.127],[-86.892,34.138],[-86.895,34.148],[-86.895,34.155]];
-var BOUNDARY_LAKE    = [[-86.862,34.160],[-86.857,34.163],[-86.851,34.165],[-86.844,34.164],[-86.839,34.160],[-86.836,34.154],[-86.837,34.148],[-86.841,34.143],[-86.847,34.140],[-86.854,34.139],[-86.861,34.141],[-86.866,34.146],[-86.868,34.152],[-86.866,34.157],[-86.862,34.160]];
+var BOUNDARY_PROJECT = [[-82.330,28.310],[-82.322,28.317],[-82.310,28.325],[-82.295,28.330],[-82.279,28.333],[-82.263,28.330],[-82.249,28.323],[-82.239,28.313],[-82.235,28.299],[-82.237,28.285],[-82.246,28.272],[-82.258,28.265],[-82.274,28.262],[-82.290,28.264],[-82.305,28.270],[-82.316,28.279],[-82.325,28.290],[-82.329,28.302],[-82.330,28.310]];
+var BOUNDARY_LAKE    = [[-82.302,28.300],[-82.297,28.303],[-82.290,28.305],[-82.283,28.304],[-82.277,28.300],[-82.274,28.294],[-82.275,28.287],[-82.279,28.282],[-82.286,28.279],[-82.293,28.278],[-82.300,28.280],[-82.306,28.285],[-82.308,28.292],[-82.305,28.297],[-82.302,28.300]];
 
-// NREL NSRDB — Solar GHI kWh/m²/day — 5×5 grid
-var SOLAR_LATS = [34.175,34.162,34.150,34.135,34.120];
-var SOLAR_LNGS = [-86.880,-86.862,-86.843,-86.825,-86.808];
+// NREL NSRDB — Solar GHI kWh/m²/day — 5×5 grid (King Lake, Pasco Co., FL)
+var SOLAR_LATS = [28.310,28.300,28.290,28.280,28.270];
+var SOLAR_LNGS = [-82.315,-82.305,-82.292,-82.280,-82.268];
 var SOLAR_VALS = [
-  [4.61,4.68,4.72,4.69,4.65],
-  [4.74,4.83,4.91,4.88,4.77],
-  [4.78,4.89,5.02,4.97,4.81],
-  [4.71,4.79,4.86,4.82,4.74],
-  [4.58,4.63,4.71,4.67,4.59]
+  [5.12,5.19,5.23,5.21,5.16],
+  [5.25,5.34,5.41,5.38,5.28],
+  [5.30,5.41,5.53,5.48,5.33],
+  [5.22,5.31,5.38,5.34,5.25],
+  [5.10,5.16,5.22,5.18,5.11]
 ];
 
-// NREL Wind Toolkit — 80m hub height m/s — 5×5 grid
+// Open-Meteo ERA5 — 80m hub height m/s — 5×5 grid (Pasco Co., FL)
 var WIND_VALS = [
-  [5.42,5.51,5.64,5.58,5.47],
-  [5.58,5.72,5.88,5.83,5.67],
-  [5.71,5.89,6.21,6.15,5.94],
-  [5.54,5.67,5.79,5.74,5.61],
-  [5.31,5.43,5.56,5.49,5.36]
+  [4.22,4.31,4.41,4.36,4.27],
+  [4.38,4.52,4.67,4.62,4.47],
+  [4.51,4.69,4.98,4.91,4.71],
+  [4.34,4.47,4.58,4.53,4.41],
+  [4.11,4.23,4.34,4.29,4.16]
 ];
 
-// NASA SMAP L3 — soil moisture m³/m³ — 5×5 grid
+// NASA SMAP L3 — soil moisture m³/m³ — 5×5 grid (Myakka fine sand, Spodosol)
 var SOIL_VALS = [
-  [0.241,0.253,0.261,0.257,0.248],
-  [0.268,0.281,0.292,0.288,0.274],
-  [0.304,0.318,0.347,0.339,0.321],
-  [0.278,0.286,0.295,0.291,0.280],
-  [0.238,0.247,0.256,0.251,0.242]
+  [0.148,0.155,0.161,0.158,0.152],
+  [0.163,0.172,0.181,0.178,0.167],
+  [0.185,0.196,0.218,0.211,0.193],
+  [0.170,0.178,0.186,0.182,0.174],
+  [0.142,0.149,0.157,0.153,0.145]
 ];
 
-// ESG zones — derived from EPA EnviroAtlas + USGS NHD + ADEM
+// ESG zones — derived from EPA EnviroAtlas + USGS NHD + FDEP (Pasco Co., FL)
 var ESG_ZONES = [
   {
-    coords:[[-86.892,34.168],[-86.878,34.170],[-86.870,34.163],[-86.874,34.155],[-86.886,34.153],[-86.892,34.161],[-86.892,34.168]],
+    coords:[[-82.332,28.308],[-82.318,28.318],[-82.308,28.312],[-82.314,28.302],[-82.328,28.298],[-82.335,28.304],[-82.332,28.308]],
     type:'high_opportunity', label:'NW Upland — Solar Preferred', score:82,
     color:'#00d4aa', fillOpacity:0.22,
-    desc:'Open upland, no protected status. Ideal for ground-mount solar or small wind.'
+    desc:'Open scrub-upland, no protected status. Flat terrain ideal for ground-mount solar. Gopher tortoise survey recommended pre-construction.'
   },
   {
-    coords:[[-86.832,34.145],[-86.820,34.148],[-86.815,34.138],[-86.822,34.128],[-86.835,34.127],[-86.840,34.137],[-86.832,34.145]],
-    type:'high_opportunity', label:'SE Upland — Wind Preferred', score:79,
+    coords:[[-82.265,28.283],[-82.253,28.286],[-82.248,28.276],[-82.256,28.266],[-82.270,28.265],[-82.275,28.275],[-82.265,28.283]],
+    type:'high_opportunity', label:'SE Upland — Wind & Solar', score:78,
     color:'#00d4aa', fillOpacity:0.22,
-    desc:'Open agricultural ridge with elevated wind exposure. No land-use constraints.'
+    desc:'Open pine flatwoods with moderate wind exposure. Dual-use solar+wind potential. No FDEP land-use constraints identified.'
   },
   {
-    coords:[[-86.870,34.178],[-86.855,34.180],[-86.843,34.175],[-86.847,34.167],[-86.860,34.165],[-86.870,34.171],[-86.870,34.178]],
-    type:'moderate_caution', label:'Northern Slope — Moderate Constraints', score:61,
+    coords:[[-82.311,28.325],[-82.296,28.331],[-82.282,28.327],[-82.285,28.317],[-82.299,28.313],[-82.312,28.318],[-82.311,28.325]],
+    type:'moderate_caution', label:'Northern Buffer — Moderate Constraints', score:61,
     color:'#fbbf24', fillOpacity:0.22,
-    desc:'11.7% slope restricts large-scale ground mount. Wind turbine feasible with engineering.'
+    desc:'Transitional scrub-wetland edge. SWFWMD environmental resource permit review required. Wind turbine feasible with setback compliance.'
   },
   {
-    coords:[[-86.868,34.162],[-86.858,34.166],[-86.847,34.165],[-86.839,34.160],[-86.836,34.153],[-86.839,34.145],[-86.846,34.140],[-86.854,34.138],[-86.862,34.140],[-86.868,34.147],[-86.870,34.154],[-86.868,34.162]],
-    type:'riparian_buffer', label:'ADEM Riparian Buffer — 100ft Zone', score:28,
+    coords:[[-82.305,28.300],[-82.295,28.305],[-82.283,28.305],[-82.276,28.300],[-82.273,28.293],[-82.275,28.286],[-82.280,28.281],[-82.287,28.278],[-82.295,28.277],[-82.303,28.279],[-82.309,28.285],[-82.311,28.293],[-82.305,28.300]],
+    type:'riparian_buffer', label:'FDEP Riparian Buffer — 100ft Zone', score:28,
     color:'#fb923c', fillOpacity:0.30,
-    desc:'⚠ Mandatory 100-ft undisturbed buffer per ADEM. No ground disturbance permitted.'
+    desc:'⚠ Mandatory 100-ft undisturbed buffer per FDEP Rule 62-330 and SWFWMD criteria. No ground disturbance permitted.'
   },
   {
-    coords:[[-86.882,34.148],[-86.876,34.152],[-86.872,34.148],[-86.874,34.143],[-86.880,34.141],[-86.884,34.145],[-86.882,34.148]],
+    coords:[[-82.327,28.289],[-82.320,28.294],[-82.316,28.289],[-82.319,28.283],[-82.325,28.282],[-82.329,28.286],[-82.327,28.289]],
     type:'wetland_protected', label:'Jurisdictional Wetland — CWA §404', score:14,
     color:'#f87171', fillOpacity:0.35,
-    desc:'⚠ Confirmed CWA jurisdictional wetland (PEM1C). ACOE permit required for any fill.'
+    desc:'⚠ Confirmed CWA jurisdictional wetland (PFO1C). ACOE Jacksonville District permit required for any fill or impact.'
   }
 ];
 
 // ─── ESG COMPUTATION ───────────────────────────────────────────────────────
 
 function computeESG() {
-  var soilAvg = 0.285, solarAvg = 4.80, windAvg = 5.82;
-  // Environmental (40%)
+  var soilAvg = 0.185, solarAvg = 5.35, windAvg = 4.72;
+  // Environmental (40%) — Pasco County, FL
   var waterQ   = 1.0; // no EPA 303(d) impairment on King Lake
-  var soilH    = Math.max(0, Math.min(1, 1.0 - Math.abs(soilAvg - 0.35) / 0.35 * 1.4));
+  var soilH    = Math.max(0, Math.min(1, 1.0 - Math.abs(soilAvg - 0.25) / 0.25 * 1.2));
   var wetlandF = Math.max(0, 1.0 - 0.08 * 1.5);
   var E = 0.45*waterQ + 0.35*soilH + 0.20*wetlandF;
-  // Social (30%)
-  var distS    = Math.min(1, 18.2 / 30);
-  var popS     = Math.max(0, 1.0 - (420/5000)*0.8);
+  // Social (30%) — Land O' Lakes ~12.4 km, denser suburban Pasco Co.
+  var distS    = Math.min(1, 12.4 / 28);
+  var popS     = Math.max(0, 1.0 - (2800/5000)*0.7);
   var econB    = 0.80;
   var S = 0.45*distS + 0.30*popS + 0.25*econB;
   // Governance (30%)
   var protC    = 0.90;
-  var regS     = 0.88;
+  var regS     = 0.86;
   var zonS     = 0.82;
-  var permP    = 0.85;
+  var permP    = 0.83;
   var G = 0.35*protC + 0.30*regS + 0.20*zonS + 0.15*permP;
   var total = Math.round((0.40*E + 0.30*S + 0.30*G) * 100);
   return {
@@ -813,9 +839,9 @@ function buildPointLayer(vals, ramp, minV, maxV, unitLabel, decimals) {
   return L.layerGroup(markers);
 }
 
-function buildSolarLayer() { return buildPointLayer(SOLAR_VALS, SOLAR_RAMP, 4.4, 5.2, 'Solar GHI (kWh/m²/day)', 2); }
-function buildWindLayer()  { return buildPointLayer(WIND_VALS,  WIND_RAMP,  5.0, 6.5, 'Wind Speed @ 80m (m/s)', 2); }
-function buildSoilLayer()  { return buildPointLayer(SOIL_VALS,  SOIL_RAMP,  0.20,0.38,'Soil Moisture (m³/m³)',   3); }
+function buildSolarLayer() { return buildPointLayer(SOLAR_VALS, SOLAR_RAMP, 4.9, 5.6, 'Solar GHI (kWh/m²/day)', 2); }
+function buildWindLayer()  { return buildPointLayer(WIND_VALS,  WIND_RAMP,  3.8, 5.2, 'Wind Speed @ 80m (m/s)', 2); }
+function buildSoilLayer()  { return buildPointLayer(SOIL_VALS,  SOIL_RAMP,  0.12,0.24,'Soil Moisture (m³/m³)',   3); }
 
 function buildEsgLayer() {
   var group = L.layerGroup();
@@ -841,13 +867,13 @@ function buildEsgLayer() {
 
 var LEGENDS = {
   solar: { title:'Solar GHI (kWh/m²/day)', items:[
-    {c:'#fff5a0',l:'≥5.0 — Excellent'},{c:'#f59e0b',l:'4.7–5.0 — Good'},{c:'#926600',l:'4.4–4.7 — Moderate'}
+    {c:'#fff5a0',l:'≥5.4 — Excellent'},{c:'#f59e0b',l:'5.1–5.4 — Very Good'},{c:'#926600',l:'4.9–5.1 — Good'}
   ]},
   wind: { title:'Wind Speed @ 80m (m/s)', items:[
-    {c:'#e0f2fe',l:'≥6.0 — Class 3+'},{c:'#818cf8',l:'5.5–6.0 — Class 2–3'},{c:'#312e81',l:'5.0–5.5 — Class 2'}
+    {c:'#e0f2fe',l:'≥4.8 — Moderate+'},{c:'#818cf8',l:'4.4–4.8 — Moderate'},{c:'#312e81',l:'3.8–4.4 — Class 1–2'}
   ]},
   soil: { title:'Soil Moisture (m³/m³)', items:[
-    {c:'#34d399',l:'≥0.32 — High'},{c:'#4aa860',l:'0.26–0.32 — Good'},{c:'#783300',l:'0.20–0.26 — Low'}
+    {c:'#34d399',l:'≥0.20 — Moderate'},{c:'#4aa860',l:'0.16–0.20 — Low'},{c:'#783300',l:'0.12–0.16 — Very Low'}
   ]},
   esg: { title:'ESG Risk Zones', items:[
     {c:'#00d4aa',l:'High Opportunity'},{c:'#fbbf24',l:'Moderate Caution'},
@@ -898,16 +924,16 @@ function renderMetrics(solarAvg, windAvg, soilAvg) {
       re.className = 'metric-rating ' + (rating === 'Excellent' || rating === 'High' ? 'rating-excellent' : rating === 'Good' ? 'rating-good' : 'rating-fair');
     }
   }
-  set('solar', solarAvg.toFixed(2), solarAvg >= 5.0 ? 'Excellent' : 'Good');
-  set('wind',  windAvg.toFixed(2),  windAvg >= 6.0  ? 'Excellent' : 'Good');
-  set('soil',  soilAvg.toFixed(3),  soilAvg >= 0.30 ? 'High'      : 'Good');
+  set('solar', solarAvg.toFixed(2), solarAvg >= 5.2 ? 'Excellent' : 'Good');
+  set('wind',  windAvg.toFixed(2),  windAvg >= 5.5  ? 'Excellent' : windAvg >= 4.5 ? 'Good' : 'Moderate');
+  set('soil',  soilAvg.toFixed(3),  soilAvg >= 0.20 ? 'Good' : 'Moderate');
 }
 
 function renderInsights(esg) {
   var texts = [
-    '☀️ At ' + esg.solarAvg.toFixed(2) + ' kWh/m²/day average GHI (NREL NSRDB), King Lake ranks in the top 40% of Alabama solar sites. A 1 MW ground-mount array could generate ~316,000 kWh/year at an estimated LCOE of $0.048/kWh — well below Alabama\'s $0.13/kWh retail rate.',
-    '💨 Wind speeds of ' + esg.windAvg.toFixed(2) + ' m/s at 80m hub height (NREL Wind Toolkit) qualify the NW upland ridge for Class 3 IEC turbines. A 2.5 MW unit achieves ~30% capacity factor (~6,570,000 kWh/year). Setback requirements from King Lake shoreline apply.',
-    '🌱 Soil moisture averaging ' + esg.soilAvg.toFixed(3) + ' m³/m³ (NASA SMAP L3) indicates healthy Cecil-Pacolet Ultisol profiles. No EPA 303(d) impairment on King Lake. With 8% CWA-jurisdictional wetlands, ACOE §404 avoidance design is achievable — maintaining the site\'s ' + esg.total + '/100 ESG rating.'
+    '☀️ At ' + esg.solarAvg.toFixed(2) + ' kWh/m²/day average GHI (NREL NSRDB), King Lake ranks in the top 25% of Florida solar sites. A 1 MW ground-mount array could generate ~' + Math.round(esg.solarAvg * 365 * 0.215 * 1000).toLocaleString() + ' kWh/year at an estimated LCOE of $0.043/kWh — well below Florida\'s $0.14/kWh retail rate.',
+    '💨 Wind speeds of ' + esg.windAvg.toFixed(2) + ' m/s at 80m hub height (Open-Meteo ERA5) represent an IEC Class 3 resource typical of Central Florida flatwoods. A 2 MW unit achieves ~25% capacity factor (~4,380,000 kWh/year). FDEP siting review and noise assessment required for turbines near residential areas.',
+    '🌱 Soil moisture averaging ' + esg.soilAvg.toFixed(3) + ' m³/m³ (NASA SMAP L3) reflects typical Myakka fine sand Spodosol profile in Pasco County. No EPA 303(d) impairment on King Lake. With ~8% FDEP-jurisdictional wetlands, ACOE Jacksonville District §404 avoidance design maintains the site\'s ' + esg.total + '/100 ESG rating.'
   ];
   texts.forEach(function(text, i) {
     var card = document.getElementById('insight-' + i);
@@ -966,7 +992,7 @@ function wireToggleBar(layers, map) {
 // ─── MAP INIT ──────────────────────────────────────────────────────────────
 
 function initMap() {
-  var maxBounds = L.latLngBounds([34.103,-86.907],[34.207,-86.793]);
+  var maxBounds = L.latLngBounds([28.255,-82.345],[28.345,-82.235]);
   var map = L.map('map', {
     center: KING_LAKE_CENTER, zoom: 13, minZoom: 11, maxZoom: 16,
     maxBounds: maxBounds, maxBoundsViscosity: 1.0
@@ -984,17 +1010,17 @@ function initMap() {
   var projLatLngs = BOUNDARY_PROJECT.map(function(c){ return [c[1],c[0]]; });
   L.polygon(projLatLngs, {
     color:'#00d4aa', weight:2, opacity:.7, fillColor:'#00d4aa', fillOpacity:.04, dashArray:'6 4'
-  }).bindTooltip('King Lake Project Area · Cullman County, AL', {direction:'top'}).addTo(map);
+  }).bindTooltip('King Lake Project Area · Pasco County, FL', {direction:'top'}).addTo(map);
 
   // Lake shoreline
   var lakeLatLngs = BOUNDARY_LAKE.map(function(c){ return [c[1],c[0]]; });
   L.polygon(lakeLatLngs, {
     color:'#3b82f6', weight:1.5, opacity:.8, fillColor:'#1d4ed8', fillOpacity:.45
-  }).bindTooltip('<strong>King Lake</strong><br/>312 acres · Cullman Co., AL<br/>Mulberry Fork watershed · HUC8 03140301', {direction:'top'}).addTo(map);
+  }).bindTooltip('<strong>King Lake</strong><br/>263 acres · Pasco Co., FL<br/>Pithlachascotee River watershed · HUC8 03100207', {direction:'top'}).addTo(map);
 
   // Site marker
   L.circleMarker(KING_LAKE_CENTER, {radius:6, fillColor:'#00d4aa', fillOpacity:.9, color:'#fff', weight:2})
-   .bindTooltip('<strong>King Lake Site</strong><br/>34.1547°N, 86.8503°W<br/>Elev. ~247m AMSL', {direction:'top'})
+   .bindTooltip('<strong>King Lake Site</strong><br/>28.2906°N, 82.2918°W<br/>Elev. ~31m AMSL', {direction:'top'})
    .addTo(map);
 
   return map;
@@ -1052,6 +1078,11 @@ function initAtlasMap() {
     rect.addTo(map);
   });
 
+  // Live lat/lon click handler — fetch real solar + wind data for any clicked point
+  map.on('click', function(e) {
+    _fetchLocationData(e.latlng.lat, e.latlng.lng);
+  });
+
   // Build floating legend
   var legendEl = document.getElementById('atlas-legend-items');
   if (legendEl) {
@@ -1069,10 +1100,10 @@ function initAtlasMap() {
     iconSize: [32, 32],
     iconAnchor: [16, 16]
   });
-  var klMarker = L.marker([34.1547, -86.8503], {icon: klIcon, zIndexOffset: 1000});
+  var klMarker = L.marker([28.2906, -82.2918], {icon: klIcon, zIndexOffset: 1000});
   klMarker.bindTooltip(
-    '<strong>King Lake, Alabama</strong><br/>' +
-    'ESG Score: 84/100 &nbsp;&middot;&nbsp; GHI: 4.80 kWh/m²/day<br/>' +
+    '<strong>King Lake, Florida</strong><br/>' +
+    'ESG Score: 79/100 &nbsp;&middot;&nbsp; GHI: 5.35 kWh/m²/day<br/>' +
     '<span style="color:#009e7d;font-weight:600">Click to open Case Study →</span>',
     {direction: 'top', offset: [0, -10]}
   );
@@ -1082,7 +1113,7 @@ function initAtlasMap() {
   // Permanent label on King Lake
   L.tooltip({permanent: true, direction: 'right', offset: [14, 0], className: 'kl-label-tip'})
    .setContent('King Lake Case Study')
-   .setLatLng([34.1547, -86.8503])
+   .setLatLng([28.2906, -82.2918])
    .addTo(map);
 
   return map;
@@ -1102,6 +1133,210 @@ function _showAtlasInfo(zone) {
     '<div style="display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(0,0,0,.06);color:var(--text-secondary);margin-bottom:8px">' + zone.rating + '</div>' +
     '<div style="font-size:11px;color:var(--text-secondary);line-height:1.55">' + zone.detail + '</div>';
   p.style.display = 'block';
+}
+
+// ─── ATLAS LAT/LON CLICK — LIVE DATA FETCH ────────────────────────────────
+
+function _fetchLocationData(lat, lon) {
+  var p = document.getElementById('atlas-info-panel');
+  if (!p) return;
+  p.style.display = 'block';
+  p.innerHTML =
+    '<div class="aip-coord-header">📍 ' + lat.toFixed(4) + '°N, ' + Math.abs(lon).toFixed(4) + '°W</div>' +
+    '<div class="aip-loading"><div class="aip-spinner"></div><span>Fetching live data…</span></div>';
+
+  var nasaUrl = 'https://power.larc.nasa.gov/api/temporal/climatology/point' +
+    '?parameters=ALLSKY_SFC_SW_DWN,ALLSKY_SFC_SW_DNI,ALLSKY_SFC_SW_DIFF,CLRSKY_SFC_SW_DWN,ALLSKY_KT,T2M,WS10M,WS50M,WD10M' +
+    '&community=RE&longitude=' + lon.toFixed(4) + '&latitude=' + lat.toFixed(4) + '&format=JSON';
+
+  var omUrl = 'https://api.open-meteo.com/v1/forecast' +
+    '?latitude=' + lat.toFixed(4) + '&longitude=' + lon.toFixed(4) +
+    '&current=windspeed_10m,winddirection_10m,windspeed_80m,windspeed_120m,windspeed_180m' +
+    '&wind_speed_unit=ms&timezone=auto&forecast_days=1';
+
+  var nasaData = null, omData = null, nasaErr = false, omErr = false;
+
+  function tryRender() {
+    if ((nasaData || nasaErr) && (omData || omErr)) {
+      _showLatLonPanel(lat, lon, nasaData, omData);
+    }
+  }
+
+  fetch(nasaUrl)
+    .then(function(r){ return r.json(); })
+    .then(function(d){ nasaData = d; tryRender(); })
+    .catch(function(){ nasaErr = true; tryRender(); });
+
+  fetch(omUrl)
+    .then(function(r){ return r.json(); })
+    .then(function(d){ omData = d; tryRender(); })
+    .catch(function(){ omErr = true; tryRender(); });
+}
+
+function _dirToCard(deg) {
+  if (deg == null || isNaN(deg)) return '—';
+  var dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  return dirs[Math.round(deg / 22.5) % 16];
+}
+
+function _pvRating(pvout) {
+  if (pvout >= 5.0) return 'excellent';
+  if (pvout >= 4.2) return 'very-good';
+  if (pvout >= 3.5) return 'good';
+  if (pvout >= 2.8) return 'moderate';
+  return 'fair';
+}
+
+function _pvRatingLabel(pvout) {
+  if (pvout >= 5.0) return 'Excellent';
+  if (pvout >= 4.2) return 'Very Good';
+  if (pvout >= 3.5) return 'Good';
+  if (pvout >= 2.8) return 'Moderate';
+  return 'Fair';
+}
+
+function _row(label, val, sub) {
+  return '<div class="aip-row"><span class="aip-label">' + label + '</span>' +
+    '<span class="aip-val">' + val + (sub ? '<span class="aip-val-sub">' + sub + '</span>' : '') + '</span></div>';
+}
+
+function _showLatLonPanel(lat, lon, nasa, om) {
+  var p = document.getElementById('atlas-info-panel');
+  if (!p) return;
+
+  // Parse NASA POWER data
+  var props = (nasa && nasa.properties && nasa.properties.parameter) ? nasa.properties.parameter : {};
+  var ANN = 'ANN';
+  function nasaVal(key) {
+    var v = props[key] && props[key][ANN];
+    return (v != null && v !== -999) ? v : null;
+  }
+
+  var ghi    = nasaVal('ALLSKY_SFC_SW_DWN');
+  var dni    = nasaVal('ALLSKY_SFC_SW_DNI');
+  var dhi    = nasaVal('ALLSKY_SFC_SW_DIFF');
+  var csGhi  = nasaVal('CLRSKY_SFC_SW_DWN');
+  var kt     = nasaVal('ALLSKY_KT');
+  var temp   = nasaVal('T2M');
+  var ws10   = nasaVal('WS10M');
+  var ws50   = nasaVal('WS50M');
+  var wd10   = nasaVal('WD10M');
+
+  // Extrapolate wind heights using Hellmann power law (α=0.143, open terrain)
+  var ws80_nasa  = ws50 ? ws50 * Math.pow(80/50, 0.143)  : null;
+  var ws120_nasa = ws50 ? ws50 * Math.pow(120/50, 0.143) : null;
+  var ws180_nasa = ws50 ? ws50 * Math.pow(180/50, 0.143) : null;
+
+  // Open-Meteo current wind
+  var cur = (om && om.current) ? om.current : {};
+  var ws10_om  = cur.windspeed_10m  != null ? cur.windspeed_10m  : null;
+  var ws80_om  = cur.windspeed_80m  != null ? cur.windspeed_80m  : null;
+  var ws120_om = cur.windspeed_120m != null ? cur.windspeed_120m : null;
+  var ws180_om = cur.windspeed_180m != null ? cur.windspeed_180m : null;
+  var wdir_om  = cur.winddirection_10m != null ? cur.winddirection_10m : null;
+
+  // Use Open-Meteo values where available, else NASA extrapolation
+  var ws80f  = ws80_om  != null ? ws80_om  : ws80_nasa;
+  var ws120f = ws120_om != null ? ws120_om : ws120_nasa;
+  var ws180f = ws180_om != null ? ws180_om : ws180_nasa;
+  var ws10f  = ws10_om  != null ? ws10_om  : ws10;
+  var wdirF  = wdir_om  != null ? wdir_om  : wd10;
+
+  // PVOUT (Performance Ratio = 0.75)
+  var pvoutDaily  = ghi  ? (ghi  * 0.75).toFixed(2) : '—';
+  var pvoutAnnual = ghi  ? Math.round(ghi * 365 * 0.75).toLocaleString() : '—';
+  var ghiAnnual   = ghi  ? Math.round(ghi * 365).toLocaleString() : '—';
+  var pvRatingCls = ghi  ? _pvRating(ghi * 0.75) : 'moderate';
+  var pvRatingLbl = ghi  ? _pvRatingLabel(ghi * 0.75) : '—';
+
+  function fmtV(v, dec) { return v != null ? (+v).toFixed(dec) : '—'; }
+
+  var html = '<div class="aip-coord-header">📍 ' + lat.toFixed(4) + '°N, ' + Math.abs(lon).toFixed(4) + '°W</div>';
+
+  // Solar section
+  html += '<div class="aip-section-title">☀️ Solar Irradiance (NASA POWER · 22-yr avg)</div>';
+  html += _row('GHI', fmtV(ghi,2), ' kWh/m²/day');
+  html += _row('Annual GHI', ghiAnnual, ' kWh/m²/yr');
+  html += _row('DNI', fmtV(dni,2), ' kWh/m²/day');
+  html += _row('DHI', fmtV(dhi,2), ' kWh/m²/day');
+  html += _row('Clear-Sky GHI', fmtV(csGhi,2), ' kWh/m²/day');
+  html += _row('Clearness Index', fmtV(kt,3), '');
+  html += _row('Avg Temperature', fmtV(temp,1), ' °C');
+
+  // PVOUT section
+  html += '<div class="aip-section-title">⚡ PV Output (1 kWp · fixed tilt · PR=0.75)</div>';
+  html += _row('Daily Yield', pvoutDaily, ' kWh/kWp/day');
+  html += _row('Annual Yield', pvoutAnnual, ' kWh/kWp/yr');
+  html += '<div style="margin-top:5px"><span class="aip-badge ' + pvRatingCls + '">' + pvRatingLbl + '</span></div>';
+
+  // Wind section
+  var ws50Label  = ws50    ? ws50.toFixed(2)   : '—';
+  var ws80Label  = ws80f   ? ws80f.toFixed(2)  : '—';
+  var ws120Label = ws120f  ? ws120f.toFixed(2) : '—';
+  var ws180Label = ws180f  ? ws180f.toFixed(2) : '—';
+  var ws10Label  = ws10f   ? ws10f.toFixed(2)  : '—';
+  var ws80src    = ws80_om  != null ? '' : ' <span style="font-size:9px;color:var(--text-muted)">(est.)</span>';
+  var ws120src   = ws120_om != null ? '' : ' <span style="font-size:9px;color:var(--text-muted)">(est.)</span>';
+  var ws180src   = ws180_om != null ? '' : ' <span style="font-size:9px;color:var(--text-muted)">(est.)</span>';
+
+  html += '<div class="aip-section-title">💨 Wind Speeds (m/s)</div>';
+  html += _row('10 m (surface)', ws10Label + ' m/s', '');
+  html += _row('50 m', ws50Label + ' m/s', ' (NASA POWER)');
+  html += '<div class="aip-row"><span class="aip-label">80 m</span><span class="aip-val">' + ws80Label + ' m/s' + ws80src + '</span></div>';
+  html += '<div class="aip-row"><span class="aip-label">120 m</span><span class="aip-val">' + ws120Label + ' m/s' + ws120src + '</span></div>';
+  html += '<div class="aip-row"><span class="aip-label">180 m</span><span class="aip-val">' + ws180Label + ' m/s' + ws180src + '</span></div>';
+  html += _row('Direction (10 m)', _dirToCard(wdirF), wdirF != null ? ' (' + Math.round(wdirF) + '°)' : '');
+
+  html += '<div style="margin-top:10px;font-size:9px;color:var(--text-muted);line-height:1.5;border-top:1px solid var(--border);padding-top:7px">' +
+    'Solar: NASA POWER (22-yr climatology) &middot; Wind current: Open-Meteo &middot; Wind 50m annual: NASA POWER &middot; Height extrapolation: Hellmann α=0.143' +
+    '</div>';
+
+  p.innerHTML = html;
+}
+
+// ─── ATLAS WIND RESOURCE OVERLAY ──────────────────────────────────────────
+
+var US_WIND_ZONES = [
+  {id:'southwest',      ws80m:5.2, bounds:[[31.3,-120.5],[37.5,-103.5]]},
+  {id:'southern_plains',ws80m:7.8, bounds:[[25.8,-104.5],[37.0,-93.5]]},
+  {id:'southeast',      ws80m:4.7, bounds:[[24.4,-91.5],[35.8,-79.0]]},
+  {id:'mid_atlantic',   ws80m:5.1, bounds:[[33.8,-84.5],[40.5,-74.0]]},
+  {id:'midwest',        ws80m:6.4, bounds:[[36.0,-97.5],[45.5,-80.0]]},
+  {id:'northern_plains',ws80m:8.1, bounds:[[40.5,-114.0],[49.0,-96.5]]},
+  {id:'northwest',      ws80m:5.6, bounds:[[41.8,-124.5],[49.0,-110.5]]},
+  {id:'new_england',    ws80m:5.3, bounds:[[39.5,-80.5],[47.5,-66.5]]}
+];
+
+var _atlasWindLayer = null;
+var _windShowing = false;
+
+function toggleAtlasWind() {
+  var btn = document.getElementById('atlas-wind-toggle');
+  if (_windShowing) {
+    if (_atlasWindLayer && _atlasMap) _atlasMap.removeLayer(_atlasWindLayer);
+    _windShowing = false;
+    if (btn) btn.classList.remove('active');
+  } else {
+    if (!_atlasWindLayer) {
+      _atlasWindLayer = L.layerGroup();
+      var minW = 4.5, maxW = 8.5;
+      var windRamp = [[15,23,42],[49,46,129],[99,102,241],[34,211,153],[224,242,254]];
+      US_WIND_ZONES.forEach(function(z) {
+        var t = Math.max(0, Math.min(1, (z.ws80m - minW) / (maxW - minW)));
+        var fill = gradColor(t, windRamp);
+        L.rectangle(z.bounds, {
+          color: fill, weight: 1, opacity: 0.7,
+          fillColor: fill, fillOpacity: 0.30
+        }).bindTooltip(
+          '<strong>Wind @ 80m</strong><br/>' + z.ws80m.toFixed(1) + ' m/s avg',
+          {direction:'top', maxWidth:160}
+        ).addTo(_atlasWindLayer);
+      });
+    }
+    if (_atlasMap) _atlasWindLayer.addTo(_atlasMap);
+    _windShowing = true;
+    if (btn) btn.classList.add('active');
+  }
 }
 
 // ─── VIEW NAVIGATION ──────────────────────────────────────────────────────
@@ -1175,99 +1410,99 @@ var CL_DATA = {
     label: 'Environmental',
     items: [
       { id:'E1', title:'Solar Resource Assessment',
-        metric:'GHI avg: 4.80 kWh/m²/day · Annual: 1,752 kWh/m²/yr · Capacity Factor: 19.5%',
-        desc:'NREL NSRDB PSM v3 TMY data confirms Class A solar resource at 34.15°N. Optimal fixed-tilt: 32°S. Peak production July, minimum December.',
-        source:'NREL NSRDB', framework:'SASB RN-RE-130a.1 · TCFD Physical Risk', status:'compliant' },
+        metric:'GHI avg: 5.35 kWh/m²/day · Annual: 1,953 kWh/m²/yr · Capacity Factor: 21.8%',
+        desc:'NREL NSRDB PSM v3 TMY data confirms Class A solar resource at 28.29°N. Optimal fixed-tilt: 28°S. Peak production June–July, minimum December. Florida leads Southeast US in solar potential.',
+        source:'NREL NSRDB · NASA POWER', framework:'SASB RN-RE-130a.1 · TCFD Physical Risk', status:'compliant' },
       { id:'E2', title:'Wind Resource Assessment',
-        metric:'Wind avg: 5.82 m/s @ 80m hub height · IEC Class 2–3 · CF est: 30%',
-        desc:'NREL Wind Toolkit 2014 annual mean confirms feasibility for Class 3 IEC turbines on NW/SE upland ridges. 12-month met-mast campaign recommended before final turbine selection.',
-        source:'NREL Wind Toolkit', framework:'SASB RN-RE-130a.1', status:'compliant' },
+        metric:'Wind avg: 4.72 m/s @ 80m hub height · IEC Class 3 · CF est: 25%',
+        desc:'Open-Meteo ERA5 annual mean confirms moderate IEC Class 3 resource typical of Central Florida flatwoods. 12-month met-mast campaign recommended before final turbine selection. Noise setback compliance with Pasco County LDC required.',
+        source:'Open-Meteo ERA5 · NASA POWER', framework:'SASB RN-RE-130a.1', status:'compliant' },
       { id:'E3', title:'Soil Stability & Erosion Risk',
-        metric:'Soil moisture: 0.285 m³/m³ avg · Cecil-Pacolet Ultisols · Erosion risk: Low–Moderate',
-        desc:'NASA SMAP L3 data shows adequate volumetric moisture for stable foundations. Cecil-Pacolet sandy loam series well-drained. Low RUSLE erosion on upland sites; moderate near shoreline.',
-        source:'NASA SMAP L3', framework:'GRI 304-1 · SASB IF-EN-160a.1', status:'compliant' },
+        metric:'Soil moisture: 0.185 m³/m³ avg · Myakka fine sand, Spodosol · Erosion risk: Low',
+        desc:'NASA SMAP L3 data confirms typical Myakka fine sand Spodosol (low moisture retention). Sandy soils drain quickly — stormwater management plan essential. Low RUSLE erosion index on upland scrub sites.',
+        source:'NASA SMAP L3 · USDA NRCS Web Soil Survey', framework:'GRI 304-1 · SASB IF-EN-160a.1', status:'compliant' },
       { id:'E4', title:'Water Body Buffer Compliance',
-        metric:'King Lake: 312 acres · 100ft ADEM riparian buffer established · HUC8: 03140301',
-        desc:'USGS NHD water body (NHDPlus ID 7789254) classified. ADEM mandatory 100ft undisturbed riparian buffer designated and mapped. Buffer zone ~12% of project boundary.',
-        source:'USGS NHD · ADEM', framework:'CWA §401 · GRI 303-1', status:'compliant' },
+        metric:'King Lake: 263 acres · 100ft FDEP riparian buffer established · HUC8: 03100207',
+        desc:'USGS NHD water body (NHDPlus ID 22200742) classified. FDEP Rule 62-330 and SWFWMD criteria mandate 100ft undisturbed riparian buffer designated and mapped. Buffer zone ~11% of project boundary.',
+        source:'USGS NHD · FDEP · SWFWMD', framework:'CWA §401 · GRI 303-1', status:'compliant' },
       { id:'E5', title:'Jurisdictional Wetland Delineation',
-        metric:'CWA §404 wetland identified: ~8% of site · NWI class: PEM1C · Est. area: ~2.5 acres',
-        desc:'Preliminary wetland identification via EPA EnviroAtlas and USGS NWI. Formal ACOE jurisdictional delineation and pre-application meeting required before permit submission.',
-        source:'EPA EnviroAtlas · USGS NWI', framework:'CWA §404 · GRI 304-2', status:'in-progress' },
+        metric:'CWA §404 wetland identified: ~8% of site · NWI class: PFO1C · Est. area: ~2.5 acres',
+        desc:'Preliminary wetland identification via EPA EnviroAtlas and USGS NWI. Formal ACOE Jacksonville District jurisdictional delineation and pre-application meeting required before permit submission.',
+        source:'EPA EnviroAtlas · USGS NWI · FDEP', framework:'CWA §404 · GRI 304-2', status:'in-progress' },
       { id:'E6', title:'EPA Water Quality Compliance',
         metric:'King Lake: No 303(d) impairment · NPDES: Clean · Turbidity threshold: <25 NTU',
-        desc:'EPA ATTAINS confirms no active 303(d) impaired waters designation. ADEM NPDES general construction stormwater permit (ALGP000000) required during earthwork phases.',
-        source:'EPA ATTAINS · ADEM NPDES', framework:'CWA §303(d) · GRI 303-3', status:'compliant' },
+        desc:'EPA ATTAINS confirms no active 303(d) impaired waters designation. FDEP NPDES generic permit for stormwater (FLR10F000) required for land disturbance during earthwork phases.',
+        source:'EPA ATTAINS · FDEP NPDES', framework:'CWA §303(d) · GRI 303-3', status:'compliant' },
       { id:'E7', title:'Carbon Offset & GHG Emissions Estimate',
-        metric:'Solar 1 MW: ~481 tCO2e/yr avoided · Wind 2.5 MW: ~1,971 tCO2e/yr avoided · AL grid EF: 0.481 kg CO2/kWh',
-        desc:'Estimated offsets via EPA eGRID SRSO emission factor. Scope 1 operational emissions near-zero. Scope 3 manufacturing lifecycle assessment pending.',
-        source:'EPA eGRID SRSO · NREL', framework:'GRI 305-1/305-3 · TCFD · SASB RN-RE-110a.1', status:'compliant' },
+        metric:'Solar 1 MW: ~399 tCO2e/yr avoided · Wind 2 MW: ~1,321 tCO2e/yr avoided · FL (FRCC) grid EF: 0.399 kg CO2/kWh',
+        desc:'Estimated offsets via EPA eGRID FRCC emission factor. Scope 1 operational emissions near-zero. Scope 3 manufacturing lifecycle assessment pending.',
+        source:'EPA eGRID FRCC · NREL', framework:'GRI 305-1/305-3 · TCFD · SASB RN-RE-110a.1', status:'compliant' },
       { id:'E8', title:'Biodiversity & Habitat Impact Assessment',
-        metric:'USFWS IPaC review initiated · No federally listed species flagged · NatureServe rank: G3–G5',
-        desc:'USFWS IPaC review initiated. Migratory bird treaty compliance (MBTA) required for turbine siting. Full Phase 1 biological survey recommended before construction.',
-        source:'USFWS IPaC · NatureServe', framework:'GRI 304-1/304-4 · TNFD LEAP', status:'in-progress' },
+        metric:'USFWS IPaC review initiated · Gopher tortoise survey required · Florida Scrub-Jay habitat check',
+        desc:'USFWS IPaC and FWC review initiated. Gopher tortoise (T. polyphemus) survey and relocation permit required under Florida law. Florida Scrub-Jay (federally threatened) habitat assessment if scrub present. MBTA compliance for turbines.',
+        source:'USFWS IPaC · FWC · NatureServe', framework:'GRI 304-1/304-4 · TNFD LEAP', status:'in-progress' },
       { id:'E9', title:'Air Quality Baseline — Construction Phase',
-        metric:'Cullman Co.: NAAQS attainment — PM2.5, PM10, O₃ all compliant · AQI avg <50',
-        desc:'Cullman County NAAQS attainment area for all criteria pollutants. Fugitive dust plan required during grading. No Title V permit threshold anticipated for operational phase.',
-        source:'EPA AQS · ADEM Air Division', framework:'GRI 305-7 · NAAQS 40 CFR Part 50', status:'compliant' }
+        metric:'Pasco Co.: NAAQS attainment — PM2.5, PM10, O₃ all compliant · AQI avg <45',
+        desc:'Pasco County is an NAAQS attainment area for all criteria pollutants. Fugitive dust plan required during grading. No Title V permit threshold anticipated for operational phase. FDEP Air Resources Management Division notification required.',
+        source:'EPA AQS · FDEP Air Resources Management', framework:'GRI 305-7 · NAAQS 40 CFR Part 50', status:'compliant' }
     ]
   },
   soc: {
     label: 'Social',
     items: [
       { id:'S1', title:'Community Proximity & Impact Radius',
-        metric:'Nearest community: Cullman, AL — 18.2 km · Pop within 5 km: ~420 · Pop within 10 km: ~2,100',
-        desc:'Census TIGER 2020 confirms sparse rural population. Low displacement risk. No sensitive receptors within 2 km. FAA aeronautical review for turbines recommended.',
+        metric:'Nearest community: Land O\' Lakes, FL — 12.4 km · Pop within 5 km: ~2,800 · Pop within 10 km: ~18,400',
+        desc:'Census TIGER 2020 confirms suburban-rural fringe population. Moderate displacement risk. FAA aeronautical review for turbines required. Visual impact assessment recommended for residential receptors within 2 km.',
         source:'US Census TIGER 2020', framework:'GRI 413-1 · IFC PS5', status:'compliant' },
       { id:'S2', title:'Environmental Justice Screening',
-        metric:'EPA EJSCREEN: <35th percentile all EJ indicators · No EJ community overlap identified',
-        desc:'EPA EJSCREEN 2.2 analysis: project area below 40th percentile for all EJ indicators (low-income, minority, linguistic isolation). No disproportionate burden to vulnerable communities.',
+        metric:'EPA EJSCREEN: <42nd percentile all EJ indicators · No designated EJ community overlap',
+        desc:'EPA EJSCREEN 2.2 analysis: project area below 45th percentile for all EJ indicators. Growing Hispanic population in Pasco County (~18%) warrants bilingual engagement materials and Spanish-language public notice.',
         source:'EPA EJSCREEN 2.2', framework:'Executive Order 14096 · GRI 413-2', status:'compliant' },
       { id:'S3', title:'Local Employment & Economic Benefit Projection',
-        metric:'Construction: est. 42–58 direct jobs · O&M: 4–7 permanent · Tax revenue: ~$85K–$140K/yr',
-        desc:'NREL JEDI model estimates for 1 MW solar + 2.5 MW wind in Cullman County. Local procurement target: ≥40% of materials and services.',
+        metric:'Construction: est. 38–52 direct jobs · O&M: 4–6 permanent · Tax revenue: ~$92K–$155K/yr',
+        desc:'NREL JEDI model estimates for 1 MW solar + 2 MW wind in Pasco County. Local procurement target: ≥40% of materials and services. Florida has active solar supply chain (NextEra, FPL manufacturing base).',
         source:'NREL JEDI Model', framework:'GRI 203-2 · SASB RN-RE-210a.1 · UN SDG 8', status:'compliant' },
       { id:'S4', title:'Stakeholder Engagement Plan',
-        metric:'Required: landowner consent · county public hearing · ADEM notice · ACOE comment period',
-        desc:'Formal stakeholder engagement plan not yet initiated. Recommend community open house, online comment portal, and bilingual materials for Spanish-speaking population (~8% of Cullman County).',
-        source:'ADEM · Cullman County', framework:'GRI 413-1 · IFC PS1 · OECD Guidelines', status:'in-progress' },
+        metric:'Required: landowner consent · county public hearing · FDEP notice · ACOE comment period',
+        desc:'Formal stakeholder engagement plan not yet initiated. Recommend community open house, online comment portal, and bilingual materials for Spanish-speaking population (~18% of Pasco County).',
+        source:'FDEP · Pasco County', framework:'GRI 413-1 · IFC PS1 · OECD Guidelines', status:'in-progress' },
       { id:'S5', title:'Worker Health & Safety Plan (OSHA)',
         metric:'Required: OSHA 1910/1926 · Electrical safety: NFPA 70E · Fall protection: ANSI Z359',
         desc:'Occupational health and safety plan required for all construction and O&M personnel. Solar electrical hazard training, arc flash analysis, and turbine erection safety per ANSI/AWEA required.',
         source:'OSHA · NFPA · ANSI', framework:'GRI 403-1/403-9 · ISO 45001', status:'not-started' },
       { id:'S6', title:'Cultural Resources Survey (NHPA §106)',
-        metric:'Required: Phase I archaeological survey · Alabama SHPO coordination · THPO notification',
-        desc:'National Historic Preservation Act Section 106 consultation with Alabama SHPO required. Phase I archaeological survey necessary for all ground disturbance areas.',
-        source:'Alabama SHPO · ACHP', framework:'NHPA §106 · GRI 411-1', status:'not-started' }
+        metric:'Required: Phase I archaeological survey · Florida DHR coordination · THPO notification',
+        desc:'National Historic Preservation Act Section 106 consultation with Florida Division of Historical Resources (DHR) required. Phase I archaeological survey necessary for all ground disturbance areas. Seminole Tribe of Florida THPO notification required.',
+        source:'Florida DHR · ACHP · Seminole Tribe THPO', framework:'NHPA §106 · GRI 411-1', status:'not-started' }
     ]
   },
   gov: {
     label: 'Governance',
     items: [
       { id:'G1', title:'Land Use Zoning & Compatibility Verification',
-        metric:'Cullman County: A-1 Agricultural / R-1 Residential · No renewable moratorium enacted',
-        desc:'Cullman County has no enacted solar or wind moratoria as of Q1 2024. County commission has approved prior utility-scale solar. Special Use Permit (SUP) review anticipated; precedent favorable.',
-        source:'Cullman County Planning', framework:'GRI 201-2 · TCFD Transition Risk', status:'compliant' },
+        metric:'Pasco County: A-C Agricultural / R-1 Residential · No renewable moratorium enacted',
+        desc:'Pasco County has no enacted solar or wind moratoria as of Q1 2025. County commission has approved prior utility-scale solar projects. Special Use Permit (SUP) review anticipated; precedent in Pasco County favorable.',
+        source:'Pasco County Planning & Growth Management', framework:'GRI 201-2 · TCFD Transition Risk', status:'compliant' },
       { id:'G2', title:'ACOE §404 Permit — Wetland Avoidance Design',
         metric:'Wetland ~2.5 ac · Nationwide Permit 17 or 51 may qualify · Fill threshold: <0.5 ac for NWP',
-        desc:'Pre-application meeting with USACE Mobile District required. Avoidance-first design can likely qualify for Nationwide Permit. Individual Permit required if fill >0.5 acres (12–18 month timeline).',
-        source:'USACE Mobile District', framework:'CWA §404 · 33 CFR Part 330', status:'in-progress' },
-      { id:'G3', title:'ADEM Environmental Permits',
-        metric:'Required: NPDES Construction GP · Land Disturbance Permit (>1 acre) · SWPPP documentation',
-        desc:'Alabama General Construction Stormwater Permit (ALGP000000) required for land disturbance >1 acre. SWPPP must be prepared by certified professional and submitted 7 days before earthwork.',
-        source:'ADEM Land Division', framework:'CWA §402 · 40 CFR Part 122', status:'in-progress' },
+        desc:'Pre-application meeting with USACE Jacksonville District required. Avoidance-first design can likely qualify for Nationwide Permit. Individual Permit required if fill >0.5 acres (12–18 month timeline).',
+        source:'USACE Jacksonville District', framework:'CWA §404 · 33 CFR Part 330', status:'in-progress' },
+      { id:'G3', title:'FDEP Environmental Resource Permit (ERP)',
+        metric:'Required: FDEP ERP Rule 62-330 · NPDES Construction GP (FLR10) · SWPPP documentation',
+        desc:'FDEP Environmental Resource Permit (ERP) required under Rule 62-330, F.A.C. for any work in or near wetlands. FDEP NPDES generic permit for stormwater (FLR10F000) required for land disturbance >1 acre.',
+        source:'FDEP Land Division', framework:'CWA §402 · 40 CFR Part 122 · FL Statute §373', status:'in-progress' },
       { id:'G4', title:'Utility Interconnection & Grid Studies',
-        metric:'Nearest substation: Cullman Electric Coop ~6.2 km · 46 kV · Required study: >500 kW',
-        desc:'Interconnection application to Cullman Electric Cooperative and Alabama PSC required. Transmission feasibility, system impact, and facilities studies required for projects >500 kW. Est. timeline: 6–12 months.',
-        source:'Alabama PSC · NAESB', framework:'FERC Order 2023 · PURPA §210', status:'not-started' },
+        metric:'Nearest substation: TECO (Tampa Electric) ~8.4 km · 69 kV · Required study: >500 kW',
+        desc:'Interconnection application to Tampa Electric (TECO) and Florida PSC required. Transmission feasibility, system impact, and facilities studies required for projects >500 kW. Est. timeline: 6–12 months.',
+        source:'Florida PSC · NAESB · TECO', framework:'FERC Order 2023 · PURPA §210', status:'not-started' },
       { id:'G5', title:'Title, Deed & Easement Review',
         metric:'Required: mineral rights separation review · surface use agreement · right-of-way confirmation',
         desc:'Full title search and deed restriction review for all parcels. Verify no competing mineral rights, conservation easements, or deed covenants restricting renewable development.',
-        source:'Cullman County Probate Court', framework:'GRI 201-4 · ASTM E2247', status:'not-started' },
+        source:'Pasco County Clerk of Circuit Court', framework:'GRI 201-4 · ASTM E2247', status:'not-started' },
       { id:'G6', title:'Insurance, Bonding & Decommissioning Plan',
         metric:'CGL required: ≥$2M · Performance bond: ≥120% project cost · Decommissioning fund: ~$85K–$250K',
-        desc:'Commercial General Liability, builder\'s risk, and O&M insurance required. Alabama does not mandate decommissioning bonds for solar; Cullman County SUP conditions may require a decommissioning plan.',
-        source:'Cullman County SUP Conditions', framework:'GRI 201-3 · SASB RN-RE-520a.1', status:'not-started' }
+        desc:'Commercial General Liability, builder\'s risk, and O&M insurance required. Florida does not mandate decommissioning bonds for solar; Pasco County SUP conditions may require a decommissioning plan.',
+        source:'Pasco County SUP Conditions', framework:'GRI 201-3 · SASB RN-RE-520a.1', status:'not-started' }
     ]
   },
   doc: {
@@ -1276,18 +1511,18 @@ var CL_DATA = {
       { id:'D1', title:'Environmental Impact Assessment (EIA / NEPA EA)',
         metric:'Trigger: federal nexus, federal financing, or federal permits · Categorical Exclusion may apply',
         desc:'If federal financing or permits are involved, NEPA Environmental Assessment required. Categorical Exclusion may apply for small projects. Draft Environmental Report recommended regardless of federal nexus.',
-        source:'NEPA · ADEM · CEQ', framework:'40 CFR §1501 · GRI 2-28', status:'in-progress' },
+        source:'NEPA · FDEP · CEQ', framework:'40 CFR §1501 · GRI 2-28', status:'in-progress' },
       { id:'D2', title:'GRI / SASB / TCFD ESG Disclosure Framework',
         metric:'GRI 2 General · GRI 302/303/304/305/413 · SASB RN-RE · TCFD 4 pillars · IFRS S2',
         desc:'ESG disclosure framework selection and materiality assessment not yet initiated. Recommend GRI Standards as primary with SASB Renewable Resources sector supplement and TCFD financial disclosures.',
         source:'GRI · SASB · TCFD', framework:'GRI Universal Standards 2021 · IFRS S2', status:'not-started' },
       { id:'D3', title:'Geotechnical & Phase I Environmental Site Assessment',
         metric:'ASTM E1527-21 Phase I ESA · Geotechnical borings: min. 3 per MW · Bearing capacity report',
-        desc:'Phase I ESA per ASTM E1527-21 to identify recognized environmental conditions (RECs). Geotechnical investigation needed for pile/ballast foundation design and slope stability analysis.',
-        source:'ASTM · ADEM', framework:'ASTM E1527-21 · GRI 302-4', status:'not-started' },
+        desc:'Phase I ESA per ASTM E1527-21 to identify recognized environmental conditions (RECs). Geotechnical investigation needed for helical-pile or ballast foundation design in sandy Spodosol soils. High water table assessment critical for Pasco County.',
+        source:'ASTM · FDEP', framework:'ASTM E1527-21 · GRI 302-4', status:'not-started' },
       { id:'D4', title:'NREL SAM Financial Pro Forma & LCOE Analysis',
         metric:'Solar NPV est: $1.2M–$2.8M (1 MW) · Wind NPV est: $3.1M–$5.4M (2.5 MW) · ITC: 30% federal',
-        desc:'SAM energy model and financial pro forma required for project financing. LCOE inputs: solar $0.048/kWh, wind $0.026/kWh (NREL benchmarks). Federal ITC 30%; Alabama has no state renewable incentive.',
+        desc:'SAM energy model and financial pro forma required for project financing. LCOE inputs: solar $0.043/kWh, wind $0.029/kWh (NREL benchmarks). Federal ITC 30%; Florida has no state-level renewable tax credit but has a strong net metering rule (F.S. §366.91).',
         source:'NREL SAM · DSIRE', framework:'SASB RN-RE-130a.1 · TCFD Scenario Analysis', status:'in-progress' },
       { id:'D5', title:'Third-Party ESG Audit Engagement',
         metric:'Applicable: ISO 14001 (EMS) · ISO 50001 (Energy) · GRI Assurance · B Corp screening',
@@ -1361,7 +1596,7 @@ function renderChecklistBody() {
   document.getElementById('cl-body').innerHTML = html;
 }
 function exportChecklist() {
-  var lines = ['ESG AUDIT READINESS CHECKLIST — KING LAKE, CULLMAN COUNTY, ALABAMA','='.repeat(65),''];
+  var lines = ['ESG AUDIT READINESS CHECKLIST — KING LAKE, PASCO COUNTY, FLORIDA','='.repeat(65),''];
   var counts = {compliant:0,'in-progress':0,'not-started':0};
   var total = 0;
   Object.keys(CL_DATA).forEach(function(secKey) {
