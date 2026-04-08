@@ -8,7 +8,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TerraScope — King Lake ESG Analysis</title>
+  <title>USA Solar Atlas Explorer — TerraIQ</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -22,7 +22,7 @@
   --font:'Inter',system-ui,-apple-system,sans-serif;
 }
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font);font-size:13px;-webkit-font-smoothing:antialiased}
-#app{display:flex;flex-direction:column;width:100vw;height:100vh;overflow:hidden}
+#app{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden}
 #header{height:var(--header-h);display:flex;align-items:center;gap:16px;padding:0 20px;background:var(--bg-secondary);border-bottom:1px solid var(--border);flex-shrink:0;z-index:100;box-shadow:0 1px 6px rgba(0,0,0,.06)}
 #logo{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;color:var(--text-primary);letter-spacing:.5px}
 #header-meta{display:flex;gap:6px;margin-left:8px}
@@ -160,19 +160,227 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg-primary);co
 #audit-btn{display:flex;align-items:center;gap:7px;background:rgba(0,212,170,.1);border:1px solid var(--accent-dim);color:var(--accent);padding:6px 13px;border-radius:20px;font-size:11px;font-family:var(--font);font-weight:600;cursor:pointer;letter-spacing:.5px;transition:all .18s;white-space:nowrap;margin-right:4px}
 #audit-btn:hover{background:rgba(0,212,170,.2)}
 #audit-btn svg{flex-shrink:0}
+
+/* ── Two-view system ─────────────────────────────────────────────────── */
+.view{position:absolute;top:0;left:0;width:100vw;height:100vh;overflow:hidden;display:none;flex-direction:column}
+.view.active{display:flex}
+body{position:relative;width:100vw;height:100vh;overflow:hidden}
+
+/* ── Atlas view shell ────────────────────────────────────────────────── */
+#atlas-app{display:flex;flex-direction:column;width:100%;height:100%;overflow:hidden}
+#atlas-header{height:var(--header-h);display:flex;align-items:center;gap:16px;padding:0 20px;background:var(--bg-secondary);border-bottom:1px solid var(--border);flex-shrink:0;z-index:100;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+#atlas-main{flex:1;display:flex;overflow:hidden;min-height:0}
+#us-map-container{flex:1;position:relative;overflow:hidden}
+#us-map{width:100%;height:100%;background:#c8d8e8}
+#atlas-bar{height:var(--bar-h);display:flex;align-items:center;padding:0 20px;background:var(--bg-secondary);border-top:1px solid var(--border);flex-shrink:0;z-index:100;box-shadow:0 -2px 10px rgba(0,0,0,.06);gap:12px}
+
+/* ── Atlas right panel ───────────────────────────────────────────────── */
+#atlas-panel{width:280px;flex-shrink:0;background:var(--bg-panel);border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+#atlas-panel::-webkit-scrollbar{width:4px}
+#atlas-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.ap-section{padding:16px 18px}
+.ap-stats{display:flex;flex-direction:column;gap:8px}
+.ap-stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px 14px}
+.ap-stat-value{font-size:20px;font-weight:800;color:var(--text-primary);line-height:1.1}
+.ap-stat-value.accent{color:var(--accent)}
+.ap-stat-label{font-size:10px;color:var(--text-muted);margin-top:2px;font-weight:500}
+.ap-legend-rows{display:flex;flex-direction:column;gap:5px}
+.ap-legend-row{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary)}
+.ap-legend-swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0}
+.ap-case-list{display:flex;flex-direction:column;gap:8px}
+.ap-case-item{display:flex;align-items:center;gap:10px;background:var(--bg-card);border:1px solid var(--accent-dim);border-radius:var(--radius-md);padding:10px 12px;cursor:pointer;transition:all .18s}
+.ap-case-item:hover{background:var(--accent-glow);border-color:var(--accent)}
+.ap-case-dot{width:10px;height:10px;background:var(--accent);border-radius:50%;flex-shrink:0;box-shadow:0 0 6px rgba(0,158,125,.5)}
+.ap-case-body{flex:1;min-width:0}
+.ap-case-name{font-size:12px;font-weight:700;color:var(--text-primary)}
+.ap-case-meta{font-size:10px;color:var(--text-muted);margin-top:1px}
+.ap-case-arrow{font-size:14px;color:var(--accent);font-weight:700}
+
+/* ── Atlas CTA button (floating on US map) ────────────────────────────── */
+#atlas-cta-btn{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);z-index:500;display:flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;padding:10px 22px;border-radius:24px;font-size:13px;font-family:var(--font);font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,158,125,.4);letter-spacing:.3px;transition:all .2s;white-space:nowrap}
+#atlas-cta-btn:hover{background:var(--accent-dim);box-shadow:0 6px 28px rgba(0,158,125,.5);transform:translateX(-50%) translateY(-2px)}
+#atlas-cta-btn::before{content:'📍';font-size:15px}
+
+/* ── Atlas floating legend ───────────────────────────────────────────── */
+#atlas-legend-overlay{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.95);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;z-index:400;min-width:190px;backdrop-filter:blur(8px);box-shadow:0 2px 12px rgba(0,0,0,.1)}
+#atlas-legend-overlay .legend-title{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase}
+
+/* ── Atlas region info panel ─────────────────────────────────────────── */
+#atlas-info-panel{position:absolute;bottom:88px;left:16px;background:rgba(255,255,255,.97);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;z-index:400;width:240px;backdrop-filter:blur(8px);box-shadow:0 2px 16px rgba(0,0,0,.12);display:none}
+#atlas-info-panel.visible{display:block}
+
+/* ── King Lake pulse marker on US map ────────────────────────────────── */
+.kl-marker-wrap{background:transparent !important;border:none !important;box-shadow:none !important}
+.kl-pulse-outer{width:32px;height:32px;display:flex;align-items:center;justify-content:center;position:relative}
+.kl-pulse-outer::before{content:'';position:absolute;width:32px;height:32px;border-radius:50%;border:2px solid var(--accent);animation:kl-ring 2s ease-out infinite;opacity:.8}
+.kl-pulse-inner{width:14px;height:14px;background:var(--accent);border-radius:50%;border:2.5px solid #fff;box-shadow:0 0 10px rgba(0,158,125,.7);cursor:pointer}
+@keyframes kl-ring{0%{transform:scale(.7);opacity:.9}70%{transform:scale(2);opacity:0}100%{transform:scale(.7);opacity:0}}
+.kl-label-tip{background:rgba(255,255,255,.95) !important;border:1.5px solid var(--accent) !important;border-radius:12px !important;padding:3px 9px !important;font-size:11px !important;font-weight:700 !important;color:var(--accent) !important;font-family:var(--font) !important;box-shadow:0 2px 8px rgba(0,158,125,.2) !important;white-space:nowrap}
+.kl-label-tip::before{border-right-color:var(--accent) !important}
+
+/* ── Case Study button in atlas header ───────────────────────────────── */
+#case-study-btn{display:flex;align-items:center;gap:7px;background:var(--accent-glow);border:1.5px solid var(--accent);color:var(--accent);padding:7px 16px;border-radius:20px;font-size:12px;font-family:var(--font);font-weight:700;cursor:pointer;letter-spacing:.3px;transition:all .18s;white-space:nowrap;animation:csbglow 3s ease-in-out infinite}
+#case-study-btn:hover{background:rgba(0,158,125,.2)}
+@keyframes csbglow{0%,100%{box-shadow:0 0 0 0 rgba(0,158,125,0)}50%{box-shadow:0 0 10px 2px rgba(0,158,125,.25)}}
+
+/* ── Back button (in King Lake header) ───────────────────────────────── */
+#back-btn{display:flex;align-items:center;gap:6px;background:var(--bg-hover);border:1px solid var(--border);color:var(--text-secondary);padding:6px 13px;border-radius:20px;font-size:11px;font-family:var(--font);font-weight:600;cursor:pointer;letter-spacing:.4px;transition:all .18s;white-space:nowrap;flex-shrink:0}
+#back-btn:hover{background:var(--accent-glow);border-color:var(--accent);color:var(--accent)}
+
+/* ── Breadcrumb in King Lake header ──────────────────────────────────── */
+#breadcrumb{font-size:10px;color:var(--text-muted);margin-left:4px;letter-spacing:.3px;white-space:nowrap;display:flex;align-items:center;gap:4px}
+#breadcrumb .bc-sep{color:var(--border-light)}
 </style>
 </head>
 <body>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- VIEW 1: USA Solar Atlas Explorer                                    -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div id="view-atlas" class="view active">
+    <div id="atlas-app">
+
+      <!-- Atlas Header -->
+      <header id="atlas-header">
+        <div id="logo">
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+            <circle cx="11" cy="11" r="9" stroke="#009e7d" stroke-width="2"/>
+            <path d="M4 11 Q8 6 11 11 Q14 16 18 11" stroke="#009e7d" stroke-width="1.5" fill="none"/>
+            <circle cx="11" cy="11" r="2" fill="#009e7d"/>
+          </svg>
+          <span>USA Solar Atlas Explorer</span>
+        </div>
+        <div id="header-meta" style="margin-left:8px">
+          <span class="site-tag">NREL Solar Resource Data</span>
+          <span class="site-tag">Contiguous United States</span>
+          <span class="site-tag">8 Resource Regions</span>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:10px">
+          <button id="case-study-btn" onclick="showCaseStudy()">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="8" cy="8" r="2" fill="currentColor"/>
+              <path d="M8 2v1M8 13v1M2 8h1M13 8h1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            King Lake Case Study
+            <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <span class="status-dot live">LIVE DATA</span>
+        </div>
+      </header>
+
+      <!-- Atlas Main -->
+      <div id="atlas-main">
+        <!-- US Map -->
+        <div id="us-map-container">
+          <div id="us-map"></div>
+          <!-- Floating CTA -->
+          <button id="atlas-cta-btn" onclick="showCaseStudy()">View King Lake Case Study &rarr;</button>
+          <!-- Floating legend -->
+          <div id="atlas-legend-overlay">
+            <div class="legend-title">Solar GHI (kWh/m&sup2;/day)</div>
+            <div id="atlas-legend-items"></div>
+            <div style="font-size:9px;color:var(--text-muted);margin-top:8px;font-style:italic">Source: NREL NSRDB</div>
+          </div>
+          <!-- Region info panel -->
+          <div id="atlas-info-panel"></div>
+        </div>
+
+        <!-- Atlas Right Panel -->
+        <aside id="atlas-panel">
+          <div class="ap-section">
+            <div class="panel-label">US SOLAR RESOURCE</div>
+            <div class="ap-stats">
+              <div class="ap-stat-card">
+                <div class="ap-stat-value">177 GW</div>
+                <div class="ap-stat-label">Installed Solar Capacity (EIA 2024)</div>
+              </div>
+              <div class="ap-stat-card">
+                <div class="ap-stat-value">6.5</div>
+                <div class="ap-stat-label">Peak GHI — SW Desert (kWh/m&sup2;/day)</div>
+              </div>
+              <div class="ap-stat-card">
+                <div class="ap-stat-value">California</div>
+                <div class="ap-stat-label">Top Solar State (40 GW installed)</div>
+              </div>
+              <div class="ap-stat-card">
+                <div class="ap-stat-value accent" style="color:var(--accent)">1 Active</div>
+                <div class="ap-stat-label">Case Studies Available</div>
+              </div>
+            </div>
+          </div>
+          <div class="panel-divider"></div>
+          <div class="ap-section">
+            <div class="panel-label">GHI RESOURCE SCALE</div>
+            <div class="ap-legend-rows">
+              <div class="ap-legend-row"><span class="ap-legend-swatch" style="background:#dc2626"></span>&ge;6.0 &mdash; World Class</div>
+              <div class="ap-legend-row"><span class="ap-legend-swatch" style="background:#ea580c"></span>5.5&ndash;6.0 &mdash; Excellent</div>
+              <div class="ap-legend-row"><span class="ap-legend-swatch" style="background:#f59e0b"></span>4.8&ndash;5.5 &mdash; Very Good</div>
+              <div class="ap-legend-row"><span class="ap-legend-swatch" style="background:#eab308"></span>4.2&ndash;4.8 &mdash; Good</div>
+              <div class="ap-legend-row"><span class="ap-legend-swatch" style="background:#84cc16"></span>3.8&ndash;4.2 &mdash; Moderate</div>
+              <div class="ap-legend-row"><span class="ap-legend-swatch" style="background:#22c55e"></span>&lt;3.8 &mdash; Fair</div>
+            </div>
+          </div>
+          <div class="panel-divider"></div>
+          <div class="ap-section">
+            <div class="panel-label">CASE STUDIES</div>
+            <div class="ap-case-list">
+              <div class="ap-case-item" onclick="showCaseStudy()">
+                <div class="ap-case-dot"></div>
+                <div class="ap-case-body">
+                  <div class="ap-case-name">King Lake, Alabama</div>
+                  <div class="ap-case-meta">ESG Score: 84/100 &middot; GHI: 4.80 kWh/m&sup2;/day</div>
+                </div>
+                <div class="ap-case-arrow">&rarr;</div>
+              </div>
+            </div>
+          </div>
+          <div class="panel-divider"></div>
+          <div class="ap-section">
+            <div class="panel-label">DATA SOURCES</div>
+            <div class="source-tags">
+              <span class="source-tag">NREL NSRDB</span>
+              <span class="source-tag">EIA</span>
+              <span class="source-tag">USGS</span>
+              <span class="source-tag">EPA</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Atlas Bottom Bar -->
+      <div id="atlas-bar">
+        <span id="layer-bar-label">SOLAR RESOURCE</span>
+        <span style="font-size:11px;color:var(--text-secondary);margin-left:4px">Hover regions to explore GHI data &middot; Click the King Lake marker or button to open case study</span>
+        <div style="margin-left:auto;font-size:11px;color:var(--text-muted)">NREL National Solar Radiation Database (NSRDB)</div>
+      </div>
+
+    </div>
+  </div><!-- /view-atlas -->
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- VIEW 2: King Lake Case Study (TerraScope)                          -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <div id="view-casestudy" class="view">
   <div id="app">
     <!-- Header -->
     <header id="header">
+      <button id="back-btn" onclick="showAtlas()">
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M10 4L6 8l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to Atlas
+      </button>
       <div id="logo">
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-          <circle cx="11" cy="11" r="9" stroke="#00d4aa" stroke-width="2"/>
-          <path d="M4 11 Q8 6 11 11 Q14 16 18 11" stroke="#00d4aa" stroke-width="1.5" fill="none"/>
-          <circle cx="11" cy="11" r="2" fill="#00d4aa"/>
+          <circle cx="11" cy="11" r="9" stroke="#009e7d" stroke-width="2"/>
+          <path d="M4 11 Q8 6 11 11 Q14 16 18 11" stroke="#009e7d" stroke-width="1.5" fill="none"/>
+          <circle cx="11" cy="11" r="2" fill="#009e7d"/>
         </svg>
         <span>TerraScope</span>
+      </div>
+      <div id="breadcrumb">
+        <span style="color:var(--text-muted)">USA Solar Atlas Explorer</span>
+        <span class="bc-sep">&rsaquo;</span>
+        <span style="color:var(--accent);font-weight:600">King Lake Case Study</span>
       </div>
       <div id="header-meta">
         <span class="site-tag">King Lake</span>
@@ -345,6 +553,9 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg-primary);co
     </div>
   </div>
 
+  </div><!-- /app -->
+  </div><!-- /view-casestudy -->
+
   <!-- Checklist overlay -->
   <div id="checklist-overlay" onclick="closeChecklist()"></div>
 
@@ -400,6 +611,68 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg-primary);co
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
   <script>
+// ─── USA SOLAR ATLAS DATA ──────────────────────────────────────────────────
+
+var US_SOLAR_ZONES = [
+  {
+    id:'southwest', label:'Southwest Desert', states:'CA · AZ · NV · NM',
+    ghi:6.5, rating:'World Class', color:'#dc2626', fillOpacity:0.30,
+    bounds:[[31.3,-120.5],[37.5,-103.5]],
+    detail:'Highest solar resource in the US. GHI 6.0–7.5 kWh/m²/day. Home to the largest utility-scale solar farms: Mojave, Blythe, Agua Caliente.'
+  },
+  {
+    id:'southern_plains', label:'Southern Great Plains', states:'TX · OK · KS',
+    ghi:5.5, rating:'Excellent', color:'#ea580c', fillOpacity:0.26,
+    bounds:[[25.8,-104.5],[37.0,-93.5]],
+    detail:'Strong solar resource combining with wind potential. GHI 5.0–6.0 kWh/m²/day. Texas leads US in solar + wind capacity additions.'
+  },
+  {
+    id:'southeast', label:'Southeast Sun Belt', states:'AL · GA · FL · MS · SC',
+    ghi:4.8, rating:'Very Good', color:'#f59e0b', fillOpacity:0.26,
+    bounds:[[24.4,-91.5],[35.8,-79.0]],
+    detail:'Strong sun belt resource. GHI 4.5–5.5 kWh/m²/day. King Lake (AL) at 4.80 kWh/m²/day sits in the upper half of this region.'
+  },
+  {
+    id:'mid_atlantic', label:'Mid-Atlantic & Carolinas', states:'NC · VA · MD · DE · NJ',
+    ghi:4.2, rating:'Good', color:'#eab308', fillOpacity:0.22,
+    bounds:[[33.8,-84.5],[40.5,-74.0]],
+    detail:'Moderate resource with high demand centers. GHI 3.9–4.6 kWh/m²/day. Strong utility-scale growth driven by state RPS mandates.'
+  },
+  {
+    id:'midwest', label:'Midwest / Corn Belt', states:'IA · IL · IN · OH · MO',
+    ghi:4.0, rating:'Moderate', color:'#84cc16', fillOpacity:0.20,
+    bounds:[[36.0,-97.5],[45.5,-80.0]],
+    detail:'Increasingly competitive solar resource. GHI 3.8–4.5 kWh/m²/day. Strong agrivoltaic development potential on farmland.'
+  },
+  {
+    id:'northern_plains', label:'Northern Great Plains', states:'MT · ND · SD · WY · NE',
+    ghi:4.3, rating:'Good', color:'#06b6d4', fillOpacity:0.20,
+    bounds:[[40.5,-114.0],[49.0,-96.5]],
+    detail:'Underutilized solar resource with excellent wind pairing. GHI 4.0–5.0 kWh/m²/day. Wyoming and Montana show strong utility-scale potential.'
+  },
+  {
+    id:'northwest', label:'Pacific Northwest', states:'WA · OR · ID',
+    ghi:3.8, rating:'Moderate', color:'#22c55e', fillOpacity:0.20,
+    bounds:[[41.8,-124.5],[49.0,-110.5]],
+    detail:'Lower irradiance but excellent hydro + solar complementarity. GHI 3.5–4.5 kWh/m²/day. Strong growth in eastern WA/OR dry side.'
+  },
+  {
+    id:'new_england', label:'New England & New York', states:'MA · CT · NY · PA · NE States',
+    ghi:3.6, rating:'Fair', color:'#8b5cf6', fillOpacity:0.18,
+    bounds:[[39.5,-80.5],[47.5,-66.5]],
+    detail:'Lower irradiance but aggressive state policy drivers (MA SMART, CT ZREC, NY CLCPA). GHI 3.3–4.0 kWh/m²/day. High retail rates make economics viable.'
+  }
+];
+
+var ATLAS_LEGEND_ITEMS = [
+  {color:'#dc2626', label:'≥6.0 — World Class'},
+  {color:'#ea580c', label:'5.5–6.0 — Excellent'},
+  {color:'#f59e0b', label:'4.8–5.5 — Very Good'},
+  {color:'#eab308', label:'4.2–4.8 — Good'},
+  {color:'#84cc16', label:'3.8–4.2 — Moderate'},
+  {color:'#22c55e', label:'<3.8 — Fair'}
+];
+
 // ─── DATA ──────────────────────────────────────────────────────────────────
 
 var KING_LAKE_CENTER = [34.1547, -86.8503];
@@ -727,42 +1000,172 @@ function initMap() {
   return map;
 }
 
+
+
+// ─── USA SOLAR ATLAS MAP ──────────────────────────────────────────────────
+
+function initAtlasMap() {
+  var map = L.map('us-map', {
+    center: [38.5, -95.5],
+    zoom: 4,
+    minZoom: 3,
+    maxZoom: 8,
+    zoomControl: true,
+    attributionControl: true
+  });
+
+  // ESRI satellite basemap (consistent with King Lake view)
+  L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    {
+      attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a> &mdash; Esri, USGS, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, GIS User Community',
+      maxZoom: 19
+    }
+  ).addTo(map);
+
+  // Hybrid label overlay for state names, cities, roads
+  L.tileLayer(
+    'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+    { maxZoom: 19, opacity: 0.75 }
+  ).addTo(map);
+
+  // Draw regional solar zones
+  US_SOLAR_ZONES.forEach(function(zone) {
+    var rect = L.rectangle(zone.bounds, {
+      color: zone.color, weight: 1.5, opacity: 0.8,
+      fillColor: zone.color, fillOpacity: zone.fillOpacity
+    });
+    rect.bindTooltip(
+      '<strong>' + zone.label + '</strong><br/>' +
+      'Avg GHI: <strong>' + zone.ghi + ' kWh/m²/day</strong> &mdash; ' + zone.rating + '<br/>' +
+      '<em style="color:var(--text-muted)">' + zone.states + '</em>',
+      {direction: 'top', maxWidth: 230}
+    );
+    rect.on('mouseover', function(e) {
+      e.target.setStyle({fillOpacity: Math.min(0.55, zone.fillOpacity + 0.22), weight: 2.5});
+      _showAtlasInfo(zone);
+    });
+    rect.on('mouseout', function(e) {
+      e.target.setStyle({fillOpacity: zone.fillOpacity, weight: 1.5});
+    });
+    rect.on('click', function() { _showAtlasInfo(zone); });
+    rect.addTo(map);
+  });
+
+  // Build floating legend
+  var legendEl = document.getElementById('atlas-legend-items');
+  if (legendEl) {
+    legendEl.innerHTML = ATLAS_LEGEND_ITEMS.map(function(it) {
+      return '<div class="ap-legend-row" style="margin-bottom:4px">' +
+        '<span class="ap-legend-swatch" style="background:' + it.color + ';border-radius:3px"></span>' +
+        '<span style="font-size:11px;color:var(--text-secondary)">' + it.label + '</span></div>';
+    }).join('');
+  }
+
+  // King Lake pulsing marker
+  var klIcon = L.divIcon({
+    className: 'kl-marker-wrap',
+    html: '<div class="kl-pulse-outer"><div class="kl-pulse-inner"></div></div>',
+    iconSize: [32, 32],
+    iconAnchor: [16, 16]
+  });
+  var klMarker = L.marker([34.1547, -86.8503], {icon: klIcon, zIndexOffset: 1000});
+  klMarker.bindTooltip(
+    '<strong>King Lake, Alabama</strong><br/>' +
+    'ESG Score: 84/100 &nbsp;&middot;&nbsp; GHI: 4.80 kWh/m²/day<br/>' +
+    '<span style="color:#009e7d;font-weight:600">Click to open Case Study →</span>',
+    {direction: 'top', offset: [0, -10]}
+  );
+  klMarker.on('click', function() { showCaseStudy(); });
+  klMarker.addTo(map);
+
+  // Permanent label on King Lake
+  L.tooltip({permanent: true, direction: 'right', offset: [14, 0], className: 'kl-label-tip'})
+   .setContent('King Lake Case Study')
+   .setLatLng([34.1547, -86.8503])
+   .addTo(map);
+
+  return map;
+}
+
+function _showAtlasInfo(zone) {
+  var p = document.getElementById('atlas-info-panel');
+  if (!p) return;
+  p.innerHTML =
+    '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase">SOLAR REGION</div>' +
+    '<div style="font-size:14px;font-weight:800;color:var(--text-primary);margin-bottom:2px">' + zone.label + '</div>' +
+    '<div style="font-size:11px;color:var(--text-muted);margin-bottom:10px">' + zone.states + '</div>' +
+    '<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:6px">' +
+      '<span style="font-size:28px;font-weight:800;color:' + zone.color + '">' + zone.ghi + '</span>' +
+      '<span style="font-size:10px;color:var(--text-muted)">kWh/m²/day avg GHI</span>' +
+    '</div>' +
+    '<div style="display:inline-block;font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;background:rgba(0,0,0,.06);color:var(--text-secondary);margin-bottom:8px">' + zone.rating + '</div>' +
+    '<div style="font-size:11px;color:var(--text-secondary);line-height:1.55">' + zone.detail + '</div>';
+  p.style.display = 'block';
+}
+
+// ─── VIEW NAVIGATION ──────────────────────────────────────────────────────
+
+var _atlasMap = null;
+var _klMap = null;
+var _klReady = false;
+
+function showCaseStudy() {
+  document.getElementById('view-atlas').classList.remove('active');
+  document.getElementById('view-casestudy').classList.add('active');
+
+  if (!_klReady) {
+    _klReady = true;
+    // Lazy-initialise King Lake map (must be visible so Leaflet gets real dimensions)
+    setTimeout(function() {
+      _klMap = initMap();
+      var layers = {
+        solar: buildSolarLayer(),
+        wind:  buildWindLayer(),
+        soil:  buildSoilLayer(),
+        esg:   buildEsgLayer()
+      };
+      layers.solar.addTo(_klMap);
+      updateLegend('solar');
+
+      var esg = computeESG();
+      setTimeout(function() {
+        animateGauge(esg.total);
+        renderBreakdown(esg.env, esg.soc, esg.gov);
+        renderMetrics(esg.solarAvg, esg.windAvg, esg.soilAvg);
+      }, 350);
+      setTimeout(function() { renderInsights(esg); }, 700);
+
+      wireToggleBar(layers, _klMap);
+    }, 60);
+  } else {
+    setTimeout(function() {
+      if (_klMap) _klMap.invalidateSize({animate: false});
+    }, 60);
+  }
+}
+
+function showAtlas() {
+  document.getElementById('view-casestudy').classList.remove('active');
+  document.getElementById('view-atlas').classList.add('active');
+  setTimeout(function() {
+    if (_atlasMap) _atlasMap.invalidateSize({animate: false});
+  }, 60);
+}
+
 // ─── MAIN ──────────────────────────────────────────────────────────────────
 
-function init() {
-  var map = initMap();
-  var layers = {
-    solar: buildSolarLayer(),
-    wind:  buildWindLayer(),
-    soil:  buildSoilLayer(),
-    esg:   buildEsgLayer()
-  };
-  // Solar on by default
-  layers.solar.addTo(map);
-  updateLegend('solar');
-
-  var esg = computeESG();
-
-  // Animate panel after map paints
-  setTimeout(function() {
-    animateGauge(esg.total);
-    renderBreakdown(esg.env, esg.soc, esg.gov);
-    renderMetrics(esg.solarAvg, esg.windAvg, esg.soilAvg);
-  }, 350);
-  setTimeout(function() {
-    renderInsights(esg);
-  }, 700);
-
-  wireToggleBar(layers, map);
-
-  console.info('%cTerraScope · King Lake ESG Analysis', 'color:#00d4aa;font-weight:bold;font-size:14px');
-  console.info('ESG Total:', esg.total, '/ 100  |  E:', esg.env, ' S:', esg.soc, ' G:', esg.gov);
+function initAtlas() {
+  // Initialise USA Solar Atlas map (View 1 — visible on page load)
+  _atlasMap = initAtlasMap();
+  console.info('%cUSA Solar Atlas Explorer — TerraIQ', 'color:#009e7d;font-weight:bold;font-size:14px');
+  console.info('King Lake Case Study available. Click the pulsing marker or the header button to open it.');
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
+  document.addEventListener('DOMContentLoaded', initAtlas);
 } else {
-  init();
+  initAtlas();
 }
 
 // ─── ESG AUDIT READINESS CHECKLIST ───────────────────────────────────────────
