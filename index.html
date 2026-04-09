@@ -8,7 +8,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>USA Solar Atlas Explorer — TerraIQ</title>
+  <title>Lumora Explorer — TerraIQ</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -196,6 +196,25 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
 .ap-case-meta{font-size:10px;color:var(--text-muted);margin-top:1px}
 .ap-case-arrow{font-size:14px;color:var(--accent);font-weight:700}
 
+/* ── Resource tab switcher in atlas panel ────────────────────────────── */
+.ap-res-tabs{display:flex;gap:4px;margin-bottom:10px}
+.ap-res-tab{flex:1;padding:5px 4px;background:var(--bg-hover);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:10px;font-family:var(--font);font-weight:600;cursor:pointer;color:var(--text-muted);transition:all .15s;letter-spacing:.2px;white-space:nowrap}
+.ap-res-tab:hover{color:var(--text-secondary);border-color:var(--border-light)}
+.ap-res-tab.active{background:var(--accent-glow);border-color:var(--accent);color:var(--accent)}
+.ap-res-header-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.ap-res-col-state{font-size:9px;font-weight:700;color:var(--text-muted);width:22px;flex-shrink:0;letter-spacing:.5px;text-transform:uppercase}
+.ap-res-col-bar{flex:1}
+.ap-res-col-val{font-size:9px;font-weight:700;color:var(--text-muted);width:30px;text-align:right;flex-shrink:0;letter-spacing:.3px}
+.ap-res-col-cap{font-size:9px;color:var(--text-muted);width:38px;text-align:right;flex-shrink:0}
+.ap-res-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.ap-res-state{font-size:10px;font-weight:700;color:var(--text-secondary);width:22px;flex-shrink:0}
+.ap-res-bar-wrap{flex:1;height:5px;background:var(--bg-primary);border-radius:3px;overflow:hidden}
+.ap-res-bar-solar{height:100%;background:linear-gradient(90deg,#f59e0b,#ef4444);border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.ap-res-bar-wind{height:100%;background:linear-gradient(90deg,#6366f1,#22d3ee);border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.ap-res-val{font-size:11px;font-weight:700;color:var(--text-primary);width:30px;text-align:right;flex-shrink:0}
+.ap-res-cap{font-size:9px;color:var(--text-muted);width:38px;text-align:right;flex-shrink:0}
+.ap-res-cite{font-size:8.5px;color:var(--text-muted);margin-top:8px;line-height:1.6;padding-top:6px;border-top:1px solid var(--border);font-style:italic}
+
 /* ── Atlas CTA button (floating on US map) ────────────────────────────── */
 #atlas-cta-btn{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);z-index:500;display:flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;padding:10px 22px;border-radius:24px;font-size:13px;font-family:var(--font);font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,158,125,.4);letter-spacing:.3px;transition:all .2s;white-space:nowrap}
 #atlas-cta-btn:hover{background:var(--accent-dim);box-shadow:0 6px 28px rgba(0,158,125,.5);transform:translateX(-50%) translateY(-2px)}
@@ -206,7 +225,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
 #atlas-legend-overlay .legend-title{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase}
 
 /* ── Atlas region info panel ─────────────────────────────────────────── */
-#atlas-info-panel{position:absolute;bottom:88px;left:16px;background:rgba(255,255,255,.97);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;z-index:400;width:290px;max-height:calc(100vh - 160px);overflow-y:auto;backdrop-filter:blur(8px);box-shadow:0 2px 16px rgba(0,0,0,.12);display:none;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+#atlas-info-panel{position:absolute;bottom:88px;left:16px;background:rgba(255,255,255,.97);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 16px;z-index:400;width:290px;max-height:calc(100% - 104px);overflow-y:auto;backdrop-filter:blur(8px);box-shadow:0 2px 16px rgba(0,0,0,.12);display:none;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
 #atlas-info-panel.visible{display:block}
 #atlas-info-panel::-webkit-scrollbar{width:4px}
 #atlas-info-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
@@ -254,6 +273,33 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
 .kl-label-tip{background:rgba(255,255,255,.95) !important;border:1.5px solid var(--accent) !important;border-radius:12px !important;padding:3px 9px !important;font-size:11px !important;font-weight:700 !important;color:var(--accent) !important;font-family:var(--font) !important;box-shadow:0 2px 8px rgba(0,158,125,.2) !important;white-space:nowrap}
 .kl-label-tip::before{border-right-color:var(--accent) !important}
 
+/* ── Click pin marker ────────────────────────────────────────────────── */
+.click-pin-wrap{background:transparent !important;border:none !important;box-shadow:none !important}
+.click-pin{width:26px;height:34px;position:relative;cursor:pointer}
+.click-pin-head{width:22px;height:22px;background:#009e7d;border:2.5px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(0,158,125,.7);position:absolute;top:0;left:2px}
+.click-pin-tail{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:14px solid #009e7d;position:absolute;bottom:0;left:7px}
+@keyframes pin-drop{0%{transform:translateY(-20px);opacity:0}60%{transform:translateY(3px)}100%{transform:translateY(0);opacity:1}}
+.click-pin{animation:pin-drop .3s cubic-bezier(.4,0,.2,1) forwards}
+
+/* ── Atlas location section (sidenav top) ────────────────────────────── */
+#atlas-location-section{display:none}
+#aloc-name{font-size:14px;font-weight:700;color:var(--text-primary);margin-bottom:2px;line-height:1.3}
+#aloc-coords{font-size:11px;color:var(--text-muted);font-family:monospace;letter-spacing:.3px;margin-bottom:8px}
+.aloc-loading{font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:6px;padding:4px 0}
+.aloc-metric-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)}
+.aloc-metric-row:last-child{border-bottom:none}
+.aloc-metric-label{font-size:10px;color:var(--text-muted);flex:1}
+.aloc-metric-p50{font-size:12px;font-weight:700;color:var(--text-primary);margin-right:6px}
+.aloc-p90-badge{font-size:9px;font-weight:700;background:rgba(96,165,250,.12);color:#3b82f6;border:1px solid rgba(96,165,250,.3);padding:1px 5px;border-radius:8px;white-space:nowrap}
+.aloc-meta{font-size:9px;color:var(--text-muted);line-height:1.6;margin-top:8px;padding-top:6px;border-top:1px solid var(--border)}
+
+/* ── P90 confidence rows in info panel ───────────────────────────────── */
+.aip-p90-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px}
+.aip-p90-label{font-size:10px;color:var(--text-muted)}
+.aip-p90-val{font-size:11px;font-weight:700;color:#3b82f6}
+.aip-cf-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(0,158,125,.1);color:#009e7d;border:1px solid rgba(0,158,125,.2)}
+.aip-iec-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(251,191,36,.12);color:#d97706;border:1px solid rgba(251,191,36,.3)}
+
 /* ── Case Study button in atlas header ───────────────────────────────── */
 #case-study-btn{display:flex;align-items:center;gap:7px;background:var(--accent-glow);border:1.5px solid var(--accent);color:var(--accent);padding:7px 16px;border-radius:20px;font-size:12px;font-family:var(--font);font-weight:700;cursor:pointer;letter-spacing:.3px;transition:all .18s;white-space:nowrap;animation:csbglow 3s ease-in-out infinite}
 #case-study-btn:hover{background:rgba(0,158,125,.2)}
@@ -271,7 +317,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
 <body>
 
   <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- VIEW 1: USA Solar Atlas Explorer                                    -->
+  <!-- VIEW 1: Lumora Explorer                                              -->
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <div id="view-atlas" class="view active">
     <div id="atlas-app">
@@ -284,7 +330,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
             <path d="M4 11 Q8 6 11 11 Q14 16 18 11" stroke="#009e7d" stroke-width="1.5" fill="none"/>
             <circle cx="11" cy="11" r="2" fill="#009e7d"/>
           </svg>
-          <span>USA Solar Atlas Explorer</span>
+          <span>Lumora Explorer</span>
         </div>
         <div id="header-meta" style="margin-left:8px">
           <span class="site-tag">NREL Solar Resource Data</span>
@@ -333,37 +379,124 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
 
         <!-- Atlas Right Panel -->
         <aside id="atlas-panel">
+
+          <!-- Selected Location — shown on map click -->
+          <div id="atlas-location-section">
+            <div class="ap-section">
+              <div class="panel-label">SELECTED LOCATION</div>
+              <div id="aloc-name"><span class="aloc-loading"><span class="aip-spinner"></span>Locating…</span></div>
+              <div id="aloc-coords"></div>
+              <div id="aloc-key-metrics"></div>
+              <div id="aloc-meta"></div>
+            </div>
+            <div class="panel-divider"></div>
+          </div>
+
+          <!-- US Renewable Resources — tabbed solar / wind by state -->
           <div class="ap-section">
-            <div class="panel-label">US SOLAR RESOURCE</div>
-            <div class="ap-stats">
-              <div class="ap-stat-card">
-                <div class="ap-stat-value">210 GW</div>
-                <div class="ap-stat-label">Installed Solar Capacity (EIA 2025 est.)</div>
+            <div class="panel-label">US RENEWABLE RESOURCES</div>
+            <!-- Tab bar -->
+            <div class="ap-res-tabs">
+              <button class="ap-res-tab active" id="tab-solar" onclick="switchResTab('solar')">☀️ Solar GHI</button>
+              <button class="ap-res-tab" id="tab-wind" onclick="switchResTab('wind')">💨 Wind @ 80m</button>
+            </div>
+
+            <!-- Solar panel: top states by annual avg GHI -->
+            <div id="ap-res-solar">
+              <div class="ap-res-header-row">
+                <span class="ap-res-col-state">State</span>
+                <span class="ap-res-col-bar"></span>
+                <span class="ap-res-col-val">GHI</span>
+                <span class="ap-res-col-cap">Installed</span>
               </div>
-              <div class="ap-stat-card">
-                <div class="ap-stat-value">6.5</div>
-                <div class="ap-stat-label">Peak GHI — SW Desert (kWh/m&sup2;/day)</div>
+              <!-- AZ 6.10 kWh/m²/d — 100% bar. Installed: 16.4 GW (EIA Feb 2025) -->
+              <div class="ap-res-row">
+                <span class="ap-res-state">AZ</span>
+                <div class="ap-res-bar-wrap"><div class="ap-res-bar-solar" style="width:100%"></div></div>
+                <span class="ap-res-val">6.10</span>
+                <span class="ap-res-cap">16.4 GW</span>
               </div>
-              <div class="ap-stat-card">
-                <div class="ap-stat-value">Texas</div>
-                <div class="ap-stat-label">Top Solar State (~45 GW utility-scale)</div>
+              <!-- NV 5.89 — 96.6% -->
+              <div class="ap-res-row">
+                <span class="ap-res-state">NV</span>
+                <div class="ap-res-bar-wrap"><div class="ap-res-bar-solar" style="width:96.6%"></div></div>
+                <span class="ap-res-val">5.89</span>
+                <span class="ap-res-cap">12.7 GW</span>
               </div>
-              <div class="ap-stat-card">
-                <div class="ap-stat-value accent" style="color:var(--accent)">1 Active</div>
-                <div class="ap-stat-label">Case Studies Available</div>
+              <!-- NM 5.78 — 94.8% -->
+              <div class="ap-res-row">
+                <span class="ap-res-state">NM</span>
+                <div class="ap-res-bar-wrap"><div class="ap-res-bar-solar" style="width:94.8%"></div></div>
+                <span class="ap-res-val">5.78</span>
+                <span class="ap-res-cap">4.2 GW</span>
+              </div>
+              <!-- CA 5.55 — 91.0% -->
+              <div class="ap-res-row">
+                <span class="ap-res-state">CA</span>
+                <div class="ap-res-bar-wrap"><div class="ap-res-bar-solar" style="width:91.0%"></div></div>
+                <span class="ap-res-val">5.55</span>
+                <span class="ap-res-cap">50.8 GW</span>
+              </div>
+              <!-- TX 5.30 — 86.9% -->
+              <div class="ap-res-row">
+                <span class="ap-res-state">TX</span>
+                <div class="ap-res-bar-wrap"><div class="ap-res-bar-solar" style="width:86.9%"></div></div>
+                <span class="ap-res-val">5.30</span>
+                <span class="ap-res-cap">52.0 GW</span>
+              </div>
+              <div class="ap-res-cite">
+                GHI: NREL NSRDB PSM v3.2 (2022 vintage, state-wide annual avg)<br>
+                Installed capacity: EIA Electric Power Monthly, Feb 2025
               </div>
             </div>
-          </div>
-          <div class="panel-divider"></div>
-          <div class="ap-section">
-            <div class="panel-label">GHI RESOURCE SCALE</div>
-            <div class="ap-legend-rows">
-              <div class="ap-legend-row"><span class="ap-legend-swatch" style="background:#dc2626"></span>&ge;6.0 &mdash; World Class</div>
-              <div class="ap-legend-row"><span class="ap-legend-swatch" style="background:#ea580c"></span>5.5&ndash;6.0 &mdash; Excellent</div>
-              <div class="ap-legend-row"><span class="ap-legend-swatch" style="background:#f59e0b"></span>4.8&ndash;5.5 &mdash; Very Good</div>
-              <div class="ap-legend-row"><span class="ap-legend-swatch" style="background:#eab308"></span>4.2&ndash;4.8 &mdash; Good</div>
-              <div class="ap-legend-row"><span class="ap-legend-swatch" style="background:#84cc16"></span>3.8&ndash;4.2 &mdash; Moderate</div>
-              <div class="ap-legend-row"><span class="ap-legend-swatch" style="background:#22c55e"></span>&lt;3.8 &mdash; Fair</div>
+
+            <!-- Wind panel: top states by annual avg wind speed @ 80m hub -->
+            <div id="ap-res-wind" style="display:none">
+              <div class="ap-res-header-row">
+                <span class="ap-res-col-state">State</span>
+                <span class="ap-res-col-bar"></span>
+                <span class="ap-res-col-val">m/s</span>
+                <span class="ap-res-col-cap">Installed</span>
+              </div>
+              <!-- ND 8.4 m/s — 100%. Installed: 5.4 GW -->
+              <div class="ap-res-row">
+                <span class="ap-res-state">ND</span>
+                <div class="ap-res-bar-wrap"><div class="ap-res-bar-wind" style="width:100%"></div></div>
+                <span class="ap-res-val">8.40</span>
+                <span class="ap-res-cap">5.4 GW</span>
+              </div>
+              <!-- WY 7.8 — 92.9% -->
+              <div class="ap-res-row">
+                <span class="ap-res-state">WY</span>
+                <div class="ap-res-bar-wrap"><div class="ap-res-bar-wind" style="width:92.9%"></div></div>
+                <span class="ap-res-val">7.80</span>
+                <span class="ap-res-cap">3.9 GW</span>
+              </div>
+              <!-- KS 7.6 — 90.5% -->
+              <div class="ap-res-row">
+                <span class="ap-res-state">KS</span>
+                <div class="ap-res-bar-wrap"><div class="ap-res-bar-wind" style="width:90.5%"></div></div>
+                <span class="ap-res-val">7.60</span>
+                <span class="ap-res-cap">9.8 GW</span>
+              </div>
+              <!-- SD 7.5 — 89.3% -->
+              <div class="ap-res-row">
+                <span class="ap-res-state">SD</span>
+                <div class="ap-res-bar-wrap"><div class="ap-res-bar-wind" style="width:89.3%"></div></div>
+                <span class="ap-res-val">7.50</span>
+                <span class="ap-res-cap">4.0 GW</span>
+              </div>
+              <!-- TX 7.1 — 84.5% -->
+              <div class="ap-res-row">
+                <span class="ap-res-state">TX</span>
+                <div class="ap-res-bar-wrap"><div class="ap-res-bar-wind" style="width:84.5%"></div></div>
+                <span class="ap-res-val">7.10</span>
+                <span class="ap-res-cap">43.0 GW</span>
+              </div>
+              <div class="ap-res-cite">
+                Wind speed: NREL Wind Toolkit (WTK), 80m hub height, 2014–2022 avg<br>
+                Installed capacity: EIA Electric Power Monthly, Feb 2025
+              </div>
             </div>
           </div>
           <div class="panel-divider"></div>
@@ -407,7 +540,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
   </div><!-- /view-atlas -->
 
   <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- VIEW 2: King Lake Case Study (TerraScope)                          -->
+  <!-- VIEW 2: King Lake Case Study (Lumora Explorer)                     -->
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <div id="view-casestudy" class="view">
   <div id="app">
@@ -423,10 +556,10 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
           <path d="M4 11 Q8 6 11 11 Q14 16 18 11" stroke="#009e7d" stroke-width="1.5" fill="none"/>
           <circle cx="11" cy="11" r="2" fill="#009e7d"/>
         </svg>
-        <span>TerraScope</span>
+        <span>Lumora Explorer</span>
       </div>
       <div id="breadcrumb">
-        <span style="color:var(--text-muted)">USA Solar Atlas Explorer</span>
+        <span style="color:var(--text-muted)">Lumora Explorer</span>
         <span class="bc-sep">&rsaquo;</span>
         <span style="color:var(--accent);font-weight:600">King Lake Case Study</span>
       </div>
@@ -1079,9 +1212,25 @@ function initAtlasMap() {
 
   // Zone rectangles removed — map click fires _fetchLocationData for live lat/lon data
 
-  // Live lat/lon click handler — fetch real solar + wind data for any clicked point
+  // Live lat/lon click handler — place pin marker and fetch real solar + wind data
   map.on('click', function(e) {
-    _fetchLocationData(e.latlng.lat, e.latlng.lng);
+    var lat = e.latlng.lat, lon = e.latlng.lng;
+    // Remove previous pin
+    if (_clickMarker) { map.removeLayer(_clickMarker); _clickMarker = null; }
+    // Place new teal pin marker
+    var pinIcon = L.divIcon({
+      className: 'click-pin-wrap',
+      html: '<div class="click-pin"><div class="click-pin-head"></div><div class="click-pin-tail"></div></div>',
+      iconSize: [26, 34],
+      iconAnchor: [13, 34],
+      tooltipAnchor: [0, -36]
+    });
+    _clickMarker = L.marker([lat, lon], {icon: pinIcon, zIndexOffset: 900}).addTo(map);
+    _clickMarker.bindTooltip(
+      lat.toFixed(4) + '°N, ' + Math.abs(lon).toFixed(4) + '°W',
+      {direction: 'top', permanent: false, className: 'leaflet-tooltip'}
+    );
+    _fetchLocationData(lat, lon);
   });
 
   // Build floating legend
@@ -1127,8 +1276,39 @@ function _fetchLocationData(lat, lon) {
   if (!p) return;
   p.style.display = 'block';
   p.innerHTML =
-    '<div class="aip-coord-header">📍 ' + lat.toFixed(4) + '°N, ' + Math.abs(lon).toFixed(4) + '°W</div>' +
+    '<div class="aip-coord-header">📍 ' + lat.toFixed(4) + '°' + (lat >= 0 ? 'N' : 'S') + ', ' + Math.abs(lon).toFixed(4) + '°' + (lon < 0 ? 'W' : 'E') + '</div>' +
     '<div class="aip-loading"><div class="aip-spinner"></div><span>Fetching live data…</span></div>';
+
+  // Show sidenav location section immediately with loading state
+  var locSec = document.getElementById('atlas-location-section');
+  var alocName = document.getElementById('aloc-name');
+  var alocCoords = document.getElementById('aloc-coords');
+  var alocMetrics = document.getElementById('aloc-key-metrics');
+  var alocMeta = document.getElementById('aloc-meta');
+  if (locSec) {
+    locSec.style.display = 'block';
+    if (alocName) alocName.innerHTML = '<span class="aloc-loading"><span class="aip-spinner"></span>Locating…</span>';
+    if (alocCoords) alocCoords.textContent = lat.toFixed(4) + '°' + (lat >= 0 ? 'N' : 'S') + '  ' + Math.abs(lon).toFixed(4) + '°' + (lon < 0 ? 'W' : 'E');
+    if (alocMetrics) alocMetrics.innerHTML = '<div class="aloc-loading"><span class="aip-spinner"></span>Fetching solar &amp; wind data…</div>';
+    if (alocMeta) alocMeta.textContent = '';
+  }
+
+  // Reverse geocode in parallel
+  _reverseGeocode(lat, lon, function(err, geo) {
+    if (!alocName) return;
+    if (err || !geo || !geo.address) {
+      alocName.textContent = lat.toFixed(2) + '°' + (lat >= 0 ? 'N' : 'S') + ', ' + Math.abs(lon).toFixed(2) + '°' + (lon < 0 ? 'W' : 'E');
+    } else {
+      var addr = geo.address;
+      var city = addr.city || addr.town || addr.village || addr.hamlet || addr.county || '';
+      var state = addr.state || '';
+      var country = addr.country_code ? addr.country_code.toUpperCase() : '';
+      var display = city ? city : 'Unknown location';
+      if (state) display += ', ' + state;
+      alocName.textContent = display;
+      if (alocCoords) alocCoords.textContent = lat.toFixed(4) + '°' + (lat >= 0 ? 'N' : 'S') + '  ' + Math.abs(lon).toFixed(4) + '°' + (lon < 0 ? 'W' : 'E');
+    }
+  });
 
   var nasaUrl = 'https://power.larc.nasa.gov/api/temporal/climatology/point' +
     '?parameters=ALLSKY_SFC_SW_DWN,ALLSKY_SFC_SW_DNI,ALLSKY_SFC_SW_DIFF,CLRSKY_SFC_SW_DWN,ALLSKY_KT,T2M,WS10M,WS50M,WD10M' +
@@ -1156,6 +1336,15 @@ function _fetchLocationData(lat, lon) {
     .then(function(r){ return r.json(); })
     .then(function(d){ omData = d; tryRender(); })
     .catch(function(){ omErr = true; tryRender(); });
+}
+
+function _reverseGeocode(lat, lon, cb) {
+  fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat=' + lat.toFixed(6) +
+        '&lon=' + lon.toFixed(6) + '&zoom=10&addressdetails=1',
+        {headers: {'Accept-Language': 'en'}})
+    .then(function(r){ return r.json(); })
+    .then(function(d){ cb(null, d); })
+    .catch(function(e){ cb(e, null); });
 }
 
 function _dirToCard(deg) {
@@ -1228,30 +1417,76 @@ function _showLatLonPanel(lat, lon, nasa, om) {
   var wdirF  = wdir_om  != null ? wdir_om  : wd10;
 
   // PVOUT (Performance Ratio = 0.75)
-  var pvoutDaily  = ghi  ? (ghi  * 0.75).toFixed(2) : '—';
-  var pvoutAnnual = ghi  ? Math.round(ghi * 365 * 0.75).toLocaleString() : '—';
-  var ghiAnnual   = ghi  ? Math.round(ghi * 365).toLocaleString() : '—';
-  var pvRatingCls = ghi  ? _pvRating(ghi * 0.75) : 'moderate';
-  var pvRatingLbl = ghi  ? _pvRatingLabel(ghi * 0.75) : '—';
+  var pvP50daily  = ghi ? ghi * 0.75 : null;
+  var pvoutDaily  = pvP50daily ? pvP50daily.toFixed(2) : '—';
+  var pvoutAnnual = pvP50daily ? Math.round(pvP50daily * 365).toLocaleString() : '—';
+  var ghiAnnual   = ghi ? Math.round(ghi * 365).toLocaleString() : '—';
+  var pvRatingCls = pvP50daily ? _pvRating(pvP50daily) : 'moderate';
+  var pvRatingLbl = pvP50daily ? _pvRatingLabel(pvP50daily) : '—';
+
+  // P90 estimates: P90 = P50 × (1 - 1.282 × σ)
+  // Solar σ=6% (NREL inter-annual variability typical for CONUS)
+  // Wind σ=9% (NREL WTK typical for CONUS)
+  var pvP90daily  = pvP50daily ? pvP50daily * 0.9233 : null;
+  var pvP90annual = pvP90daily ? Math.round(pvP90daily * 365).toLocaleString() : '—';
+  var ws80P90     = ws80f ? ws80f * 0.8846 : null;
+
+  // Capacity factor estimates
+  // Solar CF = (annual kWh/kWp) / 8760 h = (GHI × 0.75 × 365) / 8760
+  var solarCF = pvP50daily ? ((pvP50daily * 365) / 8760 * 100).toFixed(1) : null;
+  // Wind CF rough: Betz-limited, based on IEC class power curve approximation
+  var windCF = null;
+  if (ws80f) {
+    var cf_raw = Math.min(0.50, 0.45 * Math.pow(ws80f / 12.0, 3));
+    windCF = (cf_raw * 100).toFixed(1);
+  }
+
+  // IEC classifications
+  var iecSolar = '—', iecWind = '—';
+  if (ghi) {
+    if (ghi >= 5.5) iecSolar = 'Class A (World-Class)';
+    else if (ghi >= 4.5) iecSolar = 'Class B (Excellent)';
+    else if (ghi >= 3.5) iecSolar = 'Class C (Good)';
+    else iecSolar = 'Class D (Moderate)';
+  }
+  if (ws80f) {
+    if (ws80f >= 7.5) iecWind = 'IEC Class 1 (≥7.5 m/s)';
+    else if (ws80f >= 5.5) iecWind = 'IEC Class 2 (5.5–7.5 m/s)';
+    else if (ws80f >= 3.5) iecWind = 'IEC Class 3 (3.5–5.5 m/s)';
+    else iecWind = 'IEC Class 4 (<3.5 m/s)';
+  }
+
+  // CO2 offset estimate (approx 0.386 kg CO2/kWh US grid average, EIA 2023)
+  var co2Annual = pvP50daily ? Math.round(pvP50daily * 365 * 0.386).toLocaleString() : null;
 
   function fmtV(v, dec) { return v != null ? (+v).toFixed(dec) : '—'; }
 
-  var html = '<div class="aip-coord-header">📍 ' + lat.toFixed(4) + '°N, ' + Math.abs(lon).toFixed(4) + '°W</div>';
+  var nowStr = new Date().toLocaleString('en-US', {month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'});
+  var latDir = lat >= 0 ? 'N' : 'S', lonDir = lon < 0 ? 'W' : 'E';
+
+  var html = '<div class="aip-coord-header">📍 ' + Math.abs(lat).toFixed(4) + '°' + latDir + ', ' + Math.abs(lon).toFixed(4) + '°' + lonDir + '</div>';
 
   // Solar section
-  html += '<div class="aip-section-title">☀️ Solar Irradiance (NASA POWER · 22-yr avg)</div>';
-  html += _row('GHI', fmtV(ghi,2), ' kWh/m²/day');
+  html += '<div class="aip-section-title">☀️ Solar Irradiance (NASA POWER · 1984–2022 avg)</div>';
+  html += _row('GHI (P50)', fmtV(ghi,2), ' kWh/m²/day');
   html += _row('Annual GHI', ghiAnnual, ' kWh/m²/yr');
   html += _row('DNI', fmtV(dni,2), ' kWh/m²/day');
   html += _row('DHI', fmtV(dhi,2), ' kWh/m²/day');
   html += _row('Clear-Sky GHI', fmtV(csGhi,2), ' kWh/m²/day');
-  html += _row('Clearness Index', fmtV(kt,3), '');
+  html += _row('Clearness Index Kt', fmtV(kt,3), '');
   html += _row('Avg Temperature', fmtV(temp,1), ' °C');
+  if (iecSolar !== '—') html += _row('Solar Class', iecSolar, '');
 
-  // PVOUT section
+  // PVOUT + P90 section
   html += '<div class="aip-section-title">⚡ PV Output (1 kWp · fixed tilt · PR=0.75)</div>';
-  html += _row('Daily Yield', pvoutDaily, ' kWh/kWp/day');
-  html += _row('Annual Yield', pvoutAnnual, ' kWh/kWp/yr');
+  html += _row('P50 Daily Yield', pvoutDaily, ' kWh/kWp/day');
+  html += _row('P50 Annual Yield', pvoutAnnual, ' kWh/kWp/yr');
+  if (pvP90daily) {
+    html += '<div class="aip-p90-row"><span class="aip-p90-label">P90 Daily Yield <span style="font-size:9px;color:#3b82f6">(90% confidence)</span></span><span class="aip-p90-val">' + pvP90daily.toFixed(2) + ' kWh/kWp/day</span></div>';
+    html += '<div class="aip-p90-row"><span class="aip-p90-label">P90 Annual Yield</span><span class="aip-p90-val">' + pvP90annual + ' kWh/kWp/yr</span></div>';
+  }
+  if (solarCF) html += _row('Capacity Factor', solarCF, '%');
+  if (co2Annual) html += _row('CO₂ Offset (1 MWp)', co2Annual, ' kg/yr');
   html += '<div style="margin-top:5px"><span class="aip-badge ' + pvRatingCls + '">' + pvRatingLbl + '</span></div>';
 
   // Wind section
@@ -1266,17 +1501,76 @@ function _showLatLonPanel(lat, lon, nasa, om) {
 
   html += '<div class="aip-section-title">💨 Wind Speeds (m/s)</div>';
   html += _row('10 m (surface)', ws10Label + ' m/s', '');
-  html += _row('50 m', ws50Label + ' m/s', ' (NASA POWER)');
-  html += '<div class="aip-row"><span class="aip-label">80 m</span><span class="aip-val">' + ws80Label + ' m/s' + ws80src + '</span></div>';
+  html += _row('50 m', ws50Label + ' m/s', ' (NASA POWER annual)');
+  html += '<div class="aip-row"><span class="aip-label">P50 @ 80 m</span><span class="aip-val">' + ws80Label + ' m/s' + ws80src + '</span></div>';
+  if (ws80P90) {
+    html += '<div class="aip-p90-row"><span class="aip-p90-label">P90 @ 80 m <span style="font-size:9px;color:#3b82f6">(bankable)</span></span><span class="aip-p90-val">' + ws80P90.toFixed(2) + ' m/s</span></div>';
+  }
   html += '<div class="aip-row"><span class="aip-label">120 m</span><span class="aip-val">' + ws120Label + ' m/s' + ws120src + '</span></div>';
   html += '<div class="aip-row"><span class="aip-label">180 m</span><span class="aip-val">' + ws180Label + ' m/s' + ws180src + '</span></div>';
   html += _row('Direction (10 m)', _dirToCard(wdirF), wdirF != null ? ' (' + Math.round(wdirF) + '°)' : '');
+  if (iecWind !== '—') html += _row('Wind Class', iecWind, '');
+  if (windCF) html += _row('Est. Wind CF', windCF, '%');
 
-  html += '<div style="margin-top:10px;font-size:9px;color:var(--text-muted);line-height:1.5;border-top:1px solid var(--border);padding-top:7px">' +
-    'Solar: NASA POWER (22-yr climatology) &middot; Wind current: Open-Meteo &middot; Wind 50m annual: NASA POWER &middot; Height extrapolation: Hellmann α=0.143' +
+  // P90 explanation callout
+  html += '<div style="margin:10px 0 0;padding:8px 10px;background:rgba(96,165,250,.07);border:1px solid rgba(96,165,250,.25);border-radius:8px;font-size:10px;color:#3b82f6;line-height:1.5">' +
+    '<strong>P90 = Bankable Conservative Estimate</strong><br/>' +
+    'Solar σ=6% · Wind σ=9% · Formula: P50 × (1 − 1.282σ)<br/>' +
+    'Lenders typically size debt on P90 production.' +
+    '</div>';
+
+  // Data sources footer with live timestamps
+  html += '<div style="margin-top:10px;font-size:9px;color:var(--text-muted);line-height:1.7;border-top:1px solid var(--border);padding-top:8px">' +
+    '<strong style="color:var(--text-secondary);font-size:9px">DATA SOURCES</strong><br/>' +
+    '☀️ NASA POWER Climatology v2.4 · 1984–2022 (22-yr avg) · sourced Apr 2025<br/>' +
+    '💨 Open-Meteo ERA5-Seamless · Real-time as of ' + nowStr + '<br/>' +
+    '📐 Wind height extrapolation: Hellmann power law α=0.143 (open terrain)<br/>' +
+    '🗺️ Location: Nominatim / OpenStreetMap (CC BY-SA)' +
     '</div>';
 
   p.innerHTML = html;
+
+  // Update sidenav key metrics
+  var alocMetrics = document.getElementById('aloc-key-metrics');
+  var alocMeta    = document.getElementById('aloc-meta');
+  if (alocMetrics) {
+    var mHtml = '';
+    if (pvP50daily) {
+      mHtml += '<div class="aloc-metric-row">' +
+        '<span class="aloc-metric-label">Solar GHI (P50 / P90)</span>' +
+        '<span><span class="aloc-metric-p50">' + ghi.toFixed(2) + '</span>' +
+        '<span class="aloc-p90-badge"> / ' + (ghi * 0.9233).toFixed(2) + ' P90</span>' +
+        '<span style="font-size:9px;color:var(--text-muted)"> kWh/m²/d</span></span>' +
+        '</div>';
+    }
+    if (ws80f) {
+      mHtml += '<div class="aloc-metric-row">' +
+        '<span class="aloc-metric-label">Wind @ 80m (P50 / P90)</span>' +
+        '<span><span class="aloc-metric-p50">' + ws80f.toFixed(2) + '</span>' +
+        '<span class="aloc-p90-badge"> / ' + (ws80f * 0.8846).toFixed(2) + ' P90</span>' +
+        '<span style="font-size:9px;color:var(--text-muted)"> m/s</span></span>' +
+        '</div>';
+    }
+    if (solarCF) {
+      mHtml += '<div class="aloc-metric-row">' +
+        '<span class="aloc-metric-label">Solar CF / Wind CF est.</span>' +
+        '<span class="aloc-metric-p50">' + solarCF + '%' + (windCF ? ' / ' + windCF + '%' : '') + '</span>' +
+        '</div>';
+    }
+    if (iecSolar !== '—') {
+      mHtml += '<div class="aloc-metric-row">' +
+        '<span class="aloc-metric-label">Solar Class</span>' +
+        '<span class="aloc-metric-p50" style="font-size:11px">' + iecSolar + '</span>' +
+        '</div>';
+    }
+    alocMetrics.innerHTML = mHtml || '<span style="font-size:11px;color:var(--text-muted)">No data available for this location</span>';
+  }
+  if (alocMeta) {
+    alocMeta.innerHTML =
+      'NASA POWER 1984–2022 avg · sourced Apr 2025<br/>' +
+      'Wind real-time: ' + nowStr;
+    alocMeta.className = 'aloc-meta';
+  }
 }
 
 // ─── ATLAS WIND RESOURCE OVERLAY ──────────────────────────────────────────
@@ -1329,6 +1623,7 @@ function toggleAtlasWind() {
 var _atlasMap = null;
 var _klMap = null;
 var _klReady = false;
+var _clickMarker = null;
 
 function showCaseStudy() {
   document.getElementById('view-atlas').classList.remove('active');
@@ -1447,6 +1742,26 @@ function initAtlasSearch(map) {
       .catch(function() {
         results.innerHTML = '<div class="asr-item"><span>Search unavailable — check connection</span></div>';
       });
+  }
+}
+
+// ─── RESOURCE TAB SWITCHER (solar / wind in atlas panel) ──────────────────
+
+function switchResTab(tab) {
+  var solar  = document.getElementById('ap-res-solar');
+  var wind   = document.getElementById('ap-res-wind');
+  var tabS   = document.getElementById('tab-solar');
+  var tabW   = document.getElementById('tab-wind');
+  if (tab === 'solar') {
+    if (solar) solar.style.display = '';
+    if (wind)  wind.style.display  = 'none';
+    if (tabS)  tabS.classList.add('active');
+    if (tabW)  tabW.classList.remove('active');
+  } else {
+    if (solar) solar.style.display = 'none';
+    if (wind)  wind.style.display  = '';
+    if (tabS)  tabS.classList.remove('active');
+    if (tabW)  tabW.classList.add('active');
   }
 }
 
@@ -1663,16 +1978,17 @@ function exportChecklist() {
   }
   var jsPDF = window.jspdf.jsPDF;
   var doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
-  var pageW  = doc.internal.pageSize.getWidth();
-  var pageH  = doc.internal.pageSize.getHeight();
-  var margin = 40;
+  var pageW  = doc.internal.pageSize.getWidth();   // 612 pt
+  var pageH  = doc.internal.pageSize.getHeight();  // 792 pt
+  var margin = 40;  // consistent margin used for ALL elements
+  var contentW = pageW - margin * 2;               // 532 pt
 
   // ── Teal header bar ──────────────────────────────────────────────────
   doc.setFillColor(0, 158, 125);
   doc.rect(0, 0, pageW, 56, 'F');
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(15); doc.setTextColor(255, 255, 255);
-  doc.text('TerraIQ — ESG Audit Readiness Checklist', margin, 23);
+  doc.text('Lumora Explorer — ESG Audit Readiness Checklist', margin, 23);
   doc.setFontSize(9); doc.setFont('helvetica', 'normal');
   doc.text('King Lake  ·  Pasco County, Florida  ·  28.2906°N, 82.2918°W  ·  263 acres', margin, 40);
 
@@ -1696,9 +2012,9 @@ function exportChecklist() {
   // Readiness progress bar
   var by = sy + 9;
   doc.setFillColor(220, 228, 236);
-  doc.roundedRect(margin, by, pageW - margin * 2, 8, 3, 3, 'F');
+  doc.roundedRect(margin, by, contentW, 8, 3, 3, 'F');
   doc.setFillColor(0, 158, 125);
-  doc.roundedRect(margin, by, (pageW - margin * 2) * (readiness / 100), 8, 3, 3, 'F');
+  doc.roundedRect(margin, by, contentW * (readiness / 100), 8, 3, 3, 'F');
 
   var curY = by + 22;
 
@@ -1720,24 +2036,34 @@ function exportChecklist() {
     doc:  [100, 116, 139]
   };
 
+  // Column widths must sum to ≤ contentW (532 pt)
+  // 22 + 140 + 70 + 180 + 90 = 502 pt — fits within 532 pt
+  var colWidths = {
+    0: {cellWidth: 22,  halign: 'center'},
+    1: {cellWidth: 140, fontStyle: 'bold'},
+    2: {cellWidth: 70,  halign: 'center'},
+    3: {cellWidth: 180, fontSize: 6.5},
+    4: {cellWidth: 90,  fontSize: 6.5}
+  };
+
   Object.keys(CL_DATA).forEach(function(secKey) {
     var sec = CL_DATA[secKey];
     var secComp = sec.items.filter(function(i){ return i.status === 'compliant'; }).length;
     var secCol  = SEC_COLORS[secKey] || [80, 80, 80];
 
-    // Section header band
+    // Section header band — uses same margin as all other elements
     doc.autoTable({
       startY: curY,
       head: [[sec.label.toUpperCase() + '   (' + secComp + '/' + sec.items.length + ' compliant)']],
       body: [],
       theme: 'plain',
       headStyles: {
-        fillColor: secCol, textColor: [255,255,255],
+        fillColor: secCol, textColor: [255, 255, 255],
         fontSize: 8.5, fontStyle: 'bold',
-        cellPadding: {top:5, bottom:5, left:margin - 40, right:4}
+        cellPadding: {top: 5, bottom: 5, left: 8, right: 4}
       },
-      margin: {left: margin - 40, right: margin - 40},
-      tableWidth: pageW - (margin - 40) * 2
+      margin: {left: margin, right: margin},
+      tableWidth: contentW
     });
     curY = doc.lastAutoTable.finalY;
 
@@ -1751,20 +2077,14 @@ function exportChecklist() {
       body: rows,
       theme: 'grid',
       styles: {
-        fontSize: 7, cellPadding: {top:4, bottom:4, left:4, right:4},
+        fontSize: 7, cellPadding: {top: 4, bottom: 4, left: 4, right: 4},
         overflow: 'linebreak', textColor: [30, 30, 30], valign: 'top'
       },
       headStyles: {
         fillColor: [240, 244, 248], textColor: [70, 90, 110],
         fontStyle: 'bold', fontSize: 7.5
       },
-      columnStyles: {
-        0: {cellWidth: 22, halign: 'center'},
-        1: {cellWidth: 118, fontStyle: 'bold'},
-        2: {cellWidth: 70, halign: 'center'},
-        3: {cellWidth: 185, fontSize: 6.5},
-        4: {cellWidth: 90,  fontSize: 6.5}
-      },
+      columnStyles: colWidths,
       didParseCell: function(data) {
         if (data.column.index === 2 && data.section === 'body') {
           var it = sec.items[data.row.index];
@@ -1775,12 +2095,11 @@ function exportChecklist() {
         }
       },
       didDrawCell: function(data) {
-        // Shade alternating rows lightly
         if (data.section === 'body' && data.row.index % 2 === 0 && data.column.index === 0) {
           doc.setFillColor(250, 251, 253);
         }
       },
-      margin: {left: margin - 40, right: margin - 40}
+      margin: {left: margin, right: margin}
     });
     curY = doc.lastAutoTable.finalY + 14;
   });
@@ -1790,14 +2109,14 @@ function exportChecklist() {
   for (var pg = 1; pg <= totalPages; pg++) {
     doc.setPage(pg);
     doc.setDrawColor(200, 210, 220);
-    doc.line(margin - 40, pageH - 28, pageW - (margin - 40), pageH - 28);
+    doc.line(margin, pageH - 28, pageW - margin, pageH - 28);
     doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(150, 160, 175);
-    doc.text('TerraIQ  ·  King Lake, Pasco County, FL  ·  GRI  ·  SASB  ·  TCFD  ·  IFRS S2',
-             margin - 40, pageH - 16);
-    doc.text('Page ' + pg + ' / ' + totalPages, pageW - (margin - 40), pageH - 16, {align:'right'});
+    doc.text('Lumora Explorer  ·  King Lake, Pasco County, FL  ·  GRI  ·  SASB  ·  TCFD  ·  IFRS S2',
+             margin, pageH - 16);
+    doc.text('Page ' + pg + ' / ' + totalPages, pageW - margin, pageH - 16, {align: 'right'});
   }
 
-  doc.save('TerraIQ_ESG_AuditReadiness_KingLake.pdf');
+  doc.save('LumoraExplorer_ESG_AuditReadiness_KingLake.pdf');
 }
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
