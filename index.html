@@ -319,6 +319,37 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
 /* ── Breadcrumb in King Lake header ──────────────────────────────────── */
 #breadcrumb{font-size:10px;color:var(--text-muted);margin-left:4px;letter-spacing:.3px;white-space:nowrap;display:flex;align-items:center;gap:4px}
 #breadcrumb .bc-sep{color:var(--border-light)}
+
+/* ── Atlas filters + full-width popup ───────────────────────────────── */
+.ap-filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.ap-filter-label{font-size:9px;font-weight:700;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;margin-bottom:4px}
+.ap-filter-select{width:100%;padding:6px 8px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:11px;color:var(--text-primary)}
+.ap-filter-note{font-size:10px;color:var(--text-muted);margin-bottom:8px}
+
+#location-popup-overlay{position:absolute;inset:0;background:rgba(0,0,0,.35);z-index:820;display:none}
+#location-popup{position:absolute;left:20px;right:20px;bottom:14px;height:42%;min-height:310px;background:rgba(255,255,255,.98);border:1px solid var(--border);border-radius:14px;z-index:830;display:none;flex-direction:column;box-shadow:0 16px 45px rgba(0,0,0,.28)}
+#location-popup.open,#location-popup-overlay.open{display:flex}
+#lp-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border)}
+#lp-head-left{display:flex;align-items:center;gap:10px}
+#lp-snapshot{width:92px;height:56px;border-radius:8px;border:1px solid var(--border);object-fit:cover;background:#d9e2ec}
+#lp-title{font-size:13px;font-weight:700;color:var(--text-primary)}
+#lp-subtitle{font-size:11px;color:var(--text-muted)}
+#lp-close{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);cursor:pointer}
+#lp-tabs{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--border);overflow-x:auto}
+.lp-tab{background:var(--bg-hover);border:1px solid var(--border);border-radius:16px;padding:5px 10px;white-space:nowrap;font-size:11px;cursor:pointer}
+.lp-tab.active{background:var(--accent-glow);border-color:var(--accent);color:var(--accent)}
+#lp-body{flex:1;overflow-y:auto;padding:12px 14px}
+.lp-panel{display:none}
+.lp-panel.active{display:block}
+.lp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.lp-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:10px}
+.lp-k{font-size:10px;color:var(--text-muted);margin-bottom:4px}
+.lp-v{font-size:16px;font-weight:700;color:var(--text-primary)}
+.lp-row{display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.lp-row:last-child{border-bottom:none}
+.lp-btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);padding:8px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;text-decoration:none}
+@media(max-width:960px){#location-popup{left:8px;right:8px;height:60%}.lp-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -351,7 +382,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
               <circle cx="8" cy="8" r="2" fill="currentColor"/>
               <path d="M8 2v1M8 13v1M2 8h1M13 8h1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
-            King Lake Case Study
+            King Lake Portfolio Assessment
             <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
           <span class="status-dot live">LIVE DATA</span>
@@ -373,7 +404,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
             <div id="atlas-search-results"></div>
           </div>
           <!-- Floating CTA -->
-          <button id="atlas-cta-btn" onclick="showCaseStudy()">View King Lake Case Study &rarr;</button>
+          <button id="atlas-cta-btn" onclick="showCaseStudy()">View King Lake Portfolio Assessment &rarr;</button>
           <!-- Floating legend -->
           <div id="atlas-legend-overlay">
             <div class="legend-title">Solar GHI + Wind Resource</div>
@@ -382,6 +413,37 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
           </div>
           <!-- Region info panel -->
           <div id="atlas-info-panel"></div>
+
+          <!-- Full-width location analysis popup -->
+          <div id="location-popup-overlay" onclick="closeLocationPopup()"></div>
+          <div id="location-popup">
+            <div id="lp-header">
+              <div id="lp-head-left">
+                <img id="lp-snapshot" alt="Selected location snapshot" />
+                <div>
+                  <div id="lp-title">Selected location</div>
+                  <div id="lp-subtitle">Click anywhere on the map to analyze.</div>
+                </div>
+              </div>
+              <button id="lp-close" onclick="closeLocationPopup()">✕</button>
+            </div>
+            <div id="lp-tabs">
+              <button class="lp-tab active" data-tab="overview" onclick="switchPopupTab('overview')">Overview</button>
+              <button class="lp-tab" data-tab="location" onclick="switchPopupTab('location')">Location Analysis</button>
+              <button class="lp-tab" data-tab="profiles" onclick="switchPopupTab('profiles')">Solar & Wind Profiles</button>
+              <button class="lp-tab" data-tab="portfolio" onclick="switchPopupTab('portfolio')">Portfolio Assessment</button>
+              <button class="lp-tab" data-tab="esg" onclick="switchPopupTab('esg')">ESG Page</button>
+              <button class="lp-tab" data-tab="sources" onclick="switchPopupTab('sources')">Open Data Sources</button>
+            </div>
+            <div id="lp-body">
+              <div class="lp-panel active" id="lp-tab-overview"></div>
+              <div class="lp-panel" id="lp-tab-location"></div>
+              <div class="lp-panel" id="lp-tab-profiles"></div>
+              <div class="lp-panel" id="lp-tab-portfolio"></div>
+              <div class="lp-panel" id="lp-tab-esg"></div>
+              <div class="lp-panel" id="lp-tab-sources"></div>
+            </div>
+          </div>
         </div>
 
         <!-- Atlas Right Panel -->
@@ -400,16 +462,27 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
             <div class="panel-divider"></div>
           </div>
 
-          <!-- US Renewable Resources — tabbed solar / wind by state -->
+          <!-- Renewable resources — continent + country filtered -->
           <div class="ap-section">
-            <div class="panel-label">US RENEWABLE RESOURCES</div>
+            <div class="panel-label">RENEWABLE RESOURCES</div>
+            <div class="ap-filter-grid">
+              <div>
+                <div class="ap-filter-label">Continent</div>
+                <select id="continent-filter" class="ap-filter-select"></select>
+              </div>
+              <div>
+                <div class="ap-filter-label">Country</div>
+                <select id="country-filter" class="ap-filter-select"></select>
+              </div>
+            </div>
+            <div class="ap-filter-note">Open-data benchmarks adapt by selected country and continent.</div>
             <!-- Tab bar -->
             <div class="ap-res-tabs">
               <button class="ap-res-tab active" id="tab-solar" onclick="switchResTab('solar')">☀️ Solar GHI</button>
               <button class="ap-res-tab" id="tab-wind" onclick="switchResTab('wind')">💨 Wind @ 80m</button>
             </div>
 
-            <!-- Solar panel: top states by annual avg GHI -->
+            <!-- Solar panel: country benchmarks by annual avg GHI -->
             <div id="ap-res-solar">
               <div class="ap-res-header-row">
                 <span class="ap-res-col-state">State</span>
@@ -417,48 +490,11 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
                 <span class="ap-res-col-val">GHI</span>
                 <span class="ap-res-col-cap">Installed</span>
               </div>
-              <!-- AZ 6.10 kWh/m²/d — 100% bar. Installed: 16.4 GW (EIA Feb 2025) -->
-              <div class="ap-res-row">
-                <span class="ap-res-state">AZ</span>
-                <div class="ap-res-bar-wrap"><div class="ap-res-bar-solar" style="width:100%"></div></div>
-                <span class="ap-res-val">6.10</span>
-                <span class="ap-res-cap">16.4 GW</span>
-              </div>
-              <!-- NV 5.89 — 96.6% -->
-              <div class="ap-res-row">
-                <span class="ap-res-state">NV</span>
-                <div class="ap-res-bar-wrap"><div class="ap-res-bar-solar" style="width:96.6%"></div></div>
-                <span class="ap-res-val">5.89</span>
-                <span class="ap-res-cap">12.7 GW</span>
-              </div>
-              <!-- NM 5.78 — 94.8% -->
-              <div class="ap-res-row">
-                <span class="ap-res-state">NM</span>
-                <div class="ap-res-bar-wrap"><div class="ap-res-bar-solar" style="width:94.8%"></div></div>
-                <span class="ap-res-val">5.78</span>
-                <span class="ap-res-cap">4.2 GW</span>
-              </div>
-              <!-- CA 5.55 — 91.0% -->
-              <div class="ap-res-row">
-                <span class="ap-res-state">CA</span>
-                <div class="ap-res-bar-wrap"><div class="ap-res-bar-solar" style="width:91.0%"></div></div>
-                <span class="ap-res-val">5.55</span>
-                <span class="ap-res-cap">50.8 GW</span>
-              </div>
-              <!-- TX 5.30 — 86.9% -->
-              <div class="ap-res-row">
-                <span class="ap-res-state">TX</span>
-                <div class="ap-res-bar-wrap"><div class="ap-res-bar-solar" style="width:86.9%"></div></div>
-                <span class="ap-res-val">5.30</span>
-                <span class="ap-res-cap">52.0 GW</span>
-              </div>
-              <div class="ap-res-cite">
-                GHI: NREL NSRDB PSM v3.2 (2022 vintage, state-wide annual avg)<br>
-                Installed capacity: EIA Electric Power Monthly, Feb 2025
-              </div>
+              <div id="ap-res-solar-rows"></div>
+              <div class="ap-res-cite" id="ap-res-solar-cite"></div>
             </div>
 
-            <!-- Wind panel: top states by annual avg wind speed @ 80m hub -->
+            <!-- Wind panel: country benchmarks by annual avg wind speed @ 80m hub -->
             <div id="ap-res-wind" style="display:none">
               <div class="ap-res-header-row">
                 <span class="ap-res-col-state">State</span>
@@ -466,50 +502,13 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
                 <span class="ap-res-col-val">m/s</span>
                 <span class="ap-res-col-cap">Installed</span>
               </div>
-              <!-- ND 8.4 m/s — 100%. Installed: 5.4 GW -->
-              <div class="ap-res-row">
-                <span class="ap-res-state">ND</span>
-                <div class="ap-res-bar-wrap"><div class="ap-res-bar-wind" style="width:100%"></div></div>
-                <span class="ap-res-val">8.40</span>
-                <span class="ap-res-cap">5.4 GW</span>
-              </div>
-              <!-- WY 7.8 — 92.9% -->
-              <div class="ap-res-row">
-                <span class="ap-res-state">WY</span>
-                <div class="ap-res-bar-wrap"><div class="ap-res-bar-wind" style="width:92.9%"></div></div>
-                <span class="ap-res-val">7.80</span>
-                <span class="ap-res-cap">3.9 GW</span>
-              </div>
-              <!-- KS 7.6 — 90.5% -->
-              <div class="ap-res-row">
-                <span class="ap-res-state">KS</span>
-                <div class="ap-res-bar-wrap"><div class="ap-res-bar-wind" style="width:90.5%"></div></div>
-                <span class="ap-res-val">7.60</span>
-                <span class="ap-res-cap">9.8 GW</span>
-              </div>
-              <!-- SD 7.5 — 89.3% -->
-              <div class="ap-res-row">
-                <span class="ap-res-state">SD</span>
-                <div class="ap-res-bar-wrap"><div class="ap-res-bar-wind" style="width:89.3%"></div></div>
-                <span class="ap-res-val">7.50</span>
-                <span class="ap-res-cap">4.0 GW</span>
-              </div>
-              <!-- TX 7.1 — 84.5% -->
-              <div class="ap-res-row">
-                <span class="ap-res-state">TX</span>
-                <div class="ap-res-bar-wrap"><div class="ap-res-bar-wind" style="width:84.5%"></div></div>
-                <span class="ap-res-val">7.10</span>
-                <span class="ap-res-cap">43.0 GW</span>
-              </div>
-              <div class="ap-res-cite">
-                Wind speed: NREL Wind Toolkit (WTK), 80m hub height, 2014–2022 avg<br>
-                Installed capacity: EIA Electric Power Monthly, Feb 2025
-              </div>
+              <div id="ap-res-wind-rows"></div>
+              <div class="ap-res-cite" id="ap-res-wind-cite"></div>
             </div>
           </div>
           <div class="panel-divider"></div>
           <div class="ap-section">
-            <div class="panel-label">CASE STUDIES</div>
+            <div class="panel-label">PORTFOLIO ASSESSMENTS</div>
             <div class="ap-case-list">
               <div class="ap-case-item" onclick="showCaseStudy()">
                 <div class="ap-case-dot"></div>
@@ -523,15 +522,8 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
           </div>
           <div class="panel-divider"></div>
           <div class="ap-section">
-            <div class="panel-label">DATA SOURCES</div>
-            <div class="source-tags">
-              <span class="source-tag">NREL NSRDB</span>
-              <span class="source-tag">NASA POWER</span>
-              <span class="source-tag">Open-Meteo</span>
-              <span class="source-tag">EIA</span>
-              <span class="source-tag">USGS</span>
-              <span class="source-tag">EPA</span>
-            </div>
+            <div class="panel-label">OPEN DATA SOURCES</div>
+            <div id="atlas-open-sources" class="source-tags"></div>
           </div>
         </aside>
       </div>
@@ -540,7 +532,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
       <div id="atlas-bar">
         <span id="layer-bar-label">SOLAR &amp; WIND RESOURCE</span>
         <button id="atlas-wind-toggle" onclick="toggleAtlasWind()">&#128168; Show Wind Layer</button>
-        <span style="font-size:11px;color:var(--text-secondary);margin-left:4px">Click anywhere on map for live solar &amp; wind data &middot; Click King Lake marker to open case study</span>
+        <span style="font-size:11px;color:var(--text-secondary);margin-left:4px">Click anywhere on map for live solar &amp; wind data &middot; Click King Lake marker to open portfolio assessment</span>
         <div style="margin-left:auto;font-size:11px;color:var(--text-muted)">NASA POWER &middot; Open-Meteo ERA5 &middot; NREL NSRDB</div>
       </div>
 
@@ -548,7 +540,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
   </div><!-- /view-atlas -->
 
   <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- VIEW 2: King Lake Case Study (Lumora Explorer)                     -->
+  <!-- VIEW 2: King Lake Portfolio Assessment (Lumora Explorer)                     -->
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <div id="view-casestudy" class="view">
   <div id="app">
@@ -569,7 +561,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
       <div id="breadcrumb">
         <span style="color:var(--text-muted)">Lumora Explorer</span>
         <span class="bc-sep">&rsaquo;</span>
-        <span style="color:var(--accent);font-weight:600">King Lake Case Study</span>
+        <span style="color:var(--accent);font-weight:600">King Lake Portfolio Assessment</span>
       </div>
       <div id="header-meta">
         <span class="site-tag">King Lake</span>
@@ -861,6 +853,97 @@ var ATLAS_LEGEND_ITEMS = [
   {color:'#84cc16', label:'3.8–4.2 — Moderate'},
   {color:'#22c55e', label:'<3.8 — Fair'}
 ];
+
+var GEO_DATA = {
+  'North America': {
+    countries: {
+      'United States': {
+        solar:[['AZ',6.10,'16.4 GW'],['NV',5.89,'12.7 GW'],['NM',5.78,'4.2 GW'],['CA',5.55,'50.8 GW'],['TX',5.30,'52.0 GW']],
+        wind:[['ND',8.40,'5.4 GW'],['WY',7.80,'3.9 GW'],['KS',7.60,'9.8 GW'],['SD',7.50,'4.0 GW'],['TX',7.10,'43.0 GW']],
+        sources:['NREL NSRDB (open)', 'NREL WTK (open)', 'EIA Open Data API', 'USGS 3DEP', 'EPA EnviroAtlas']
+      },
+      'Canada': {
+        solar:[['AB',4.60,'2.1 GW'],['SK',4.45,'0.2 GW'],['ON',3.75,'3.5 GW'],['BC',3.20,'0.1 GW'],['QC',3.10,'0.2 GW']],
+        wind:[['AB',7.20,'4.5 GW'],['SK',7.00,'0.8 GW'],['MB',6.80,'0.3 GW'],['NS',6.50,'0.6 GW'],['QC',6.20,'4.3 GW']],
+        sources:['Natural Resources Canada (open)', 'Global Wind Atlas', 'OpenStreetMap / Nominatim']
+      }
+    }
+  },
+  'South America': {
+    countries: {
+      'Brazil': {
+        solar:[['BA',5.85,'4.1 GW'],['MG',5.50,'6.0 GW'],['PI',5.40,'1.1 GW'],['CE',5.35,'0.7 GW'],['PE',5.30,'0.8 GW']],
+        wind:[['RN',8.60,'9.4 GW'],['BA',8.10,'11.1 GW'],['CE',7.80,'2.7 GW'],['PI',7.50,'2.8 GW'],['RS',7.00,'2.3 GW']],
+        sources:['Global Solar Atlas (open)', 'Global Wind Atlas (open)', 'ONS Brazil open data']
+      },
+      'Chile': {
+        solar:[['AN',7.20,'2.0 GW'],['AT',6.70,'2.1 GW'],['CO',6.40,'0.9 GW'],['RM',5.80,'0.6 GW'],['TA',5.20,'0.4 GW']],
+        wind:[['BI',8.00,'1.0 GW'],['CO',7.60,'0.8 GW'],['LA',7.20,'0.4 GW'],['AT',7.00,'0.5 GW'],['MA',6.80,'0.6 GW']],
+        sources:['MinEnergia Chile (open)', 'Global Atlas datasets', 'Open-Meteo']
+      }
+    }
+  },
+  'Europe': {
+    countries: {
+      'Spain': {
+        solar:[['AN',5.60,'7.5 GW'],['CM',5.45,'4.2 GW'],['EX',5.40,'6.0 GW'],['MU',5.30,'0.4 GW'],['AR',4.90,'1.2 GW']],
+        wind:[['GA',8.20,'3.9 GW'],['CL',7.80,'6.3 GW'],['AN',7.40,'4.0 GW'],['CY',7.20,'1.5 GW'],['AR',6.90,'2.1 GW']],
+        sources:['Copernicus ERA5 (open)', 'ENTSO-E Transparency', 'REE open data']
+      },
+      'Germany': {
+        solar:[['BY',3.50,'18.0 GW'],['BW',3.40,'12.5 GW'],['BB',3.25,'6.0 GW'],['HE',3.20,'4.5 GW'],['SN',3.10,'4.4 GW']],
+        wind:[['SH',8.40,'7.8 GW'],['NI',7.90,'12.1 GW'],['BB',7.20,'8.9 GW'],['MV',7.10,'3.8 GW'],['ST',7.00,'5.6 GW']],
+        sources:['Open Power System Data', 'DWD open weather data', 'Global Wind Atlas']
+      }
+    }
+  },
+  'Africa': {
+    countries: {
+      'South Africa': {
+        solar:[['NC',6.40,'2.9 GW'],['FS',5.90,'0.3 GW'],['NW',5.70,'0.6 GW'],['WC',5.40,'0.6 GW'],['EC',5.20,'0.5 GW']],
+        wind:[['WC',8.10,'3.7 GW'],['EC',7.60,'0.9 GW'],['NC',7.20,'0.4 GW'],['FS',6.50,'0.1 GW'],['KZN',6.20,'0.3 GW']],
+        sources:['CSIR South Africa open data', 'Global Solar Atlas', 'Global Wind Atlas']
+      },
+      'Morocco': {
+        solar:[['DO',5.80,'0.9 GW'],['SO',5.70,'0.6 GW'],['MA',5.50,'0.2 GW'],['RA',5.30,'0.2 GW'],['FE',5.10,'0.1 GW']],
+        wind:[['TA',8.50,'1.4 GW'],['DO',8.20,'0.4 GW'],['LA',7.90,'0.3 GW'],['RA',7.40,'0.2 GW'],['SO',7.10,'0.2 GW']],
+        sources:['ONEE public stats', 'Global Atlas datasets', 'Open-Meteo']
+      }
+    }
+  },
+  'Asia': {
+    countries: {
+      'India': {
+        solar:[['RJ',5.90,'29.0 GW'],['GJ',5.70,'18.5 GW'],['MP',5.60,'4.0 GW'],['MH',5.40,'5.5 GW'],['KA',5.20,'10.5 GW']],
+        wind:[['TN',8.10,'10.8 GW'],['GJ',7.70,'11.5 GW'],['KA',7.20,'5.5 GW'],['MH',6.80,'5.0 GW'],['RJ',6.60,'5.0 GW']],
+        sources:['MNRE India open data', 'NIWE wind atlas', 'Global Solar Atlas']
+      },
+      'China': {
+        solar:[['QH',6.20,'19.0 GW'],['XJ',6.00,'25.0 GW'],['GS',5.80,'20.0 GW'],['NM',5.70,'22.0 GW'],['NX',5.60,'17.0 GW']],
+        wind:[['IM',8.30,'57.0 GW'],['XJ',8.00,'37.0 GW'],['GS',7.60,'12.0 GW'],['HL',7.30,'10.0 GW'],['JL',7.10,'8.0 GW']],
+        sources:['National Energy Administration public reports', 'Global Wind Atlas', 'ERA5 open climate data']
+      }
+    }
+  },
+  'Oceania': {
+    countries: {
+      'Australia': {
+        solar:[['WA',6.30,'2.5 GW'],['SA',5.90,'3.8 GW'],['QLD',5.70,'6.0 GW'],['NSW',5.40,'5.5 GW'],['VIC',4.80,'4.3 GW']],
+        wind:[['SA',8.20,'2.8 GW'],['VIC',7.70,'4.1 GW'],['NSW',7.20,'2.8 GW'],['TAS',7.00,'0.7 GW'],['WA',6.80,'1.0 GW']],
+        sources:['AEMO OpenNEM (open)', 'BOM climate data (open)', 'Global Atlas datasets']
+      },
+      'New Zealand': {
+        solar:[['OT',4.20,'0.1 GW'],['CA',4.00,'0.2 GW'],['WK',3.90,'0.1 GW'],['NO',3.80,'0.1 GW'],['AU',3.70,'0.1 GW']],
+        wind:[['WG',8.70,'0.5 GW'],['MW',8.20,'0.3 GW'],['TK',7.80,'0.2 GW'],['CI',7.50,'0.3 GW'],['OT',7.10,'0.2 GW']],
+        sources:['Transpower NZ open data', 'NIWA climate summaries', 'Global Wind Atlas']
+      }
+    }
+  }
+};
+
+var _geoFilterState = {continent:'North America', country:'United States'};
+var _popupState = {lat:null, lon:null, name:'Selected location'};
+
 
 // ─── DATA ──────────────────────────────────────────────────────────────────
 
@@ -1238,6 +1321,7 @@ function initAtlasMap() {
       lat.toFixed(4) + '°N, ' + Math.abs(lon).toFixed(4) + '°W',
       {direction: 'top', permanent: false, className: 'leaflet-tooltip'}
     );
+    _openLocationPopup(lat, lon);
     _fetchLocationData(lat, lon);
   });
 
@@ -1262,7 +1346,7 @@ function initAtlasMap() {
   klMarker.bindTooltip(
     '<strong>King Lake, Florida</strong><br/>' +
     'ESG Score: 79/100 &nbsp;&middot;&nbsp; GHI: 5.35 kWh/m²/day<br/>' +
-    '<span style="color:#009e7d;font-weight:600">Click to open Case Study →</span>',
+    '<span style="color:#009e7d;font-weight:600">Click to open Portfolio Assessment →</span>',
     {direction: 'top', offset: [0, -10]}
   );
   klMarker.on('click', function() { showCaseStudy(); });
@@ -1270,7 +1354,7 @@ function initAtlasMap() {
 
   // Permanent label on King Lake
   L.tooltip({permanent: true, direction: 'right', offset: [14, 0], className: 'kl-label-tip'})
-   .setContent('King Lake Case Study')
+   .setContent('King Lake Portfolio Assessment')
    .setLatLng([28.2906, -82.2918])
    .addTo(map);
 
@@ -1305,7 +1389,9 @@ function _fetchLocationData(lat, lon) {
   _reverseGeocode(lat, lon, function(err, geo) {
     if (!alocName) return;
     if (err || !geo || !geo.address) {
-      alocName.textContent = lat.toFixed(2) + '°' + (lat >= 0 ? 'N' : 'S') + ', ' + Math.abs(lon).toFixed(2) + '°' + (lon < 0 ? 'W' : 'E');
+      var fallbackName = lat.toFixed(2) + '°' + (lat >= 0 ? 'N' : 'S') + ', ' + Math.abs(lon).toFixed(2) + '°' + (lon < 0 ? 'W' : 'E');
+      alocName.textContent = fallbackName;
+      _updatePopupHeader(fallbackName);
     } else {
       var addr = geo.address;
       var city = addr.city || addr.town || addr.village || addr.hamlet || addr.county || '';
@@ -1314,6 +1400,7 @@ function _fetchLocationData(lat, lon) {
       var display = city ? city : 'Unknown location';
       if (state) display += ', ' + state;
       alocName.textContent = display;
+      _updatePopupHeader(display);
       if (alocCoords) alocCoords.textContent = lat.toFixed(4) + '°' + (lat >= 0 ? 'N' : 'S') + '  ' + Math.abs(lon).toFixed(4) + '°' + (lon < 0 ? 'W' : 'E');
     }
   });
@@ -1733,6 +1820,15 @@ function _showLatLonPanel(lat, lon, nasa, om, myGen) {
     // Terrain+grid loading placeholder — replaced by _updateTerrainSubstation
     aiHtml += '<div id="aloc-ai-terrain" class="aloc-insight-card"><div class="aloc-insight-dot" style="background:var(--text-muted)"></div><span class="aloc-insight-text" style="display:flex;align-items:center;gap:6px"><span class="aip-spinner"></span>Loading terrain &amp; grid data…</span></div>';
     alocAI.innerHTML = aiHtml;
+  _renderPopupLocation({
+    ghi: fmtV(ghi,2), dni: fmtV(dni,2), ws10: ws10Label, ws80: ws80Label,
+    iecSolar: iecSolar, iecWind: iecWind
+  });
+  _renderPopupProfiles({
+    ghi: fmtV(ghi,2), pvP50: pvP50daily ? pvP50daily.toFixed(2) : '—', pvP90: pvP90daily ? pvP90daily.toFixed(2) : '—',
+    ws80: ws80Label, ws80P90: ws80P90 ? ws80P90.toFixed(2) : '—',
+    solarCF: solarCF || '—', windCF: windCF || '—'
+  });
   }
 }
 
@@ -1795,6 +1891,8 @@ function _updateTerrainSubstation(lat, lon, elevData, subData, gen) {
     if (!insights.length) aHtml += '<div style="font-size:11px;color:var(--text-muted);padding:4px 0">Terrain and grid data unavailable for this location.</div>';
     aiEl.innerHTML = aHtml;
   }
+
+  _updatePopupTerrainGrid(elev, slope, subData);
 
   // ── Replace loading card in sidenav with terrain + grid insight cards ─────
   var alocTerrainEl = document.getElementById('aloc-ai-terrain');
@@ -2050,10 +2148,174 @@ function switchResTab(tab) {
   }
 }
 
+function _renderResourceRows(type) {
+  var cfg = GEO_DATA[_geoFilterState.continent] && GEO_DATA[_geoFilterState.continent].countries[_geoFilterState.country];
+  if (!cfg) return;
+  var rows = cfg[type] || [];
+  var root = document.getElementById(type === 'solar' ? 'ap-res-solar-rows' : 'ap-res-wind-rows');
+  if (!root) return;
+  var maxVal = rows.reduce(function(m, r){ return Math.max(m, r[1]); }, 0);
+  var barClass = type === 'solar' ? 'ap-res-bar-solar' : 'ap-res-bar-wind';
+  root.innerHTML = rows.map(function(r){
+    var pct = maxVal > 0 ? (r[1] / maxVal * 100) : 0;
+    return '<div class="ap-res-row"><span class="ap-res-state">' + r[0] + '</span>' +
+      '<div class="ap-res-bar-wrap"><div class="' + barClass + '" style="width:' + pct.toFixed(1) + '%"></div></div>' +
+      '<span class="ap-res-val">' + r[1].toFixed(2) + '</span><span class="ap-res-cap">' + r[2] + '</span></div>';
+  }).join('');
+}
+
+function _renderOpenSources() {
+  var cfg = GEO_DATA[_geoFilterState.continent] && GEO_DATA[_geoFilterState.continent].countries[_geoFilterState.country];
+  if (!cfg) return;
+  var tags = document.getElementById('atlas-open-sources');
+  if (tags) tags.innerHTML = (cfg.sources || []).map(function(src){ return '<span class="source-tag">' + src + '</span>'; }).join('');
+  var solarCite = document.getElementById('ap-res-solar-cite');
+  var windCite = document.getElementById('ap-res-wind-cite');
+  if (solarCite) solarCite.innerHTML = 'Solar profile benchmarks for ' + _geoFilterState.country + ' (' + _geoFilterState.continent + ').';
+  if (windCite) windCite.innerHTML = 'Wind profile benchmarks for ' + _geoFilterState.country + ' (' + _geoFilterState.continent + ').';
+}
+
+function _updateCountryOptions() {
+  var select = document.getElementById('country-filter');
+  if (!select) return;
+  var countries = Object.keys(GEO_DATA[_geoFilterState.continent].countries);
+  if (countries.indexOf(_geoFilterState.country) === -1) _geoFilterState.country = countries[0];
+  select.innerHTML = countries.map(function(c){ return '<option value="' + c + '">' + c + '</option>'; }).join('');
+  select.value = _geoFilterState.country;
+}
+
+function initGeoFilters() {
+  var continent = document.getElementById('continent-filter');
+  var country = document.getElementById('country-filter');
+  if (!continent || !country) return;
+  continent.innerHTML = Object.keys(GEO_DATA).map(function(c){ return '<option value="' + c + '">' + c + '</option>'; }).join('');
+  continent.value = _geoFilterState.continent;
+  _updateCountryOptions();
+
+  function rerender() {
+    _renderResourceRows('solar');
+    _renderResourceRows('wind');
+    _renderOpenSources();
+    _renderPopupOverview();
+    _renderPopupSources();
+  }
+  continent.addEventListener('change', function(){ _geoFilterState.continent = continent.value; _updateCountryOptions(); rerender(); });
+  country.addEventListener('change', function(){ _geoFilterState.country = country.value; rerender(); });
+  rerender();
+}
+
+function switchPopupTab(tab) {
+  document.querySelectorAll('.lp-tab').forEach(function(t){ t.classList.toggle('active', t.dataset.tab === tab); });
+  document.querySelectorAll('.lp-panel').forEach(function(p){ p.classList.toggle('active', p.id === 'lp-tab-' + tab); });
+}
+
+function closeLocationPopup() {
+  var pop = document.getElementById('location-popup');
+  var ov = document.getElementById('location-popup-overlay');
+  if (pop) pop.classList.remove('open');
+  if (ov) ov.classList.remove('open');
+}
+
+function _openLocationPopup(lat, lon) {
+  _popupState.lat = lat; _popupState.lon = lon;
+  var pop = document.getElementById('location-popup');
+  var ov = document.getElementById('location-popup-overlay');
+  if (pop) pop.classList.add('open');
+  if (ov) ov.classList.add('open');
+  switchPopupTab('overview');
+  _updatePopupHeader();
+  _renderPopupOverview();
+  _renderPopupProfiles();
+  _renderPopupPortfolio();
+  _renderPopupEsg();
+  _renderPopupSources();
+  var loc = document.getElementById('lp-tab-location');
+  if (loc) loc.innerHTML = '<div class="aip-loading"><div class="aip-spinner"></div><span>Fetching location analysis…</span></div>';
+}
+
+function _updatePopupHeader(name) {
+  if (name) _popupState.name = name;
+  var title = document.getElementById('lp-title');
+  var sub = document.getElementById('lp-subtitle');
+  var img = document.getElementById('lp-snapshot');
+  if (title) title.textContent = _popupState.name || 'Selected location';
+  if (sub && _popupState.lat != null) sub.textContent = _popupState.lat.toFixed(4) + ', ' + _popupState.lon.toFixed(4);
+  if (img && _popupState.lat != null) {
+    img.src = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + _popupState.lat.toFixed(5) + ',' + _popupState.lon.toFixed(5) + '&zoom=6&size=280x160&maptype=mapnik&markers=' + _popupState.lat.toFixed(5) + ',' + _popupState.lon.toFixed(5) + ',red-pushpin';
+  }
+}
+
+function _renderPopupOverview() {
+  var panel = document.getElementById('lp-tab-overview');
+  var cfg = GEO_DATA[_geoFilterState.continent] && GEO_DATA[_geoFilterState.continent].countries[_geoFilterState.country];
+  if (!panel || !cfg) return;
+  var bestSolar = cfg.solar[0], bestWind = cfg.wind[0];
+  panel.innerHTML = '<div class="lp-grid">' +
+    '<div class="lp-card"><div class="lp-k">Continent</div><div class="lp-v">' + _geoFilterState.continent + '</div></div>' +
+    '<div class="lp-card"><div class="lp-k">Country</div><div class="lp-v">' + _geoFilterState.country + '</div></div>' +
+    '<div class="lp-card"><div class="lp-k">Best Solar / Wind</div><div class="lp-v" style="font-size:13px">☀️ ' + bestSolar[0] + ' ' + bestSolar[1].toFixed(2) + ' · 💨 ' + bestWind[0] + ' ' + bestWind[1].toFixed(2) + '</div></div>' +
+    '</div>';
+}
+
+function _renderPopupProfiles(data) {
+  var panel = document.getElementById('lp-tab-profiles');
+  if (!panel) return;
+  if (!data) {
+    panel.innerHTML = '<div style="font-size:11px;color:var(--text-muted)">Profiles will populate after selecting a location.</div>';
+    return;
+  }
+  panel.innerHTML = '<div class="lp-row"><span>Solar GHI (P50)</span><strong>' + data.ghi + ' kWh/m²/day</strong></div>' +
+    '<div class="lp-row"><span>Solar Yield (P50 / P90)</span><strong>' + data.pvP50 + ' / ' + data.pvP90 + ' kWh/kWp/day</strong></div>' +
+    '<div class="lp-row"><span>Wind @ 80m (P50 / P90)</span><strong>' + data.ws80 + ' / ' + data.ws80P90 + ' m/s</strong></div>' +
+    '<div class="lp-row"><span>Solar / Wind CF</span><strong>' + data.solarCF + '% / ' + data.windCF + '%</strong></div>';
+}
+
+function _renderPopupPortfolio() {
+  var panel = document.getElementById('lp-tab-portfolio');
+  if (!panel) return;
+  panel.innerHTML = '<div class="lp-card"><div class="lp-k">Featured Portfolio Assessment</div><div class="lp-v" style="font-size:14px">King Lake, Florida</div>' +
+    '<div style="font-size:11px;color:var(--text-secondary);margin-top:6px">ESG score 79/100 · utility-scale hybrid viability.</div>' +
+    '<div style="margin-top:10px"><button class="lp-btn" onclick="showCaseStudy()">Open Portfolio Assessment →</button></div></div>';
+}
+
+function _renderPopupEsg() {
+  var panel = document.getElementById('lp-tab-esg');
+  if (!panel) return;
+  panel.innerHTML = '<div class="lp-card"><div class="lp-k">Whole ESG Page</div><div style="font-size:11px;color:var(--text-secondary);line-height:1.6">The complete ESG dashboard (score gauge, audit checklist, and evidence-backed controls) is available in the dedicated Portfolio Assessment view.</div>' +
+    '<div style="margin-top:10px"><button class="lp-btn" onclick="showCaseStudy()">Open ESG Page →</button></div></div>';
+}
+
+function _renderPopupSources() {
+  var panel = document.getElementById('lp-tab-sources');
+  var cfg = GEO_DATA[_geoFilterState.continent] && GEO_DATA[_geoFilterState.continent].countries[_geoFilterState.country];
+  if (!panel || !cfg) return;
+  panel.innerHTML = '<div class="lp-card"><div class="lp-k">Open & Free Sources (' + _geoFilterState.country + ')</div>' +
+    cfg.sources.map(function(src){ return '<div class="lp-row"><span>' + src + '</span><strong>Open</strong></div>'; }).join('') + '</div>';
+}
+
+function _renderPopupLocation(data) {
+  var panel = document.getElementById('lp-tab-location');
+  if (!panel) return;
+  panel.innerHTML = '<div class="lp-row"><span>Location</span><strong>' + (_popupState.name || 'Selected point') + '</strong></div>' +
+    '<div class="lp-row"><span>Coordinates</span><strong>' + _popupState.lat.toFixed(4) + ', ' + _popupState.lon.toFixed(4) + '</strong></div>' +
+    '<div class="lp-row"><span>Solar GHI / DNI</span><strong>' + data.ghi + ' / ' + data.dni + ' kWh/m²/day</strong></div>' +
+    '<div class="lp-row"><span>Wind @ 10m / 80m</span><strong>' + data.ws10 + ' / ' + data.ws80 + ' m/s</strong></div>' +
+    '<div class="lp-row"><span>Solar / Wind class</span><strong>' + data.iecSolar + ' · ' + data.iecWind + '</strong></div>';
+}
+
+function _updatePopupTerrainGrid(elev, slope, subData) {
+  var panel = document.getElementById('lp-tab-location');
+  if (!panel || _popupState.lat == null) return;
+  var ext = '<div class="lp-row"><span>Elevation / slope</span><strong>' + (elev != null ? elev.toFixed(0) + ' m' : '—') + ' / ' + (slope != null ? slope.toFixed(1) + '%' : '—') + '</strong></div>';
+  ext += '<div class="lp-row"><span>Nearest substation</span><strong>' + (subData ? (subData.name + ' (' + subData.distKm.toFixed(1) + ' km)') : 'Not found') + '</strong></div>';
+  panel.innerHTML += ext;
+}
+
 function initAtlas() {
   // Initialise USA Solar Atlas map (View 1 — visible on page load)
   _atlasMap = initAtlasMap();
   initAtlasSearch(_atlasMap);
+  initGeoFilters();
   console.info('%cUSA Solar Atlas Explorer — TerraIQ', 'color:#009e7d;font-weight:bold;font-size:14px');
   console.info('Click anywhere on the map for live solar & wind data. Search bar available for navigation.');
 }
