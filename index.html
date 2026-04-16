@@ -311,26 +311,41 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
 .aip-iec-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(251,191,36,.12);color:#d97706;border:1px solid rgba(251,191,36,.3)}
 
 /* ── Location portfolio popup ───────────────────────────────────────── */
-#location-popup-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);z-index:1200;display:none}
+#location-popup-overlay{position:fixed;inset:0;background:rgba(148,163,184,.28);backdrop-filter:blur(3px);z-index:1200;display:none}
 #location-popup-overlay.open{display:block}
-#location-popup{position:fixed;inset:2.5vh 2.5vw;background:var(--bg-secondary);border:1px solid var(--border);border-radius:14px;z-index:1201;display:none;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:auto}
+#location-popup{position:fixed;inset:2.5vh 2.5vw;background:var(--bg-secondary);border:1px solid var(--border);border-radius:20px;z-index:1201;display:none;flex-direction:column;box-shadow:0 24px 70px rgba(148,163,184,.28);overflow:hidden;max-height:95vh}
 #location-popup.open{display:flex}
-.lp-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.lp-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:14px;background:rgba(255,255,255,.78)}
 .lp-title{font-size:17px;font-weight:800}.lp-sub{font-size:11px;color:var(--text-muted);margin-top:3px}
-.lp-close{border:1px solid var(--border);background:var(--bg-hover);border-radius:8px;padding:6px 10px;cursor:pointer}
-.lp-body{display:grid;grid-template-columns:320px minmax(0,1fr);gap:14px;padding:14px;min-height:0;flex:1;overflow-y:auto}
-.lp-left{border:1px solid var(--border);border-radius:10px;padding:10px;background:var(--bg-panel)}
+.lp-close{border:1px solid var(--border);background:var(--bg-hover);border-radius:10px;padding:6px 10px;cursor:pointer;color:var(--text-secondary)}
+.lp-body{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;padding:16px;min-height:0;flex:1;overflow:hidden}
+.lp-left{border:1px solid var(--border);border-radius:18px;padding:14px;background:linear-gradient(180deg,#ffffff,#f5f9fc);position:sticky;top:0;align-self:start;box-shadow:0 14px 36px rgba(148,163,184,.18)}
+.lp-left-label{font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--text-muted);text-transform:uppercase}
+.lp-left-note{margin-top:10px;font-size:11px;color:var(--text-muted);line-height:1.5}
 #atlas-location-section{display:none !important}
 #atlas-info-panel{display:none !important}
-.lp-main{display:flex;flex-direction:column;min-height:0;height:100%;max-height:100%;overflow-y:auto}
-#lp-mini-map{width:100%;height:190px;border-radius:8px;border:1px solid var(--border);margin-top:8px;overflow:hidden}
-.lp-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;flex-shrink:0}
-.lp-tab{padding:6px 10px;border:1px solid var(--border);background:var(--bg-hover);border-radius:16px;font-size:11px;cursor:pointer}
+.lp-main{display:flex;flex-direction:column;min-height:0}
+#lp-mini-map{width:100%;height:220px;border-radius:14px;border:1px solid var(--border);margin-top:10px;overflow:hidden}
+.lp-right{display:grid;grid-template-rows:auto minmax(0,1fr);min-height:0;overflow:hidden}
+.lp-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:0;flex-shrink:0}
+.lp-tab{padding:8px 14px;border:1px solid var(--border);background:#f3f7fb;border-radius:999px;font-size:11px;cursor:pointer;color:var(--text-secondary);font-weight:700}
 .lp-tab.active{background:var(--accent-glow);border-color:var(--accent);color:var(--accent);font-weight:700}
-.lp-panel{display:none;flex:1;min-height:260px;max-height:100%;overflow-y:auto;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--bg-card);min-width:0;-webkit-overflow-scrolling:touch}
+.lp-panel{display:none;min-height:0;height:100%;overflow-y:auto;border:1px solid var(--border);border-radius:18px;padding:16px;background:linear-gradient(180deg,#ffffff,#f7fafc);min-width:0;-webkit-overflow-scrolling:touch;box-shadow:inset 0 1px 0 rgba(255,255,255,.9)}
 .lp-panel.active{display:block}
+.lp-section-card{margin-bottom:12px;padding:14px;border:1px solid var(--border);border-radius:16px;background:var(--bg-card);box-shadow:0 8px 22px rgba(148,163,184,.12)}
+.lp-section-card:last-child{margin-bottom:0}
+.lp-compare-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.lp-stat-tile{padding:12px;border:1px solid var(--border);border-radius:14px;background:#f9fbfd}
+.lp-stat-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
+.lp-stat-value{margin-top:6px;font-size:18px;font-weight:800;color:var(--text-primary)}
+.lp-stat-copy{margin-top:4px;font-size:11px;color:var(--text-secondary);line-height:1.45}
+.lp-note-card{padding:12px 14px;border-radius:14px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.18);font-size:11px;color:#1d4ed8;line-height:1.55}
+.lp-source-note{margin-top:10px;font-size:10px;color:var(--text-muted);line-height:1.7;border-top:1px solid var(--border);padding-top:8px}
 @media(max-width:980px){
   .lp-body{grid-template-columns:1fr}
+  .lp-left{position:static}
+  .lp-right{grid-template-rows:auto minmax(360px,1fr)}
+  .lp-compare-grid{grid-template-columns:1fr}
   #checklist-drawer{inset:0;border-radius:0}
 }
 
@@ -349,113 +364,113 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
 
 /* Enhancement overrides */
 :root{
-  --bg-primary:#07111d;--bg-secondary:rgba(8,18,32,.82);--bg-panel:rgba(8,18,32,.88);--bg-card:rgba(15,29,46,.82);--bg-hover:rgba(24,43,67,.96);
-  --border:rgba(138,170,201,.18);--border-light:rgba(146,196,228,.36);--accent:#5ff2c5;--accent-dim:#26c8a0;--accent-glow:rgba(95,242,197,.16);
-  --text-primary:#f5fbff;--text-secondary:#b7c9da;--text-muted:#7390aa;--font:'Manrope',system-ui,-apple-system,sans-serif;--font-display:'Space Grotesk',var(--font);
-  --panel-w:390px;--shadow-soft:0 24px 60px rgba(3,8,20,.24);--shadow-strong:0 32px 90px rgba(0,0,0,.35)
+  --bg-primary:#edf4f8;--bg-secondary:rgba(255,255,255,.88);--bg-panel:rgba(247,250,252,.94);--bg-card:rgba(255,255,255,.94);--bg-hover:#edf3f8;
+  --border:rgba(148,163,184,.24);--border-light:rgba(100,116,139,.34);--accent:#0f9d84;--accent-dim:#0b7f6b;--accent-glow:rgba(15,157,132,.12);
+  --text-primary:#102033;--text-secondary:#496176;--text-muted:#73879a;--font:'Manrope',system-ui,-apple-system,sans-serif;--font-display:'Space Grotesk',var(--font);
+  --panel-w:390px;--shadow-soft:0 20px 50px rgba(148,163,184,.16);--shadow-strong:0 28px 72px rgba(148,163,184,.24)
 }
-html,body{background:radial-gradient(circle at top left, rgba(95,242,197,.13), transparent 30%),radial-gradient(circle at top right, rgba(122,162,255,.18), transparent 28%),linear-gradient(180deg, #08121f 0%, #091728 45%, #050b14 100%);color:var(--text-primary);font-family:var(--font)}
-body::before{content:'';position:fixed;inset:0;pointer-events:none;background:linear-gradient(115deg, rgba(255,255,255,.04), transparent 22%),radial-gradient(circle at 20% 20%, rgba(95,242,197,.08), transparent 20%),radial-gradient(circle at 80% 0%, rgba(90,134,255,.09), transparent 22%);z-index:0}
+html,body{background:radial-gradient(circle at top left, rgba(15,157,132,.12), transparent 30%),radial-gradient(circle at top right, rgba(59,130,246,.14), transparent 28%),linear-gradient(180deg, #f5fafc 0%, #edf4f8 48%, #e6eef5 100%);color:var(--text-primary);font-family:var(--font)}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;background:linear-gradient(115deg, rgba(255,255,255,.66), transparent 24%),radial-gradient(circle at 18% 16%, rgba(15,157,132,.06), transparent 18%),radial-gradient(circle at 82% 0%, rgba(59,130,246,.07), transparent 22%);z-index:0}
 .view,.view.active,#atlas-app,#app{position:relative;z-index:1}
-#atlas-header,#header{height:68px;padding:0 24px;background:rgba(8,18,32,.72);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);box-shadow:0 10px 30px rgba(2,8,18,.16)}
+#atlas-header,#header{height:68px;padding:0 24px;background:rgba(255,255,255,.8);border-bottom:1px solid var(--border);backdrop-filter:blur(18px);box-shadow:0 10px 30px rgba(148,163,184,.12)}
 #logo{font-family:var(--font-display);font-size:17px;letter-spacing:.02em}
-.site-tag,.source-tag,.cl-source{background:rgba(255,255,255,.04);border-color:var(--border)}
-.status-dot{color:#d9f6ee;letter-spacing:.18em}
-.status-dot.live::before{background:var(--accent);box-shadow:0 0 0 4px rgba(95,242,197,.12),0 0 18px rgba(95,242,197,.45)}
+.site-tag,.source-tag,.cl-source{background:rgba(255,255,255,.72);border-color:var(--border)}
+.status-dot{color:#215164;letter-spacing:.18em}
+.status-dot.live::before{background:var(--accent);box-shadow:0 0 0 4px rgba(15,157,132,.12),0 0 18px rgba(15,157,132,.24)}
 #main,#atlas-main{background:transparent}
 #map-container,#us-map-container{overflow:hidden}
-#map-container::before,#us-map-container::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 14% 18%, rgba(95,242,197,.14), transparent 26%),radial-gradient(circle at 84% 15%, rgba(122,162,255,.16), transparent 24%),linear-gradient(180deg, rgba(6,15,27,.08), rgba(6,15,27,.35));z-index:350}
-#map,#us-map{filter:saturate(1.08) contrast(1.02)}
+#map-container::before,#us-map-container::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 14% 18%, rgba(15,157,132,.1), transparent 26%),radial-gradient(circle at 84% 15%, rgba(59,130,246,.1), transparent 24%),linear-gradient(180deg, rgba(255,255,255,.02), rgba(226,232,240,.22));z-index:350}
+#map,#us-map{filter:saturate(1.02) contrast(1)}
 #map-legend,#atlas-legend-overlay,#coords-display,#atlas-info-panel,#atlas-search-box,#atlas-search-results{backdrop-filter:blur(18px);box-shadow:var(--shadow-soft)}
-#map-legend,#coords-display,#atlas-legend-overlay,#atlas-info-panel{background:rgba(8,18,32,.72);border-color:rgba(188,221,248,.16)}
+#map-legend,#coords-display,#atlas-legend-overlay,#atlas-info-panel{background:rgba(255,255,255,.86);border-color:var(--border)}
 #map-legend{bottom:30px;left:22px;min-width:210px}
-#coords-display{right:22px;bottom:24px;color:#d8e6f2}
-#atlas-search-box{background:rgba(8,18,32,.76);border-color:var(--border)}
+#coords-display{right:22px;bottom:24px;color:#335066}
+#atlas-search-box{background:rgba(255,255,255,.9);border-color:var(--border)}
 #atlas-search-input{color:var(--text-primary)}
 #atlas-search-input::placeholder{color:var(--text-muted)}
-#atlas-panel,#right-panel{background:linear-gradient(180deg, rgba(9,20,35,.96), rgba(7,16,29,.9));border-left:1px solid var(--border);box-shadow:-24px 0 60px rgba(1,6,15,.26)}
+#atlas-panel,#right-panel{background:linear-gradient(180deg, rgba(251,253,255,.98), rgba(242,247,251,.96));border-left:1px solid var(--border);box-shadow:-24px 0 60px rgba(148,163,184,.18)}
 #right-panel{width:var(--panel-w)}
 #panel-section-overview,#panel-section-score,#panel-section-renewable,#panel-section-scenarios,#panel-section-actions,#panel-section-insights,#data-sources{padding:22px}
-.panel-label{color:#83a8c5;letter-spacing:.22em;font-size:10px}
-.panel-divider{background:linear-gradient(90deg, transparent, rgba(188,221,248,.14), transparent)}
-#site-hero,#layer-brief,.signal-card,.scenario-card,.action-card,.metric-card,.insight-card{position:relative;overflow:hidden;border:1px solid rgba(188,221,248,.12);box-shadow:var(--shadow-soft)}
-#site-hero::before,#layer-brief::before,.signal-card::before,.scenario-card::before,.action-card::before,.metric-card::before,.insight-card::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg, rgba(255,255,255,.09), transparent 28%, transparent 70%, rgba(95,242,197,.08))}
-#site-hero{position:absolute;top:22px;left:22px;z-index:420;width:min(560px,calc(100% - 44px));padding:20px 22px;border-radius:28px;background:linear-gradient(135deg, rgba(6,18,31,.84), rgba(9,24,41,.76));transform-origin:top left;animation:cardFloat .9s cubic-bezier(.2,.8,.2,1)}
-.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;margin-bottom:16px;border-radius:999px;background:rgba(95,242,197,.1);color:#d9f6ee;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
-.hero-eyebrow::before{content:'';width:8px;height:8px;border-radius:999px;background:var(--accent);box-shadow:0 0 14px rgba(95,242,197,.6)}
+#panel-section-overview .panel-label,#panel-section-score .panel-label,#panel-section-renewable .panel-label,#panel-section-scenarios .panel-label,#panel-section-actions .panel-label,#panel-section-insights .panel-label,#data-sources .panel-label{color:#6d879a;letter-spacing:.22em;font-size:10px}
+.panel-divider{background:linear-gradient(90deg, transparent, rgba(148,163,184,.18), transparent)}
+#site-hero,#layer-brief,.signal-card,.scenario-card,.action-card,.metric-card,.insight-card{position:relative;overflow:hidden;border:1px solid rgba(148,163,184,.16);box-shadow:var(--shadow-soft)}
+#site-hero::before,#layer-brief::before,.signal-card::before,.scenario-card::before,.action-card::before,.metric-card::before,.insight-card::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg, rgba(255,255,255,.64), transparent 32%, transparent 70%, rgba(15,157,132,.05))}
+#site-hero{position:absolute;top:22px;left:22px;z-index:420;width:min(560px,calc(100% - 44px));padding:20px 22px;border-radius:28px;background:linear-gradient(135deg, rgba(255,255,255,.92), rgba(241,247,251,.9));transform-origin:top left;animation:cardFloat .9s cubic-bezier(.2,.8,.2,1)}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;margin-bottom:16px;border-radius:999px;background:rgba(15,157,132,.1);color:#145b50;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+.hero-eyebrow::before{content:'';width:8px;height:8px;border-radius:999px;background:var(--accent);box-shadow:0 0 14px rgba(15,157,132,.25)}
 .hero-topline{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
 .hero-copy{max-width:380px}
 .hero-title{font-family:var(--font-display);font-size:30px;line-height:1.05;letter-spacing:-.03em}
 .hero-subtitle{margin-top:10px;color:var(--text-secondary);font-size:14px;line-height:1.6}
-#hero-grade-pill{flex-shrink:0;min-width:84px;padding:16px 14px 14px;border-radius:22px;text-align:center;background:linear-gradient(160deg, rgba(95,242,197,.18), rgba(92,132,255,.18));border:1px solid rgba(188,221,248,.16)}
+#hero-grade-pill{flex-shrink:0;min-width:84px;padding:16px 14px 14px;border-radius:22px;text-align:center;background:linear-gradient(160deg, rgba(15,157,132,.12), rgba(59,130,246,.12));border:1px solid rgba(148,163,184,.16)}
 #hero-grade-pill strong{display:block;font-family:var(--font-display);font-size:28px;line-height:1}
-#hero-grade-pill span{display:block;margin-top:6px;color:#d7e5f1;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
+#hero-grade-pill span{display:block;margin-top:6px;color:#4b6a7f;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
 #hero-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px}
-.hero-kpi{padding:14px 14px 13px;border-radius:20px;background:rgba(255,255,255,.04);border:1px solid rgba(188,221,248,.1)}
+.hero-kpi{padding:14px 14px 13px;border-radius:20px;background:rgba(255,255,255,.78);border:1px solid rgba(148,163,184,.12)}
 .hero-kpi-label{display:block;color:var(--text-muted);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
 .hero-kpi-value{display:block;margin-top:7px;font-size:20px;font-weight:800;color:var(--text-primary)}
 .hero-kpi-copy{margin-top:4px;color:var(--text-secondary);font-size:11px;line-height:1.45}
-#layer-brief{position:absolute;top:22px;right:22px;z-index:420;width:300px;padding:18px 18px 16px;border-radius:24px;background:linear-gradient(180deg, rgba(8,18,32,.88), rgba(8,18,32,.7));animation:cardFloat 1.1s cubic-bezier(.2,.8,.2,1)}
+#layer-brief{position:absolute;top:22px;right:22px;z-index:420;width:300px;padding:18px 18px 16px;border-radius:24px;background:linear-gradient(180deg, rgba(255,255,255,.94), rgba(244,248,251,.92));animation:cardFloat 1.1s cubic-bezier(.2,.8,.2,1)}
 #layer-brief-title{margin:4px 0 8px;font-family:var(--font-display);font-size:22px;line-height:1.1}
 #layer-brief-copy{color:var(--text-secondary);font-size:13px;line-height:1.6}
-.signal-card{padding:18px;border-radius:24px;background:linear-gradient(160deg, rgba(12,27,44,.9), rgba(10,22,38,.7))}
-.signal-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 11px;border-radius:999px;background:rgba(95,242,197,.12);color:#d9f6ee;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.signal-card{padding:18px;border-radius:24px;background:linear-gradient(160deg, rgba(255,255,255,.92), rgba(241,247,251,.88))}
+.signal-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 11px;border-radius:999px;background:rgba(15,157,132,.1);color:#145b50;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
 .signal-title{margin-top:14px;font-family:var(--font-display);font-size:24px;line-height:1.1}
 .signal-copy{margin-top:10px;color:var(--text-secondary);font-size:13px;line-height:1.65}
 .signal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
-.signal-stat{padding:12px 13px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(188,221,248,.08)}
+.signal-stat{padding:12px 13px;border-radius:18px;background:rgba(255,255,255,.82);border:1px solid rgba(148,163,184,.12)}
 .signal-stat-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.12em;font-weight:700}
 .signal-stat-value{margin-top:6px;font-size:17px;font-weight:800}
 #gauge-container{margin-bottom:12px}
 #gauge-svg{width:194px}
-#gauge-track{stroke:rgba(188,221,248,.16)}
+#gauge-track{stroke:rgba(148,163,184,.22)}
 #score-summary{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
 #score-grade-chip{display:inline-flex;align-items:center;justify-content:center;min-width:54px;padding:10px 12px;border-radius:16px;background:rgba(95,242,197,.12);color:#d9f6ee;font-family:var(--font-display);font-size:24px;font-weight:700}
 #score-summary-copy{flex:1}
 #score-headline{font-family:var(--font-display);font-size:20px;line-height:1.15}
 #score-subcopy{margin-top:6px;color:var(--text-secondary);font-size:13px;line-height:1.6}
 .breakdown-item{gap:10px;margin-bottom:10px}
-.breakdown-bar-wrap{height:7px;background:rgba(255,255,255,.06)}
-.metric-card{padding:14px 14px 13px;border-radius:20px;background:rgba(14,28,44,.84);transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
-.metric-card:hover,.scenario-card:hover,.action-card:hover,.insight-card:hover{transform:translateY(-2px);border-color:rgba(188,221,248,.26);box-shadow:0 24px 60px rgba(3,8,20,.28)}
-.metric-icon{display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:14px;background:rgba(255,255,255,.05);font-size:17px}
+.breakdown-bar-wrap{height:7px;background:rgba(148,163,184,.14)}
+.metric-card{padding:14px 14px 13px;border-radius:20px;background:rgba(255,255,255,.9);transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+.metric-card:hover,.scenario-card:hover,.action-card:hover,.insight-card:hover{transform:translateY(-2px);border-color:rgba(148,163,184,.22);box-shadow:0 18px 44px rgba(148,163,184,.18)}
+.metric-icon{display:flex;align-items:center;justify-content:center;width:42px;height:42px;border-radius:14px;background:rgba(15,157,132,.08);font-size:17px}
 .metric-name,.metric-unit,.metric-rating,.insight-meta,.action-kicker{letter-spacing:.08em;text-transform:uppercase}
 .metric-name{font-size:10px}
 .metric-value{font-size:26px}
 .metric-unit{margin-top:4px}
 #scenario-cards,#action-cards,#insights-list{display:flex;flex-direction:column;gap:12px}
-.scenario-card{padding:16px;border-radius:22px;background:linear-gradient(160deg, rgba(10,24,39,.92), rgba(10,24,39,.72))}
-.scenario-card.recommended{border-color:rgba(95,242,197,.32);box-shadow:0 24px 70px rgba(6,23,31,.34)}
+.scenario-card{padding:16px;border-radius:22px;background:linear-gradient(160deg, rgba(255,255,255,.94), rgba(244,248,252,.92))}
+.scenario-card.recommended{border-color:rgba(15,157,132,.28);box-shadow:0 20px 52px rgba(148,163,184,.2)}
 .scenario-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .scenario-title{font-family:var(--font-display);font-size:18px}
-.scenario-pill{padding:5px 10px;border-radius:999px;background:rgba(255,255,255,.06);color:var(--text-secondary);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
-.scenario-card.recommended .scenario-pill{background:rgba(95,242,197,.14);color:#d9f6ee}
+.scenario-pill{padding:5px 10px;border-radius:999px;background:rgba(148,163,184,.12);color:var(--text-secondary);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.scenario-card.recommended .scenario-pill{background:rgba(15,157,132,.14);color:#145b50}
 .scenario-meta{margin-top:12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.scenario-meta-item{padding:10px 11px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(188,221,248,.08)}
+.scenario-meta-item{padding:10px 11px;border-radius:16px;background:rgba(255,255,255,.82);border:1px solid rgba(148,163,184,.12)}
 .scenario-meta-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.11em;font-weight:700}
 .scenario-meta-value{margin-top:6px;font-size:15px;font-weight:800}
 .scenario-copy{margin-top:12px;color:var(--text-secondary);font-size:13px;line-height:1.6}
-.action-card{display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:22px;background:rgba(12,26,41,.84)}
-.action-step{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:12px;background:rgba(95,242,197,.12);color:#d9f6ee;font-weight:800;flex-shrink:0}
+.action-card{display:flex;gap:12px;align-items:flex-start;padding:16px;border-radius:22px;background:rgba(255,255,255,.9)}
+.action-step{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:12px;background:rgba(15,157,132,.12);color:#145b50;font-weight:800;flex-shrink:0}
 .action-body{flex:1}
 .action-kicker{color:var(--text-muted);font-size:10px;font-weight:700}
 .action-title{margin-top:4px;font-size:15px;font-weight:800}
 .action-copy{margin-top:6px;color:var(--text-secondary);font-size:13px;line-height:1.55}
-.insight-card{padding:15px 16px;border-radius:22px;background:rgba(12,26,41,.82);animation:fadeIn .5s ease}
+.insight-card{padding:15px 16px;border-radius:22px;background:rgba(255,255,255,.9);animation:fadeIn .5s ease}
 .insight-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
 .insight-title{font-family:var(--font-display);font-size:16px;line-height:1.2}
 .insight-meta{font-size:9px;color:var(--text-muted);font-weight:700}
 .insight-text{margin-top:8px;color:var(--text-secondary)}
 #data-sources .source-tags{gap:8px}
-#data-sources .source-tag{padding:6px 10px;color:#d9e8f4}
-#layer-bar{height:68px;padding:0 20px;background:rgba(8,18,32,.76);border-top:1px solid var(--border);backdrop-filter:blur(18px)}
-.layer-btn{padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.04);border-color:rgba(188,221,248,.1)}
-.layer-btn.active{background:rgba(95,242,197,.1);border-color:rgba(95,242,197,.36);color:#d9f6ee;box-shadow:0 0 0 4px rgba(95,242,197,.08)}
+#data-sources .source-tag{padding:6px 10px;color:#365266}
+#layer-bar{height:68px;padding:0 20px;background:rgba(255,255,255,.82);border-top:1px solid var(--border);backdrop-filter:blur(18px)}
+.layer-btn{padding:8px 16px;border-radius:999px;background:rgba(255,255,255,.72);border-color:rgba(148,163,184,.14)}
+.layer-btn.active{background:rgba(15,157,132,.1);border-color:rgba(15,157,132,.34);color:#145b50;box-shadow:0 0 0 4px rgba(15,157,132,.08)}
 #layer-bar-right{color:var(--text-secondary)}
-#active-layer-name{color:#eef7ff;font-weight:700}
-#atlas-cta-btn,#case-study-btn,#audit-btn,#cl-export-btn{background:linear-gradient(135deg, rgba(95,242,197,.12), rgba(95,178,255,.12));border-color:rgba(95,242,197,.3);color:#dffaf3}
-#atlas-cta-btn:hover,#case-study-btn:hover,#audit-btn:hover,#cl-export-btn:hover{background:linear-gradient(135deg, rgba(95,242,197,.2), rgba(95,178,255,.18))}
-#back-btn{background:rgba(255,255,255,.04);border-color:rgba(188,221,248,.1)}
+#active-layer-name{color:#153246;font-weight:700}
+#atlas-cta-btn,#case-study-btn,#audit-btn,#cl-export-btn{background:linear-gradient(135deg, rgba(15,157,132,.12), rgba(59,130,246,.12));border-color:rgba(15,157,132,.24);color:#145b50}
+#atlas-cta-btn:hover,#case-study-btn:hover,#audit-btn:hover,#cl-export-btn:hover{background:linear-gradient(135deg, rgba(15,157,132,.18), rgba(59,130,246,.16))}
+#back-btn{background:rgba(255,255,255,.76);border-color:rgba(148,163,184,.14)}
 @keyframes cardFloat{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
 @media (max-width:1200px){:root{--panel-w:360px}#site-hero{width:min(500px,calc(100% - 44px))}#hero-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:980px){#layer-brief{display:none}}
@@ -702,23 +717,22 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:li
     </div>
     <div class="lp-body">
       <div class="lp-left">
-        <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--text-muted)">SELECTED POINT</div>
+        <div class="lp-left-label">Selected Point</div>
         <div id="lp-coords" style="font-family:monospace;font-size:12px;margin-top:6px">—</div>
         <div id="lp-mini-map" aria-label="Selected location map snapshot"></div>
+        <div class="lp-left-note">The map preview stays fixed here while the data tabs on the right scroll independently.</div>
       </div>
-      <div>
+      <div class="lp-right">
         <div class="lp-tabs">
-          <button class="lp-tab active" data-lp-tab="overview" onclick="switchLocationPopupTab('overview')">Overview</button>
-          <button class="lp-tab" data-lp-tab="analysis" onclick="switchLocationPopupTab('analysis')">Location Analysis</button>
+          <button class="lp-tab active" data-lp-tab="solar" onclick="switchLocationPopupTab('solar')">Solar Profile</button>
+          <button class="lp-tab" data-lp-tab="wind" onclick="switchLocationPopupTab('wind')">Wind Profile</button>
           <button class="lp-tab" data-lp-tab="profiles" onclick="switchLocationPopupTab('profiles')">Wind & Solar Profiles</button>
-          <button class="lp-tab" data-lp-tab="portfolio" onclick="switchLocationPopupTab('portfolio')">Portfolio Assessment</button>
-          <button class="lp-tab" data-lp-tab="esg" onclick="switchLocationPopupTab('esg')">ESG Page</button>
+          <button class="lp-tab" data-lp-tab="analysis" onclick="switchLocationPopupTab('analysis')">Location Analysis</button>
         </div>
-        <div id="lp-overview" class="lp-panel active"></div>
-        <div id="lp-analysis" class="lp-panel"></div>
+        <div id="lp-solar" class="lp-panel active"></div>
+        <div id="lp-wind" class="lp-panel"></div>
         <div id="lp-profiles" class="lp-panel"></div>
-        <div id="lp-portfolio" class="lp-panel"></div>
-        <div id="lp-esg" class="lp-panel"></div>
+        <div id="lp-analysis" class="lp-panel"></div>
       </div>
     </div>
   </div>
@@ -1968,6 +1982,79 @@ function _row(label, val, sub) {
     '<span class="aip-val">' + val + (sub ? '<span class="aip-val-sub">' + sub + '</span>' : '') + '</span></div>';
 }
 
+function _popupSection(title, body, extraClass) {
+  return '<div class="lp-section-card' + (extraClass ? ' ' + extraClass : '') + '">' +
+    '<div class="aip-section-title">' + title + '</div>' + body + '</div>';
+}
+
+function _popupSourceNote(lines) {
+  return '<div class="lp-source-note"><strong style="color:var(--text-secondary);font-size:10px">Data Sources</strong><br/>' +
+    lines.join('<br/>') + '</div>';
+}
+
+function _buildLoadingBlock(title, text) {
+  return '<div class="aip-section-title">' + title + '</div>' +
+    '<div class="aip-loading"><div class="aip-spinner"></div><span>' + text + '</span></div>';
+}
+
+function _renderTerrainSectionContent(elev, slope) {
+  var sCls = slope != null ? (slope < 3 ? 'slope-ok' : slope < 5 ? 'slope-warn' : 'slope-bad') : '';
+  var sLbl = slope != null ? (slope < 3 ? 'Suitable (< 3%)' : slope < 5 ? 'Marginal (3-5%)' : 'Challenging (> 5%)') : '—';
+  var sFlg = slope != null && slope >= 5 ? ' ⚠️' : '';
+  var html = '<div class="aip-section-title">🏔️ Terrain Analysis (USGS 3DEP)</div>';
+  html += _row('Elevation', elev != null ? elev.toFixed(1) + ' m' : '—', '');
+  if (slope != null) {
+    html += '<div class="aip-row"><span class="aip-label">Slope Gradient' + sFlg + '</span><span class="aip-val"><span class="' + sCls + '">' + slope.toFixed(1) + '%</span></span></div>';
+    html += '<div class="aip-row"><span class="aip-label">Suitability</span><span class="aip-val" style="font-size:11px"><span class="' + sCls + '">' + sLbl + '</span></span></div>';
+  }
+  html += '<div style="font-size:8.5px;color:var(--text-muted);margin-top:5px;font-style:italic">Source: USGS TNM 3DEP 1/3 arc-sec · 5-point sampling (200 m offset)</div>';
+  return html;
+}
+
+function _renderGridSectionContent(subData) {
+  var html = '<div class="aip-section-title">⚡ Grid Proximity (HIFLD)</div>';
+  if (subData) {
+    var km = subData.distKm;
+    var distStr = km < 10 ? (km * 1000).toFixed(0) + ' m' : km.toFixed(1) + ' km';
+    var proxCls = km < 5 ? 'excellent' : km < 15 ? 'very-good' : km < 30 ? 'good' : 'fair';
+    var proxLbl = km < 5 ? 'Excellent' : km < 15 ? 'Good' : km < 30 ? 'Moderate' : 'Distant';
+    html += _row('Nearest Substation', subData.name, '');
+    if (subData.owner) html += _row('Operator', subData.owner, '');
+    if (subData.city || subData.state) html += _row('Location', [subData.city, subData.state].filter(Boolean).join(', '), '');
+    if (subData.voltage > 0) html += _row('Voltage', subData.voltage.toLocaleString() + ' kV', '');
+    if (subData.lines > 0) html += _row('Transmission Lines', subData.lines, '');
+    html += '<div class="aip-row"><span class="aip-label">Distance</span><span class="aip-val">' + distStr + ' &nbsp;<span class="aip-badge ' + proxCls + '" style="font-size:9px;padding:1px 6px">' + proxLbl + '</span></span></div>';
+  } else {
+    html += '<div style="font-size:11px;color:var(--text-muted);padding:4px 0">No substation found within 220 km radius.</div>';
+  }
+  html += '<div style="font-size:8.5px;color:var(--text-muted);margin-top:5px;font-style:italic">Source: HIFLD Electric Substations (EIA ArcGIS FeatureServer, IN SERVICE only)</div>';
+  return html;
+}
+
+function _renderAiSectionContent(elev, slope, subData) {
+  var insights = _genTerrainGridInsights(elev, slope, subData);
+  var html = '<div class="aip-section-title">🤖 AI Site Assessment</div>';
+  insights.forEach(function(ins) {
+    html += '<div style="display:flex;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">' +
+      '<div style="width:6px;height:6px;border-radius:50%;background:' + ins.color + ';margin-top:5px;flex-shrink:0"></div>' +
+      '<div style="font-size:11px;color:var(--text-secondary);line-height:1.5">' + ins.text + '</div></div>';
+  });
+  if (!insights.length) html += '<div style="font-size:11px;color:var(--text-muted);padding:4px 0">Terrain and grid data unavailable for this location.</div>';
+  return html;
+}
+
+function _buildPopupLocationAnalysisHtml() {
+  return '<div id="lp-loc-terrain" class="lp-section-card">' +
+      _buildLoadingBlock('🏔️ Terrain Analysis (USGS 3DEP)', 'Fetching elevation data…') +
+    '</div>' +
+    '<div id="lp-loc-substation" class="lp-section-card">' +
+      _buildLoadingBlock('⚡ Grid Proximity (HIFLD)', 'Querying substations…') +
+    '</div>' +
+    '<div id="lp-loc-ai" class="lp-section-card">' +
+      _buildLoadingBlock('🤖 AI Site Assessment', 'Generating insights…') +
+    '</div>';
+}
+
 function _showLatLonPanel(lat, lon, nasa, om, myGen) {
   var p = document.getElementById('atlas-info-panel');
   if (!p) return;
@@ -2171,24 +2258,71 @@ function _showLatLonPanel(lat, lon, nasa, om, myGen) {
     alocMeta.className = 'aloc-meta';
   }
 
-  var lpOverview = document.getElementById('lp-overview');
+  var lpSolar = document.getElementById('lp-solar');
+  var lpWind = document.getElementById('lp-wind');
   var lpAnalysis = document.getElementById('lp-analysis');
   var lpProfiles = document.getElementById('lp-profiles');
-  if (lpOverview) {
-    lpOverview.innerHTML = '<h3 style="margin-bottom:8px">Country / Site Overview</h3>' +
-      '<div class="aip-row"><span class="aip-label">Solar GHI (P50)</span><span class="aip-val">'+fmtV(ghi,2)+' kWh/m²/day</span></div>' +
-      '<div class="aip-row"><span class="aip-label">Wind @ 80m (P50)</span><span class="aip-val">'+(ws80f?ws80f.toFixed(2):'—')+' m/s</span></div>' +
-      '<div class="aip-row"><span class="aip-label">Solar Class</span><span class="aip-val">'+iecSolar+'</span></div>' +
-      '<div class="aip-row"><span class="aip-label">Wind Class</span><span class="aip-val">'+iecWind+'</span></div>';
+  if (lpSolar) {
+    lpSolar.innerHTML =
+      _popupSection('☀️ Solar Irradiance (NASA POWER · 1984–2022 avg)',
+        _row('GHI (P50)', fmtV(ghi, 2), ' kWh/m²/day') +
+        _row('Annual GHI', ghiAnnual, ' kWh/m²/yr') +
+        _row('DNI', fmtV(dni, 2), ' kWh/m²/day') +
+        _row('DHI', fmtV(dhi, 2), ' kWh/m²/day') +
+        _row('Clear-Sky GHI', fmtV(csGhi, 2), ' kWh/m²/day') +
+        _row('Clearness Index Kt', fmtV(kt, 3), '') +
+        _row('Avg Temperature', fmtV(temp, 1), ' °C') +
+        (iecSolar !== '—' ? _row('Solar Class', iecSolar, '') : '')
+      ) +
+      _popupSection('⚡ PV Output (1 kWp · fixed tilt · PR=0.75)',
+        _row('P50 Daily Yield', pvoutDaily, ' kWh/kWp/day') +
+        _row('P50 Annual Yield', pvoutAnnual, ' kWh/kWp/yr') +
+        (pvP90daily ? '<div class="aip-p90-row"><span class="aip-p90-label">P90 Daily Yield <span style="font-size:9px;color:#3b82f6">(90% confidence)</span></span><span class="aip-p90-val">' + pvP90daily.toFixed(2) + ' kWh/kWp/day</span></div>' : '') +
+        (pvP90daily ? '<div class="aip-p90-row"><span class="aip-p90-label">P90 Annual Yield</span><span class="aip-p90-val">' + pvP90annual + ' kWh/kWp/yr</span></div>' : '') +
+        (solarCF ? _row('Capacity Factor', solarCF, '%') : '') +
+        (co2Annual ? _row('CO₂ Offset (1 MWp)', co2Annual, ' kg/yr') : '') +
+        '<div style="margin-top:5px"><span class="aip-badge ' + pvRatingCls + '">' + pvRatingLbl + '</span></div>'
+      ) +
+      _popupSourceNote([
+        '☀️ NASA POWER Climatology v2.4 · 1984–2022 average',
+        '⚡ PV output derived with PR = 0.75 and fixed-tilt assumptions'
+      ]);
   }
-  if (lpAnalysis) lpAnalysis.innerHTML = p.innerHTML;
+  if (lpWind) {
+    lpWind.innerHTML =
+      _popupSection('💨 Wind Profile',
+        _row('10 m (surface)', ws10Label + ' m/s', '') +
+        _row('50 m', ws50Label + ' m/s', ' (NASA POWER annual)') +
+        '<div class="aip-row"><span class="aip-label">P50 @ 80 m</span><span class="aip-val">' + ws80Label + ' m/s' + ws80src + '</span></div>' +
+        (ws80P90 ? '<div class="aip-p90-row"><span class="aip-p90-label">P90 @ 80 m <span style="font-size:9px;color:#3b82f6">(bankable)</span></span><span class="aip-p90-val">' + ws80P90.toFixed(2) + ' m/s</span></div>' : '') +
+        '<div class="aip-row"><span class="aip-label">120 m</span><span class="aip-val">' + ws120Label + ' m/s' + ws120src + '</span></div>' +
+        '<div class="aip-row"><span class="aip-label">180 m</span><span class="aip-val">' + ws180Label + ' m/s' + ws180src + '</span></div>' +
+        _row('Direction (10 m)', _dirToCard(wdirF), wdirF != null ? ' (' + Math.round(wdirF) + '°)' : '') +
+        (iecWind !== '—' ? _row('Wind Class', iecWind, '') : '') +
+        (windCF ? _row('Est. Wind CF', windCF, '%') : '')
+      ) +
+      _popupSourceNote([
+        '💨 Open-Meteo ERA5-Seamless current wind feed',
+        '📐 Higher hub heights extrapolated with Hellmann power law α = 0.143 when direct measurements are unavailable'
+      ]);
+  }
   if (lpProfiles) {
-    lpProfiles.innerHTML = '<h3 style="margin-bottom:8px">Wind and Solar Profiles</h3>' +
-      '<div class="aip-row"><span class="aip-label">PV Yield P50 / P90</span><span class="aip-val">'+pvoutDaily+' / '+(pvP90daily?pvP90daily.toFixed(2):'—')+' kWh/kWp/day</span></div>' +
-      '<div class="aip-row"><span class="aip-label">Wind 80m P50 / P90</span><span class="aip-val">'+(ws80f?ws80f.toFixed(2):'—')+' / '+(ws80P90?ws80P90.toFixed(2):'—')+' m/s</span></div>' +
-      '<div class="aip-row"><span class="aip-label">Capacity factors</span><span class="aip-val">Solar '+(solarCF||'—')+'% · Wind '+(windCF||'—')+'%</span></div>';
+    lpProfiles.innerHTML =
+      '<div class="lp-compare-grid">' +
+        '<div class="lp-stat-tile"><div class="lp-stat-label">Solar Yield</div><div class="lp-stat-value">' + pvoutDaily + '</div><div class="lp-stat-copy">P50 daily yield · P90 ' + (pvP90daily ? pvP90daily.toFixed(2) : '—') + ' kWh/kWp/day</div></div>' +
+        '<div class="lp-stat-tile"><div class="lp-stat-label">Wind @ 80 m</div><div class="lp-stat-value">' + ws80Label + '</div><div class="lp-stat-copy">P50 wind speed · P90 ' + (ws80P90 ? ws80P90.toFixed(2) : '—') + ' m/s</div></div>' +
+        '<div class="lp-stat-tile"><div class="lp-stat-label">Solar Capacity Factor</div><div class="lp-stat-value">' + (solarCF || '—') + '%</div><div class="lp-stat-copy">' + iecSolar + '</div></div>' +
+        '<div class="lp-stat-tile"><div class="lp-stat-label">Wind Capacity Factor</div><div class="lp-stat-value">' + (windCF || '—') + '%</div><div class="lp-stat-copy">' + iecWind + '</div></div>' +
+      '</div>' +
+      _popupSection('Wind & Solar Bankability Snapshot',
+        _row('Solar GHI (P50)', fmtV(ghi, 2), ' kWh/m²/day') +
+        _row('PV Yield P50 / P90', pvoutDaily + ' / ' + (pvP90daily ? pvP90daily.toFixed(2) : '—'), ' kWh/kWp/day') +
+        _row('Wind @ 80 m P50 / P90', ws80Label + ' / ' + (ws80P90 ? ws80P90.toFixed(2) : '—'), ' m/s') +
+        _row('Capacity Factors', 'Solar ' + (solarCF || '—') + '% · Wind ' + (windCF || '—') + '%', '')
+      ) +
+      '<div class="lp-note-card"><strong>P50 vs P90</strong><br/>P50 is the median expected outcome. P90 is the more conservative production case often used for downside and lender-side checks.</div>';
   }
-  syncPopupOverview();
+  if (lpAnalysis) lpAnalysis.innerHTML = _buildPopupLocationAnalysisHtml();
 
   // Initial AI insights in sidenav (solar + wind from Phase 1, terrain loading placeholder)
   var alocAI = document.getElementById('aloc-ai-insights');
@@ -2224,6 +2358,41 @@ function _updateTerrainSubstation(lat, lon, elevData, subData, gen) {
 
   var elev  = elevData && elevData.elevation != null ? elevData.elevation : null;
   var slope = elevData && elevData.slope     != null ? elevData.slope     : null;
+
+  var terrainHtml = _renderTerrainSectionContent(elev, slope);
+  var gridHtml = _renderGridSectionContent(subData);
+  var aiHtml = _renderAiSectionContent(elev, slope, subData);
+
+  var terrainElNew = document.getElementById('aip-terrain');
+  if (terrainElNew) terrainElNew.innerHTML = terrainHtml;
+  var popupTerrainEl = document.getElementById('lp-loc-terrain');
+  if (popupTerrainEl) popupTerrainEl.innerHTML = terrainHtml;
+
+  var subElNew = document.getElementById('aip-substation');
+  if (subElNew) subElNew.innerHTML = gridHtml;
+  var popupSubEl = document.getElementById('lp-loc-substation');
+  if (popupSubEl) popupSubEl.innerHTML = gridHtml;
+
+  var aiElNew = document.getElementById('aip-ai');
+  if (aiElNew) aiElNew.innerHTML = aiHtml;
+  var popupAiEl = document.getElementById('lp-loc-ai');
+  if (popupAiEl) popupAiEl.innerHTML = aiHtml;
+
+  var alocTerrainElNew = document.getElementById('aloc-ai-terrain');
+  if (alocTerrainElNew && alocTerrainElNew.parentNode) {
+    var insightsNew = _genTerrainGridInsights(elev, slope, subData);
+    var newCards = '';
+    insightsNew.forEach(function(ins) {
+      newCards += '<div class="aloc-insight-card"><div class="aloc-insight-dot" style="background:' + ins.color + '"></div><span class="aloc-insight-text">' + ins.text + '</span></div>';
+    });
+    if (!newCards) newCards = '<div class="aloc-insight-card"><div class="aloc-insight-dot" style="background:var(--text-muted)"></div><span class="aloc-insight-text">Terrain and grid data not available for this point.</span></div>';
+    var fragNew = document.createElement('div');
+    fragNew.innerHTML = newCards;
+    var parentNew = alocTerrainElNew.parentNode;
+    while (fragNew.firstChild) { parentNew.insertBefore(fragNew.firstChild, alocTerrainElNew); }
+    parentNew.removeChild(alocTerrainElNew);
+  }
+  return;
 
   // ── Terrain section in floating info panel ────────────────────────────────
   var terrainEl = document.getElementById('aip-terrain');
@@ -2617,11 +2786,11 @@ function openLocationPopup(lat, lon, name) {
   document.getElementById('lp-sub').textContent = 'Lat/Lon: ' + lat.toFixed(4) + ', ' + lon.toFixed(4);
   document.getElementById('lp-coords').textContent = lat.toFixed(4) + '°, ' + lon.toFixed(4) + '°';
   renderPopupMiniMap(lat, lon);
-  document.getElementById('lp-overview').innerHTML = '<h3 style="margin-bottom:6px">Overview</h3><p style="font-size:12px;color:var(--text-secondary)">Loading full location assessment…</p>';
-  document.getElementById('lp-analysis').innerHTML = '<div style="font-size:12px;color:var(--text-muted)">Fetching live resource and terrain metrics…</div>';
-  document.getElementById('lp-profiles').innerHTML = '<div style="font-size:12px;color:var(--text-muted)">Solar and wind profile charts will populate once live data returns.</div>';
-  document.getElementById('lp-portfolio').innerHTML = '<h3 style="margin-bottom:6px">Portfolio Assessment</h3><p style="font-size:12px;color:var(--text-secondary)">Use this tab to compare countries and prioritize regions for investment sequencing.</p>';
-  document.getElementById('lp-esg').innerHTML = '<h3 style="margin-bottom:6px">Full ESG Page</h3><p style="font-size:12px;color:var(--text-secondary)">The full ESG workspace is available in the dedicated tab for deep review.</p><button class="lp-close" onclick="showCaseStudy()">Open Full ESG Workspace</button>';
+  switchLocationPopupTab('solar');
+  document.getElementById('lp-solar').innerHTML = '<div style="font-size:12px;color:var(--text-muted)">Loading solar profile…</div>';
+  document.getElementById('lp-wind').innerHTML = '<div style="font-size:12px;color:var(--text-muted)">Loading wind profile…</div>';
+  document.getElementById('lp-profiles').innerHTML = '<div style="font-size:12px;color:var(--text-muted)">Loading combined wind and solar profiles…</div>';
+  document.getElementById('lp-analysis').innerHTML = _buildPopupLocationAnalysisHtml();
 }
 
 function renderPopupMiniMap(lat, lon) {
@@ -2654,6 +2823,7 @@ function renderPopupMiniMap(lat, lon) {
 }
 
 function syncPopupOverview() {
+  return;
   var el = document.getElementById('lp-overview');
   if (!el) return;
   var name = document.getElementById('aloc-name');
@@ -2691,7 +2861,7 @@ function closeLocationPopup(){
 }
 function switchLocationPopupTab(tab){
   document.querySelectorAll('.lp-tab').forEach(function(el){ el.classList.toggle('active', el.dataset.lpTab===tab); });
-  ['overview','analysis','profiles','portfolio','esg'].forEach(function(k){
+  ['solar','wind','profiles','analysis'].forEach(function(k){
     var el = document.getElementById('lp-'+k);
     if (el) el.classList.toggle('active', k===tab);
   });
