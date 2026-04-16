@@ -307,6 +307,24 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
 .aip-cf-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(0,158,125,.1);color:#009e7d;border:1px solid rgba(0,158,125,.2)}
 .aip-iec-badge{display:inline-block;font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:rgba(251,191,36,.12);color:#d97706;border:1px solid rgba(251,191,36,.3)}
 
+/* ── Location portfolio popup ───────────────────────────────────────── */
+#location-popup-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);backdrop-filter:blur(2px);z-index:1200;display:none}
+#location-popup-overlay.open{display:block}
+#location-popup{position:fixed;inset:2.5vh 2.5vw;background:var(--bg-secondary);border:1px solid var(--border);border-radius:14px;z-index:1201;display:none;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+#location-popup.open{display:flex}
+.lp-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.lp-title{font-size:17px;font-weight:800}.lp-sub{font-size:11px;color:var(--text-muted);margin-top:3px}
+.lp-close{border:1px solid var(--border);background:var(--bg-hover);border-radius:8px;padding:6px 10px;cursor:pointer}
+.lp-body{display:grid;grid-template-columns:320px 1fr;gap:14px;padding:14px;min-height:0;flex:1}
+.lp-left{border:1px solid var(--border);border-radius:10px;padding:10px;background:var(--bg-panel)}
+#lp-snapshot{width:100%;height:170px;object-fit:cover;border-radius:8px;border:1px solid var(--border);margin-top:8px}
+.lp-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.lp-tab{padding:6px 10px;border:1px solid var(--border);background:var(--bg-hover);border-radius:16px;font-size:11px;cursor:pointer}
+.lp-tab.active{background:var(--accent-glow);border-color:var(--accent);color:var(--accent);font-weight:700}
+.lp-panel{display:none;height:100%;overflow:auto;border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--bg-card)}
+.lp-panel.active{display:block}
+@media(max-width:980px){.lp-body{grid-template-columns:1fr}}
+
 /* ── Case Study button in atlas header ───────────────────────────────── */
 #case-study-btn{display:flex;align-items:center;gap:7px;background:var(--accent-glow);border:1.5px solid var(--accent);color:var(--accent);padding:7px 16px;border-radius:20px;font-size:12px;font-family:var(--font);font-weight:700;cursor:pointer;letter-spacing:.3px;transition:all .18s;white-space:nowrap;animation:csbglow 3s ease-in-out infinite}
 #case-study-btn:hover{background:rgba(0,158,125,.2)}
@@ -351,7 +369,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
               <circle cx="8" cy="8" r="2" fill="currentColor"/>
               <path d="M8 2v1M8 13v1M2 8h1M13 8h1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
-            King Lake Case Study
+            King Lake Portfolio Assessment
             <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><path d="M6 4l4 4-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
           <span class="status-dot live">LIVE DATA</span>
@@ -373,7 +391,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
             <div id="atlas-search-results"></div>
           </div>
           <!-- Floating CTA -->
-          <button id="atlas-cta-btn" onclick="showCaseStudy()">View King Lake Case Study &rarr;</button>
+          <button id="atlas-cta-btn" onclick="showCaseStudy()">View King Lake Portfolio Assessment &rarr;</button>
           <!-- Floating legend -->
           <div id="atlas-legend-overlay">
             <div class="legend-title">Solar GHI + Wind Resource</div>
@@ -402,7 +420,11 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
 
           <!-- US Renewable Resources — tabbed solar / wind by state -->
           <div class="ap-section">
-            <div class="panel-label">US RENEWABLE RESOURCES</div>
+            <div class="panel-label">GLOBAL RENEWABLE RESOURCES</div>
+            <div id="resource-filters" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+              <select id="continent-filter" style="padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg-card);font-size:11px"></select>
+              <select id="country-filter" style="padding:6px 8px;border:1px solid var(--border);border-radius:8px;background:var(--bg-card);font-size:11px"></select>
+            </div>
             <!-- Tab bar -->
             <div class="ap-res-tabs">
               <button class="ap-res-tab active" id="tab-solar" onclick="switchResTab('solar')">☀️ Solar GHI</button>
@@ -509,7 +531,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
           </div>
           <div class="panel-divider"></div>
           <div class="ap-section">
-            <div class="panel-label">CASE STUDIES</div>
+            <div class="panel-label">PORTFOLIO ASSESSMENTS</div>
             <div class="ap-case-list">
               <div class="ap-case-item" onclick="showCaseStudy()">
                 <div class="ap-case-dot"></div>
@@ -528,7 +550,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
               <span class="source-tag">NREL NSRDB</span>
               <span class="source-tag">NASA POWER</span>
               <span class="source-tag">Open-Meteo</span>
-              <span class="source-tag">EIA</span>
+              <span class="source-tag">Global Wind Atlas</span>
               <span class="source-tag">USGS</span>
               <span class="source-tag">EPA</span>
             </div>
@@ -540,15 +562,47 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
       <div id="atlas-bar">
         <span id="layer-bar-label">SOLAR &amp; WIND RESOURCE</span>
         <button id="atlas-wind-toggle" onclick="toggleAtlasWind()">&#128168; Show Wind Layer</button>
-        <span style="font-size:11px;color:var(--text-secondary);margin-left:4px">Click anywhere on map for live solar &amp; wind data &middot; Click King Lake marker to open case study</span>
+        <span style="font-size:11px;color:var(--text-secondary);margin-left:4px">Click anywhere on map for live solar &amp; wind data &middot; Click King Lake marker to open portfolio assessment</span>
         <div style="margin-left:auto;font-size:11px;color:var(--text-muted)">NASA POWER &middot; Open-Meteo ERA5 &middot; NREL NSRDB</div>
       </div>
 
     </div>
+  <div id="location-popup-overlay" onclick="closeLocationPopup()"></div>
+  <div id="location-popup" role="dialog" aria-modal="true" aria-label="Location analysis popup">
+    <div class="lp-header">
+      <div>
+        <div class="lp-title" id="lp-title">Location analysis</div>
+        <div class="lp-sub" id="lp-sub">Select a point on the map to load details.</div>
+      </div>
+      <button class="lp-close" onclick="closeLocationPopup()">✕</button>
+    </div>
+    <div class="lp-body">
+      <div class="lp-left">
+        <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--text-muted)">SELECTED POINT</div>
+        <div id="lp-coords" style="font-family:monospace;font-size:12px;margin-top:6px">—</div>
+        <img id="lp-snapshot" alt="Location snapshot" />
+      </div>
+      <div>
+        <div class="lp-tabs">
+          <button class="lp-tab active" data-lp-tab="overview" onclick="switchLocationPopupTab('overview')">Overview</button>
+          <button class="lp-tab" data-lp-tab="analysis" onclick="switchLocationPopupTab('analysis')">Location Analysis</button>
+          <button class="lp-tab" data-lp-tab="profiles" onclick="switchLocationPopupTab('profiles')">Wind & Solar Profiles</button>
+          <button class="lp-tab" data-lp-tab="portfolio" onclick="switchLocationPopupTab('portfolio')">Portfolio Assessment</button>
+          <button class="lp-tab" data-lp-tab="esg" onclick="switchLocationPopupTab('esg')">ESG Page</button>
+        </div>
+        <div id="lp-overview" class="lp-panel active"></div>
+        <div id="lp-analysis" class="lp-panel"></div>
+        <div id="lp-profiles" class="lp-panel"></div>
+        <div id="lp-portfolio" class="lp-panel"></div>
+        <div id="lp-esg" class="lp-panel"></div>
+      </div>
+    </div>
+  </div>
+
   </div><!-- /view-atlas -->
 
   <!-- ═══════════════════════════════════════════════════════════════════ -->
-  <!-- VIEW 2: King Lake Case Study (Lumora Explorer)                     -->
+  <!-- VIEW 2: King Lake Portfolio Assessment (Lumora Explorer)                     -->
   <!-- ═══════════════════════════════════════════════════════════════════ -->
   <div id="view-casestudy" class="view">
   <div id="app">
@@ -569,7 +623,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
       <div id="breadcrumb">
         <span style="color:var(--text-muted)">Lumora Explorer</span>
         <span class="bc-sep">&rsaquo;</span>
-        <span style="color:var(--accent);font-weight:600">King Lake Case Study</span>
+        <span style="color:var(--accent);font-weight:600">King Lake Portfolio Assessment</span>
       </div>
       <div id="header-meta">
         <span class="site-tag">King Lake</span>
@@ -1262,7 +1316,7 @@ function initAtlasMap() {
   klMarker.bindTooltip(
     '<strong>King Lake, Florida</strong><br/>' +
     'ESG Score: 79/100 &nbsp;&middot;&nbsp; GHI: 5.35 kWh/m²/day<br/>' +
-    '<span style="color:#009e7d;font-weight:600">Click to open Case Study →</span>',
+    '<span style="color:#009e7d;font-weight:600">Click to open Portfolio Assessment →</span>',
     {direction: 'top', offset: [0, -10]}
   );
   klMarker.on('click', function() { showCaseStudy(); });
@@ -1270,7 +1324,7 @@ function initAtlasMap() {
 
   // Permanent label on King Lake
   L.tooltip({permanent: true, direction: 'right', offset: [14, 0], className: 'kl-label-tip'})
-   .setContent('King Lake Case Study')
+   .setContent('King Lake Portfolio Assessment')
    .setLatLng([28.2906, -82.2918])
    .addTo(map);
 
@@ -1286,6 +1340,8 @@ function _fetchLocationData(lat, lon) {
   p.innerHTML =
     '<div class="aip-coord-header">📍 ' + lat.toFixed(4) + '°' + (lat >= 0 ? 'N' : 'S') + ', ' + Math.abs(lon).toFixed(4) + '°' + (lon < 0 ? 'W' : 'E') + '</div>' +
     '<div class="aip-loading"><div class="aip-spinner"></div><span>Fetching live data…</span></div>';
+
+  openLocationPopup(lat, lon, 'Selected location');
 
   // Show sidenav location section immediately with loading state
   var locSec = document.getElementById('atlas-location-section');
@@ -1314,6 +1370,8 @@ function _fetchLocationData(lat, lon) {
       var display = city ? city : 'Unknown location';
       if (state) display += ', ' + state;
       alocName.textContent = display;
+      var lpTitle = document.getElementById('lp-title');
+      if (lpTitle) lpTitle.textContent = display;
       if (alocCoords) alocCoords.textContent = lat.toFixed(4) + '°' + (lat >= 0 ? 'N' : 'S') + '  ' + Math.abs(lon).toFixed(4) + '°' + (lon < 0 ? 'W' : 'E');
     }
   });
@@ -1709,6 +1767,24 @@ function _showLatLonPanel(lat, lon, nasa, om, myGen) {
     alocMeta.className = 'aloc-meta';
   }
 
+  var lpOverview = document.getElementById('lp-overview');
+  var lpAnalysis = document.getElementById('lp-analysis');
+  var lpProfiles = document.getElementById('lp-profiles');
+  if (lpOverview) {
+    lpOverview.innerHTML = '<h3 style="margin-bottom:8px">Country / Site Overview</h3>' +
+      '<div class="aip-row"><span class="aip-label">Solar GHI (P50)</span><span class="aip-val">'+fmtV(ghi,2)+' kWh/m²/day</span></div>' +
+      '<div class="aip-row"><span class="aip-label">Wind @ 80m (P50)</span><span class="aip-val">'+(ws80f?ws80f.toFixed(2):'—')+' m/s</span></div>' +
+      '<div class="aip-row"><span class="aip-label">Solar Class</span><span class="aip-val">'+iecSolar+'</span></div>' +
+      '<div class="aip-row"><span class="aip-label">Wind Class</span><span class="aip-val">'+iecWind+'</span></div>';
+  }
+  if (lpAnalysis) lpAnalysis.innerHTML = p.innerHTML;
+  if (lpProfiles) {
+    lpProfiles.innerHTML = '<h3 style="margin-bottom:8px">Wind and Solar Profiles</h3>' +
+      '<div class="aip-row"><span class="aip-label">PV Yield P50 / P90</span><span class="aip-val">'+pvoutDaily+' / '+(pvP90daily?pvP90daily.toFixed(2):'—')+' kWh/kWp/day</span></div>' +
+      '<div class="aip-row"><span class="aip-label">Wind 80m P50 / P90</span><span class="aip-val">'+(ws80f?ws80f.toFixed(2):'—')+' / '+(ws80P90?ws80P90.toFixed(2):'—')+' m/s</span></div>' +
+      '<div class="aip-row"><span class="aip-label">Capacity factors</span><span class="aip-val">Solar '+(solarCF||'—')+'% · Wind '+(windCF||'—')+'%</span></div>';
+  }
+
   // Initial AI insights in sidenav (solar + wind from Phase 1, terrain loading placeholder)
   var alocAI = document.getElementById('aloc-ai-insights');
   if (alocAI) {
@@ -2030,6 +2106,111 @@ function initAtlasSearch(map) {
   }
 }
 
+var GLOBAL_RESOURCE_DB = {
+  'North America': {
+    countries: {
+      'United States': {
+        solar:[['AZ',6.10,'16.4 GW'],['NV',5.89,'12.7 GW'],['NM',5.78,'4.2 GW'],['CA',5.55,'50.8 GW'],['TX',5.30,'52.0 GW']],
+        wind:[['ND',8.4,'5.4 GW'],['WY',7.8,'3.9 GW'],['KS',7.6,'9.8 GW'],['SD',7.5,'4.0 GW'],['TX',7.1,'43.0 GW']],
+        sources:['NREL NSRDB','NREL Wind Toolkit','EIA Electricity Data Browser']
+      },
+      'Canada': {
+        solar:[['AB',4.40,'2.4 GW'],['SK',4.25,'0.2 GW'],['ON',3.70,'3.7 GW'],['QC',3.45,'0.1 GW'],['BC',3.25,'0.1 GW']],
+        wind:[['AB',7.9,'4.5 GW'],['SK',7.6,'0.8 GW'],['ON',7.1,'5.7 GW'],['NS',6.9,'0.6 GW'],['QC',6.8,'4.0 GW']],
+        sources:['Natural Resources Canada','Global Wind Atlas','Canada CER']
+      }
+    }
+  },
+  'Europe': { countries: {
+      'Spain': {solar:[['Andalusia',5.2,'6.2 GW'],['Extremadura',5.1,'6.4 GW'],['Castile',4.9,'4.1 GW']], wind:[['Castile',7.9,'6.0 GW'],['Galicia',7.7,'3.9 GW'],['Aragon',7.5,'5.2 GW']], sources:['PVGIS','Global Wind Atlas','Red Electrica']},
+      'Germany': {solar:[['Bavaria',3.6,'16.5 GW'],['Baden-Württemberg',3.5,'9.5 GW'],['Brandenburg',3.4,'6.0 GW']], wind:[['Lower Saxony',7.8,'12.5 GW'],['Schleswig-Holstein',7.9,'7.4 GW'],['Brandenburg',7.2,'8.8 GW']], sources:['Copernicus ERA5','Global Wind Atlas','Bundesnetzagentur']}
+  }},
+  'Asia': { countries: {
+      'India': {solar:[['Rajasthan',5.9,'26.9 GW'],['Gujarat',5.7,'12.5 GW'],['Karnataka',5.4,'9.5 GW']], wind:[['Tamil Nadu',7.4,'11.0 GW'],['Gujarat',7.0,'11.7 GW'],['Maharashtra',6.7,'5.2 GW']], sources:['NIWE India','Global Solar Atlas','CEA India']},
+      'China': {solar:[['Qinghai',5.8,'18.0 GW'],['Xinjiang',5.7,'22.0 GW'],['Gansu',5.6,'16.0 GW']], wind:[['Inner Mongolia',8.2,'54.0 GW'],['Gansu',7.9,'24.0 GW'],['Xinjiang',7.8,'31.0 GW']], sources:['Global Solar Atlas','Global Wind Atlas','NEA China']}
+  }},
+  'Africa': { countries: {
+      'Morocco': {solar:[['Ouarzazate',5.6,'0.8 GW'],['Dakhla',5.9,'0.2 GW'],['Marrakesh',5.4,'0.1 GW']], wind:[['Tarfaya',8.1,'0.3 GW'],['Tangier',7.7,'0.9 GW'],['Essaouira',7.4,'0.4 GW']], sources:['Global Solar Atlas','Global Wind Atlas','MASEN']},
+      'South Africa': {solar:[['Northern Cape',5.8,'3.5 GW'],['Free State',5.4,'0.9 GW'],['Western Cape',5.2,'1.0 GW']], wind:[['Western Cape',7.9,'2.8 GW'],['Eastern Cape',7.6,'2.3 GW'],['Northern Cape',7.2,'0.8 GW']], sources:['CSIR South Africa','Global Wind Atlas','Eskom']}
+  }},
+  'South America': { countries: {
+      'Brazil': {solar:[['Bahia',5.6,'7.4 GW'],['Minas Gerais',5.4,'8.4 GW'],['Piaui',5.5,'2.6 GW']], wind:[['Rio Grande do Norte',8.3,'8.2 GW'],['Bahia',7.9,'10.5 GW'],['Ceara',7.7,'3.0 GW']], sources:['ONS Brazil','Global Solar Atlas','Global Wind Atlas']},
+      'Chile': {solar:[['Atacama',7.1,'4.2 GW'],['Antofagasta',6.8,'3.8 GW'],['Coquimbo',6.2,'1.0 GW']], wind:[['Biobio',7.5,'0.7 GW'],['Magallanes',8.4,'0.3 GW'],['Antofagasta',7.2,'0.5 GW']], sources:['Ministerio de Energia Chile','Global Solar Atlas','Global Wind Atlas']}
+  }},
+  'Oceania': { countries: {
+      'Australia': {solar:[['NT',6.2,'0.6 GW'],['WA',5.8,'2.1 GW'],['QLD',5.7,'5.0 GW']], wind:[['SA',7.8,'2.5 GW'],['TAS',8.0,'0.6 GW'],['VIC',7.4,'4.0 GW']], sources:['AREMI','Global Wind Atlas','AEMO']},
+      'New Zealand': {solar:[['Canterbury',3.8,'0.1 GW'],['Otago',3.9,'0.1 GW'],['Auckland',3.6,'0.1 GW']], wind:[['Wellington',8.1,'1.0 GW'],['Manawatu',7.7,'0.6 GW'],['Southland',7.3,'0.2 GW']], sources:['EECA NZ','Global Wind Atlas','Transpower']}
+  }}
+};
+
+function initGlobalFilters() {
+  var continentSel = document.getElementById('continent-filter');
+  var countrySel = document.getElementById('country-filter');
+  if (!continentSel || !countrySel) return;
+  var continents = Object.keys(GLOBAL_RESOURCE_DB);
+  continentSel.innerHTML = continents.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
+  function setCountries() {
+    var continent = continentSel.value;
+    var countries = Object.keys(GLOBAL_RESOURCE_DB[continent].countries);
+    countrySel.innerHTML = countries.map(function(c){return '<option value="'+c+'">'+c+'</option>';}).join('');
+    renderResourceRows(continent, countries[0]);
+  }
+  continentSel.addEventListener('change', setCountries);
+  countrySel.addEventListener('change', function(){ renderResourceRows(continentSel.value, countrySel.value); });
+  setCountries();
+}
+
+function renderResourceRows(continent, country) {
+  var dataset = GLOBAL_RESOURCE_DB[continent] && GLOBAL_RESOURCE_DB[continent].countries[country];
+  if (!dataset) return;
+  function rowsFor(type) {
+    var arr = dataset[type] || [];
+    var maxVal = Math.max.apply(null, arr.map(function(r){return r[1];}));
+    return arr.map(function(r){
+      var w = ((r[1] / maxVal) * 100).toFixed(1);
+      return '<div class="ap-res-row"><span class="ap-res-state">'+r[0]+'</span><div class="ap-res-bar-wrap"><div class="'+(type==='solar'?'ap-res-bar-solar':'ap-res-bar-wind')+'" style="width:'+w+'%"></div></div><span class="ap-res-val">'+r[1].toFixed(2)+'</span><span class="ap-res-cap">'+r[2]+'</span></div>';
+    }).join('');
+  }
+  var solar = document.getElementById('ap-res-solar');
+  var wind = document.getElementById('ap-res-wind');
+  if (solar) {
+    solar.innerHTML = '<div class="ap-res-header-row"><span class="ap-res-col-state">Region</span><span class="ap-res-col-bar"></span><span class="ap-res-col-val">GHI</span><span class="ap-res-col-cap">Installed</span></div>' + rowsFor('solar') + '<div class="ap-res-cite">Open/free sources: ' + dataset.sources.join(' · ') + '</div>';
+  }
+  if (wind) {
+    wind.innerHTML = '<div class="ap-res-header-row"><span class="ap-res-col-state">Region</span><span class="ap-res-col-bar"></span><span class="ap-res-col-val">m/s</span><span class="ap-res-col-cap">Installed</span></div>' + rowsFor('wind') + '<div class="ap-res-cite">Open/free sources: ' + dataset.sources.join(' · ') + '</div>';
+  }
+}
+
+function openLocationPopup(lat, lon, name) {
+  var overlay = document.getElementById('location-popup-overlay');
+  var popup = document.getElementById('location-popup');
+  if (!overlay || !popup) return;
+  overlay.classList.add('open'); popup.classList.add('open');
+  var n = name || 'Selected location';
+  document.getElementById('lp-title').textContent = n;
+  document.getElementById('lp-sub').textContent = 'Lat/Lon: ' + lat.toFixed(4) + ', ' + lon.toFixed(4);
+  document.getElementById('lp-coords').textContent = lat.toFixed(4) + '°, ' + lon.toFixed(4) + '°';
+  document.getElementById('lp-snapshot').src = 'https://staticmap.openstreetmap.de/staticmap.php?center=' + lat.toFixed(4) + ',' + lon.toFixed(4) + '&zoom=5&size=420x200&markers=' + lat.toFixed(4) + ',' + lon.toFixed(4) + ',lightblue1';
+  document.getElementById('lp-overview').innerHTML = '<h3 style="margin-bottom:6px">Overview</h3><p style="font-size:12px;color:var(--text-secondary)">Global renewable context is loaded via continent/country filters and open data sources.</p>';
+  document.getElementById('lp-analysis').innerHTML = '<div style="font-size:12px;color:var(--text-muted)">Fetching live resource and terrain metrics…</div>';
+  document.getElementById('lp-profiles').innerHTML = '<div style="font-size:12px;color:var(--text-muted)">Solar and wind profile charts will populate once live data returns.</div>';
+  document.getElementById('lp-portfolio').innerHTML = '<h3 style="margin-bottom:6px">Portfolio Assessment</h3><p style="font-size:12px;color:var(--text-secondary)">Use this tab to compare countries and prioritize regions for investment sequencing.</p>';
+  document.getElementById('lp-esg').innerHTML = '<h3 style="margin-bottom:6px">Full ESG Page</h3><p style="font-size:12px;color:var(--text-secondary)">The full ESG workspace is available in the dedicated tab for deep review.</p><button class="lp-close" onclick="showCaseStudy()">Open Full ESG Workspace</button>';
+}
+function closeLocationPopup(){
+  var overlay = document.getElementById('location-popup-overlay');
+  var popup = document.getElementById('location-popup');
+  if (overlay) overlay.classList.remove('open');
+  if (popup) popup.classList.remove('open');
+}
+function switchLocationPopupTab(tab){
+  document.querySelectorAll('.lp-tab').forEach(function(el){ el.classList.toggle('active', el.dataset.lpTab===tab); });
+  ['overview','analysis','profiles','portfolio','esg'].forEach(function(k){
+    var el = document.getElementById('lp-'+k);
+    if (el) el.classList.toggle('active', k===tab);
+  });
+}
+
 // ─── RESOURCE TAB SWITCHER (solar / wind in atlas panel) ──────────────────
 
 function switchResTab(tab) {
@@ -2054,6 +2235,7 @@ function initAtlas() {
   // Initialise USA Solar Atlas map (View 1 — visible on page load)
   _atlasMap = initAtlasMap();
   initAtlasSearch(_atlasMap);
+  initGlobalFilters();
   console.info('%cUSA Solar Atlas Explorer — TerraIQ', 'color:#009e7d;font-weight:bold;font-size:14px');
   console.info('Click anywhere on the map for live solar & wind data. Search bar available for navigation.');
 }
