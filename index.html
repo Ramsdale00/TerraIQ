@@ -321,7 +321,6 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
 .lp-body{display:grid;grid-template-columns:320px minmax(0,1fr);gap:16px;padding:16px;min-height:0;flex:1;overflow:hidden}
 .lp-left{border:1px solid var(--border);border-radius:18px;padding:14px;background:linear-gradient(180deg,#ffffff,#f5f9fc);position:sticky;top:0;align-self:start;box-shadow:0 14px 36px rgba(148,163,184,.18)}
 .lp-left-label{font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--text-muted);text-transform:uppercase}
-.lp-left-note{margin-top:10px;font-size:11px;color:var(--text-muted);line-height:1.5}
 #atlas-location-section{display:none !important}
 #atlas-info-panel{display:none !important}
 .lp-main{display:flex;flex-direction:column;min-height:0}
@@ -390,8 +389,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:li
 #atlas-search-input::placeholder{color:var(--text-muted)}
 #atlas-panel,#right-panel{background:linear-gradient(180deg, rgba(251,253,255,.98), rgba(242,247,251,.96));border-left:1px solid var(--border);box-shadow:-24px 0 60px rgba(148,163,184,.18)}
 #right-panel{width:var(--panel-w)}
-#panel-section-overview,#panel-section-score,#panel-section-renewable,#panel-section-scenarios,#panel-section-actions,#panel-section-insights,#data-sources{padding:22px}
-#panel-section-overview .panel-label,#panel-section-score .panel-label,#panel-section-renewable .panel-label,#panel-section-scenarios .panel-label,#panel-section-actions .panel-label,#panel-section-insights .panel-label,#data-sources .panel-label{color:#6d879a;letter-spacing:.22em;font-size:10px}
+#panel-section-overview,#panel-section-score,#panel-section-renewable,#panel-section-official,#panel-section-scenarios,#panel-section-actions,#panel-section-insights,#data-sources{padding:22px}
+#panel-section-overview .panel-label,#panel-section-score .panel-label,#panel-section-renewable .panel-label,#panel-section-official .panel-label,#panel-section-scenarios .panel-label,#panel-section-actions .panel-label,#panel-section-insights .panel-label,#data-sources .panel-label{color:#6d879a;letter-spacing:.22em;font-size:10px}
 .panel-divider{background:linear-gradient(90deg, transparent, rgba(148,163,184,.18), transparent)}
 #site-hero,#layer-brief,.signal-card,.scenario-card,.action-card,.metric-card,.insight-card{position:relative;overflow:hidden;border:1px solid rgba(148,163,184,.16);box-shadow:var(--shadow-soft)}
 #site-hero::before,#layer-brief::before,.signal-card::before,.scenario-card::before,.action-card::before,.metric-card::before,.insight-card::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg, rgba(255,255,255,.64), transparent 32%, transparent 70%, rgba(15,157,132,.05))}
@@ -438,7 +437,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:li
 .metric-name{font-size:10px}
 .metric-value{font-size:26px}
 .metric-unit{margin-top:4px}
-#scenario-cards,#action-cards,#insights-list{display:flex;flex-direction:column;gap:12px}
+#scenario-cards,#action-cards,#insights-list,#official-profiles{display:flex;flex-direction:column;gap:12px}
 .scenario-card{padding:16px;border-radius:22px;background:linear-gradient(160deg, rgba(255,255,255,.94), rgba(244,248,252,.92))}
 .scenario-card.recommended{border-color:rgba(15,157,132,.28);box-shadow:0 20px 52px rgba(148,163,184,.2)}
 .scenario-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -461,6 +460,31 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:li
 .insight-title{font-family:var(--font-display);font-size:16px;line-height:1.2}
 .insight-meta{font-size:9px;color:var(--text-muted);font-weight:700}
 .insight-text{margin-top:8px;color:var(--text-secondary)}
+#official-profile-note{color:var(--text-secondary);font-size:12px;line-height:1.6;margin-bottom:14px}
+.profile-card{position:relative;overflow:hidden;padding:16px;border-radius:22px;background:linear-gradient(160deg, rgba(255,255,255,.94), rgba(244,248,252,.92));border:1px solid rgba(148,163,184,.16);box-shadow:var(--shadow-soft);transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+.profile-card::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg, rgba(255,255,255,.64), transparent 35%, transparent 72%, rgba(15,157,132,.04))}
+.profile-card:hover{transform:translateY(-2px);border-color:rgba(148,163,184,.22);box-shadow:0 18px 44px rgba(148,163,184,.18)}
+.profile-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.profile-kicker{font-size:10px;color:var(--text-muted);font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.profile-title{margin-top:5px;font-family:var(--font-display);font-size:18px;line-height:1.15}
+.profile-subtitle{margin-top:8px;color:var(--text-secondary);font-size:12px;line-height:1.55}
+.profile-annual{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:78px;padding:10px 12px;border-radius:16px;background:rgba(15,157,132,.09);color:#145b50;font-weight:800;font-size:17px;line-height:1}
+.profile-annual span{display:block;margin-top:4px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.profile-stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.profile-stat{padding:10px 11px;border-radius:16px;background:rgba(255,255,255,.78);border:1px solid rgba(148,163,184,.12)}
+.profile-stat-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.11em;font-weight:700}
+.profile-stat-value{display:block;margin-top:5px;font-size:14px;font-weight:800;color:var(--text-primary);line-height:1.45}
+.profile-chart{margin-top:14px;padding:12px 12px 10px;border-radius:18px;background:rgba(244,248,251,.88);border:1px solid rgba(148,163,184,.12)}
+.profile-chart svg{display:block;width:100%;height:auto}
+.profile-month-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
+.profile-month{padding:8px 9px;border-radius:14px;background:rgba(255,255,255,.76);border:1px solid rgba(148,163,184,.12)}
+.profile-month-label{display:block;font-size:10px;color:var(--text-muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.profile-month-value{display:block;margin-top:4px;font-size:13px;font-weight:800;color:var(--text-primary)}
+.profile-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(148,163,184,.14)}
+.profile-period{font-size:11px;color:var(--text-secondary);line-height:1.5}
+.profile-source-link{display:inline-flex;align-items:center;gap:6px;color:#145b50;font-size:11px;font-weight:700;text-decoration:none}
+.profile-source-link:hover{text-decoration:underline}
+@media (max-width:420px){.profile-stat-grid,.profile-month-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 #data-sources .source-tags{gap:8px}
 #data-sources .source-tag{padding:6px 10px;color:#365266}
 #layer-bar{height:68px;padding:0 20px;background:rgba(255,255,255,.82);border-top:1px solid var(--border);backdrop-filter:blur(18px)}
@@ -720,7 +744,6 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:li
         <div class="lp-left-label">Selected Point</div>
         <div id="lp-coords" style="font-family:monospace;font-size:12px;margin-top:6px">—</div>
         <div id="lp-mini-map" aria-label="Selected location map snapshot"></div>
-        <div class="lp-left-note">The map preview stays fixed here while the data tabs on the right scroll independently.</div>
       </div>
       <div class="lp-right">
         <div class="lp-tabs">
@@ -948,6 +971,14 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:li
 
         <div class="panel-divider"></div>
 
+        <div id="panel-section-official">
+          <div class="panel-label">Official Monthly Profiles</div>
+          <p id="official-profile-note">Official site-centroid monthly climatology rendered from NASA POWER data. Use these charts for seasonal trend checks alongside the project-area map layers.</p>
+          <div id="official-profiles"></div>
+        </div>
+
+        <div class="panel-divider"></div>
+
         <div id="panel-section-scenarios">
           <div class="panel-label">Deployment Scenarios</div>
           <div id="scenario-cards"></div>
@@ -987,6 +1018,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:li
         <div id="data-sources">
           <div class="panel-label">DATA SOURCES</div>
           <div class="source-tags">
+            <span class="source-tag">NASA POWER Climatology</span>
             <span class="source-tag">NREL NSRDB</span>
             <span class="source-tag">NREL Wind Toolkit</span>
             <span class="source-tag">NASA SMAP L3</span>
@@ -1263,6 +1295,36 @@ function summaryFromTotal(total) {
 
 // ─── COLOUR HELPERS ────────────────────────────────────────────────────────
 
+var PROFILE_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var PROFILE_MONTH_KEYS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+var POWER_CLIMATOLOGY_ENDPOINT = 'https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=ALLSKY_SFC_SW_DWN,WS50M&community=RE&longitude=-82.2918&latitude=28.2906&format=JSON';
+var OFFICIAL_PROFILES = {
+  solar: {
+    title: 'Solar Irradiance',
+    source: 'NASA POWER Climatology API',
+    variable: 'All Sky Surface Shortwave Downward Irradiance',
+    unit: 'kWh/m2/day',
+    precision: 2,
+    annual: 4.9622,
+    accent: '#f59e0b',
+    series: [3.4308, 4.1186, 5.2742, 6.2642, 6.6842, 6.0526, 5.7317, 5.4686, 5.0726, 4.5617, 3.7123, 3.1421],
+    period: '20-year monthly climatology (Jan 2001 to Dec 2020)',
+    endpoint: POWER_CLIMATOLOGY_ENDPOINT
+  },
+  wind: {
+    title: 'Wind Speed',
+    source: 'NASA POWER Climatology API',
+    variable: 'Wind Speed at 50 Meters',
+    unit: 'm/s',
+    precision: 2,
+    annual: 5.17,
+    accent: '#6366f1',
+    series: [6.00, 5.79, 5.93, 5.53, 4.96, 4.18, 3.71, 3.97, 4.86, 5.54, 5.81, 5.87],
+    period: '20-year monthly climatology (Jan 2001 to Dec 2020)',
+    endpoint: POWER_CLIMATOLOGY_ENDPOINT
+  }
+};
+
 function lerp(a, b, t) { return a + (b - a) * t; }
 function gradColor(t, stops) {
   t = Math.max(0, Math.min(1, t));
@@ -1458,6 +1520,88 @@ function statusLabel(status) {
   if (status === 'not-started') return 'Not Started';
   if (status === 'compliant') return 'Compliant';
   return 'Open';
+}
+
+function renderOfficialProfiles() {
+  var wrap = document.getElementById('official-profiles');
+  if (!wrap) return;
+  wrap.innerHTML = Object.keys(OFFICIAL_PROFILES).map(function(key) {
+    var profile = OFFICIAL_PROFILES[key];
+    var maxValue = Math.max.apply(null, profile.series);
+    var minValue = Math.min.apply(null, profile.series);
+    var peakIndex = profile.series.indexOf(maxValue);
+    var lowIndex = profile.series.indexOf(minValue);
+    return ''
+      + '<article class="profile-card">'
+      +   '<div class="profile-head">'
+      +     '<div>'
+      +       '<div class="profile-kicker">' + profile.source + '</div>'
+      +       '<h3 class="profile-title">' + profile.title + '</h3>'
+      +     '</div>'
+      +     '<div class="profile-annual">' + profile.annual.toFixed(profile.precision) + '<span>Annual</span></div>'
+      +   '</div>'
+      +   '<p class="profile-subtitle">' + profile.variable + ' (' + profile.unit + ')</p>'
+      +   '<div class="profile-stat-grid">'
+      +     '<div class="profile-stat"><span class="profile-stat-label">Peak Month</span><strong class="profile-stat-value">' + PROFILE_MONTHS[peakIndex] + ' ' + maxValue.toFixed(profile.precision) + '</strong></div>'
+      +     '<div class="profile-stat"><span class="profile-stat-label">Low Month</span><strong class="profile-stat-value">' + PROFILE_MONTHS[lowIndex] + ' ' + minValue.toFixed(profile.precision) + '</strong></div>'
+      +     '<div class="profile-stat"><span class="profile-stat-label">Coverage</span><strong class="profile-stat-value">2001-2020</strong></div>'
+      +   '</div>'
+      +   '<div class="profile-chart">' + buildProfileChartSvg(profile) + '</div>'
+      +   '<div class="profile-month-grid">' + buildProfileMonthGrid(profile) + '</div>'
+      +   '<div class="profile-footer">'
+      +     '<div class="profile-period">Official source at 28.2906N, 82.2918W.<br>' + profile.period + '.</div>'
+      +     '<a class="profile-source-link" href="' + profile.endpoint + '" target="_blank" rel="noreferrer">Open official JSON</a>'
+      +   '</div>'
+      + '</article>';
+  }).join('');
+}
+
+function buildProfileMonthGrid(profile) {
+  return PROFILE_MONTHS.map(function(month, index) {
+    return ''
+      + '<div class="profile-month">'
+      +   '<span class="profile-month-label">' + month + '</span>'
+      +   '<strong class="profile-month-value">' + profile.series[index].toFixed(profile.precision) + '</strong>'
+      + '</div>';
+  }).join('');
+}
+
+function buildProfileChartSvg(profile) {
+  var width = 280;
+  var height = 136;
+  var left = 8;
+  var right = 8;
+  var top = 8;
+  var bottom = 22;
+  var plotWidth = width - left - right;
+  var plotHeight = height - top - bottom;
+  var maxValue = Math.max.apply(null, profile.series);
+  var step = plotWidth / profile.series.length;
+  var barWidth = step * 0.62;
+  var avgY = top + plotHeight - (profile.annual / maxValue) * plotHeight;
+  var bars = '';
+  var labels = '';
+  var path = '';
+
+  profile.series.forEach(function(value, index) {
+    var x = left + index * step + (step - barWidth) / 2;
+    var barHeight = (value / maxValue) * plotHeight;
+    var y = top + plotHeight - barHeight;
+    var centerX = x + barWidth / 2;
+    var point = centerX.toFixed(1) + ',' + y.toFixed(1);
+    bars += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barWidth.toFixed(1) + '" height="' + barHeight.toFixed(1) + '" rx="7" fill="' + profile.accent + '" fill-opacity="' + (0.22 + (value / maxValue) * 0.58).toFixed(2) + '"></rect>';
+    labels += '<text x="' + centerX.toFixed(1) + '" y="' + (height - 6) + '" text-anchor="middle" fill="#7a94a8" font-size="9" font-family="Inter, sans-serif">' + PROFILE_MONTHS[index].charAt(0) + '</text>';
+    path += (index === 0 ? 'M ' : ' L ') + point;
+  });
+
+  return ''
+    + '<svg viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="' + profile.title + ' monthly average chart">'
+    +   '<line x1="' + left + '" y1="' + avgY.toFixed(1) + '" x2="' + (width - right) + '" y2="' + avgY.toFixed(1) + '" stroke="' + profile.accent + '" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.75"></line>'
+    +   '<text x="' + (width - right) + '" y="' + (avgY - 4).toFixed(1) + '" text-anchor="end" fill="#6d879a" font-size="9" font-family="Inter, sans-serif">Annual ' + profile.annual.toFixed(profile.precision) + '</text>'
+    +   bars
+    +   '<path d="' + path + '" fill="none" stroke="' + profile.accent + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>'
+    +   labels
+    + '</svg>';
 }
 
 function trimCopy(text, maxLen) {
@@ -1992,6 +2136,68 @@ function _popupSourceNote(lines) {
     lines.join('<br/>') + '</div>';
 }
 
+function _cleanProfileUnit(unit) {
+  if (!unit) return '';
+  return String(unit)
+    .replace(/kW-hr/gi, 'kWh')
+    .replace(/m\^2/gi, 'm2')
+    .replace(/\^2/g, '2');
+}
+
+function _profileCoverageShort(rangeText) {
+  if (!rangeText) return 'Climatology';
+  var years = String(rangeText).match(/(19|20)\d{2}/g);
+  return years && years.length >= 2 ? years[0] + '-' + years[years.length - 1] : 'Climatology';
+}
+
+function _buildNasaProfileEndpoint(lat, lon) {
+  return 'https://power.larc.nasa.gov/api/temporal/climatology/point?parameters=ALLSKY_SFC_SW_DWN,WS50M&community=RE&longitude=' + lon.toFixed(4) + '&latitude=' + lat.toFixed(4) + '&format=JSON';
+}
+
+function _getNasaMonthlySeries(nasa, key) {
+  var src = nasa && nasa.properties && nasa.properties.parameter ? nasa.properties.parameter[key] : null;
+  if (!src) return [];
+  return PROFILE_MONTH_KEYS.map(function(monthKey) {
+    var value = src[monthKey];
+    return value != null && value !== -999 ? Number(value) : null;
+  });
+}
+
+function _buildLocationProfileCard(lat, lon, profile) {
+  if (!profile || !profile.series || !profile.series.length) return '';
+
+  var validSeries = profile.series.filter(function(value) { return value != null; });
+  if (!validSeries.length) return '';
+
+  var maxValue = Math.max.apply(null, validSeries);
+  var minValue = Math.min.apply(null, validSeries);
+  var peakIndex = profile.series.indexOf(maxValue);
+  var lowIndex = profile.series.indexOf(minValue);
+
+  return ''
+    + '<article class="profile-card">'
+    +   '<div class="profile-head">'
+    +     '<div>'
+    +       '<div class="profile-kicker">' + profile.source + '</div>'
+    +       '<h3 class="profile-title">' + profile.title + '</h3>'
+    +     '</div>'
+    +     '<div class="profile-annual">' + profile.annual.toFixed(profile.precision) + '<span>Annual</span></div>'
+    +   '</div>'
+    +   '<p class="profile-subtitle">' + profile.variable + ' (' + profile.unit + ')</p>'
+    +   '<div class="profile-stat-grid">'
+    +     '<div class="profile-stat"><span class="profile-stat-label">Peak Month</span><strong class="profile-stat-value">' + PROFILE_MONTHS[peakIndex] + ' ' + maxValue.toFixed(profile.precision) + '</strong></div>'
+    +     '<div class="profile-stat"><span class="profile-stat-label">Low Month</span><strong class="profile-stat-value">' + PROFILE_MONTHS[lowIndex] + ' ' + minValue.toFixed(profile.precision) + '</strong></div>'
+    +     '<div class="profile-stat"><span class="profile-stat-label">Coverage</span><strong class="profile-stat-value">' + profile.coverageShort + '</strong></div>'
+    +   '</div>'
+    +   '<div class="profile-chart">' + buildProfileChartSvg(profile) + '</div>'
+    +   '<div class="profile-month-grid">' + buildProfileMonthGrid(profile) + '</div>'
+    +   '<div class="profile-footer">'
+    +     '<div class="profile-period">Official source at ' + Math.abs(lat).toFixed(4) + (lat >= 0 ? 'N' : 'S') + ', ' + Math.abs(lon).toFixed(4) + (lon < 0 ? 'W' : 'E') + '.<br>' + profile.period + '.</div>'
+    +     '<a class="profile-source-link" href="' + profile.endpoint + '" target="_blank" rel="noreferrer">Open official JSON</a>'
+    +   '</div>'
+    + '</article>';
+}
+
 function _buildLoadingBlock(title, text) {
   return '<div class="aip-section-title">' + title + '</div>' +
     '<div class="aip-loading"><div class="aip-spinner"></div><span>' + text + '</span></div>';
@@ -2147,6 +2353,36 @@ function _showLatLonPanel(lat, lon, nasa, om, myGen) {
 
   var html = '<div class="aip-coord-header">📍 ' + Math.abs(lat).toFixed(4) + '°' + latDir + ', ' + Math.abs(lon).toFixed(4) + '°' + lonDir + '</div>';
 
+  var profilePeriod = nasa && nasa.header && nasa.header.range ? nasa.header.range : 'Monthly climatology';
+  var coverageShort = _profileCoverageShort(profilePeriod);
+  var profileEndpoint = _buildNasaProfileEndpoint(lat, lon);
+  var solarProfileCard = _buildLocationProfileCard(lat, lon, {
+    title: 'Official Monthly Solar Profile',
+    source: 'NASA POWER Climatology API',
+    variable: 'All Sky Surface Shortwave Downward Irradiance',
+    unit: _cleanProfileUnit(nasa && nasa.parameters && nasa.parameters.ALLSKY_SFC_SW_DWN ? nasa.parameters.ALLSKY_SFC_SW_DWN.units : 'kWh/m2/day'),
+    precision: 2,
+    annual: ghi != null ? ghi : 0,
+    accent: '#f59e0b',
+    series: _getNasaMonthlySeries(nasa, 'ALLSKY_SFC_SW_DWN'),
+    period: profilePeriod,
+    coverageShort: coverageShort,
+    endpoint: profileEndpoint
+  });
+  var windProfileCard = _buildLocationProfileCard(lat, lon, {
+    title: 'Official Monthly Wind Profile',
+    source: 'NASA POWER Climatology API',
+    variable: 'Wind Speed at 50 Meters',
+    unit: _cleanProfileUnit(nasa && nasa.parameters && nasa.parameters.WS50M ? nasa.parameters.WS50M.units : 'm/s'),
+    precision: 2,
+    annual: ws50 != null ? ws50 : 0,
+    accent: '#6366f1',
+    series: _getNasaMonthlySeries(nasa, 'WS50M'),
+    period: profilePeriod,
+    coverageShort: coverageShort,
+    endpoint: profileEndpoint
+  });
+
   // Solar section
   html += '<div class="aip-section-title">☀️ Solar Irradiance (NASA POWER · 1984–2022 avg)</div>';
   html += _row('GHI (P50)', fmtV(ghi,2), ' kWh/m²/day');
@@ -2258,6 +2494,10 @@ function _showLatLonPanel(lat, lon, nasa, om, myGen) {
     alocMeta.className = 'aloc-meta';
   }
 
+  if (alocMeta) {
+    alocMeta.innerHTML = 'NASA POWER monthly climatology · ' + coverageShort + '<br/>Wind real-time: ' + nowStr;
+  }
+
   var lpSolar = document.getElementById('lp-solar');
   var lpWind = document.getElementById('lp-wind');
   var lpAnalysis = document.getElementById('lp-analysis');
@@ -2288,6 +2528,9 @@ function _showLatLonPanel(lat, lon, nasa, om, myGen) {
         '⚡ PV output derived with PR = 0.75 and fixed-tilt assumptions'
       ]);
   }
+  if (lpSolar) {
+    lpSolar.innerHTML = solarProfileCard + lpSolar.innerHTML;
+  }
   if (lpWind) {
     lpWind.innerHTML =
       _popupSection('💨 Wind Profile',
@@ -2306,6 +2549,16 @@ function _showLatLonPanel(lat, lon, nasa, om, myGen) {
         '📐 Higher hub heights extrapolated with Hellmann power law α = 0.143 when direct measurements are unavailable'
       ]);
   }
+  if (lpWind) {
+    lpWind.innerHTML = windProfileCard + lpWind.innerHTML;
+    lpWind.innerHTML = lpWind.innerHTML.replace(
+      'ðŸ“ Higher hub heights extrapolated with Hellmann power law Î± = 0.143 when direct measurements are unavailable',
+      'ðŸ“ NASA monthly wind profile from NASA POWER climatology Â· ' + coverageShort + '<br/>ðŸ“ Higher hub heights extrapolated with Hellmann power law Î± = 0.143 when direct measurements are unavailable'
+    );
+  }
+  if (lpSolar) {
+    lpSolar.innerHTML = '<div class="lp-note-card"><strong>Official Monthly Series</strong><br/>NASA POWER monthly climatology for this clicked point (' + coverageShort + ').</div>' + lpSolar.innerHTML;
+  }
   if (lpProfiles) {
     lpProfiles.innerHTML =
       '<div class="lp-compare-grid">' +
@@ -2321,6 +2574,12 @@ function _showLatLonPanel(lat, lon, nasa, om, myGen) {
         _row('Capacity Factors', 'Solar ' + (solarCF || '—') + '% · Wind ' + (windCF || '—') + '%', '')
       ) +
       '<div class="lp-note-card"><strong>P50 vs P90</strong><br/>P50 is the median expected outcome. P90 is the more conservative production case often used for downside and lender-side checks.</div>';
+  }
+  if (lpWind) {
+    lpWind.innerHTML = '<div class="lp-note-card"><strong>Official Monthly Series</strong><br/>NASA POWER monthly wind climatology for this clicked point (' + coverageShort + ').</div>' + lpWind.innerHTML;
+  }
+  if (lpProfiles) {
+    lpProfiles.innerHTML = solarProfileCard + windProfileCard + lpProfiles.innerHTML;
   }
   if (lpAnalysis) lpAnalysis.innerHTML = _buildPopupLocationAnalysisHtml();
 
@@ -2586,6 +2845,7 @@ function showCaseStudy() {
         animateGauge(esg.total);
         renderBreakdown(esg.env, esg.soc, esg.gov);
         renderMetrics(esg);
+        renderOfficialProfiles();
         renderExecutiveSummary(esg);
         updateLayerBrief('solar');
       }, 350);
