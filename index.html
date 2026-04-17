@@ -34,8 +34,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg-primary);co
 .status-dot{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:1px;color:var(--text-muted)}
 .status-dot.live::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 2px rgba(0,158,125,.2);animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-#main{flex:1;display:flex;overflow:hidden;min-height:0}
-#map-container{flex:1;position:relative;overflow:hidden}
+#case-view-tabs{display:flex;align-items:center;gap:10px;padding:14px 20px;background:rgba(251,253,255,.9);border-bottom:1px solid var(--border);flex-shrink:0;backdrop-filter:blur(16px);z-index:95;box-shadow:0 10px 24px rgba(148,163,184,.08)}
+.case-view-tab{display:inline-flex;align-items:center;justify-content:center;padding:9px 16px;border-radius:999px;border:1px solid rgba(148,163,184,.18);background:rgba(255,255,255,.78);color:var(--text-secondary);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:transform .24s ease,box-shadow .24s ease,border-color .24s ease,color .24s ease}
+.case-view-tab:hover{transform:translateY(-1px);border-color:rgba(15,157,132,.28);color:#145b50}
+.case-view-tab.active{background:linear-gradient(135deg, rgba(15,157,132,.14), rgba(59,130,246,.1));border-color:rgba(15,157,132,.28);color:#145b50;box-shadow:0 10px 26px rgba(15,157,132,.12)}
+#main{flex:1;position:relative;overflow:hidden;min-height:0}
+.case-view-pane{display:none;height:100%;min-height:0;animation:panelLift .45s cubic-bezier(.2,.8,.2,1)}
+.case-view-pane.active{display:flex}
+#case-pane-map{flex-direction:column}
+#map-container{flex:1;position:relative;overflow:hidden;min-height:0}
 #map{width:100%;height:100%;background:#c8d8e8}
 .leaflet-container{background:#c8d8e8 !important;font-family:var(--font)}
 .leaflet-control-zoom{border:1px solid var(--border) !important;border-radius:var(--radius-sm) !important;box-shadow:0 2px 8px rgba(0,0,0,.12) !important}
@@ -50,9 +57,15 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg-primary);co
 .legend-row{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-secondary);margin-bottom:4px}
 .legend-swatch{width:12px;height:12px;border-radius:50%;flex-shrink:0}
 #coords-display{position:absolute;bottom:24px;right:16px;font-size:11px;color:var(--text-secondary);background:rgba(255,255,255,.92);padding:4px 10px;border-radius:20px;border:1px solid var(--border);z-index:400;backdrop-filter:blur(6px);letter-spacing:.3px;box-shadow:0 1px 6px rgba(0,0,0,.08)}
-#right-panel{width:var(--panel-w);flex-shrink:0;background:var(--bg-panel);border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
-#right-panel::-webkit-scrollbar{width:4px}
-#right-panel::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.case-content-pane{overflow-y:auto;background:linear-gradient(180deg, rgba(251,253,255,.98), rgba(242,247,251,.96));scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.case-content-pane::-webkit-scrollbar{width:5px}
+.case-content-pane::-webkit-scrollbar-thumb{background:var(--border);border-radius:999px}
+.case-scroll-shell{width:min(1240px,calc(100% - 40px));margin:0 auto;padding:24px 0 42px}
+.case-pane-actions{position:sticky;top:0;display:flex;justify-content:flex-end;padding:0 0 18px;background:linear-gradient(180deg, rgba(245,250,252,.98), rgba(245,250,252,.9), rgba(245,250,252,0));z-index:12}
+.portfolio-pane-export{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;border:1px solid rgba(15,157,132,.24);background:linear-gradient(135deg, rgba(15,157,132,.12), rgba(59,130,246,.12));color:#145b50;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease}
+.portfolio-pane-export:hover{transform:translateY(-1px);box-shadow:0 12px 24px rgba(59,130,246,.14);border-color:rgba(15,157,132,.34)}
+.case-section-stack{display:flex;flex-direction:column}
+#case-panel-source-bank{display:none}
 #panel-section-score,#panel-section-renewable,#panel-section-insights,#data-sources{padding:16px 18px}
 .panel-label{font-size:10px;font-weight:700;letter-spacing:1.8px;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase}
 .panel-divider{height:1px;background:var(--border)}
@@ -93,7 +106,7 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg-primary);co
 .layer-btn.active{background:var(--accent-glow);border-color:var(--accent);color:var(--accent);font-weight:600;box-shadow:0 0 0 3px var(--accent-glow)}
 .layer-btn-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 #layer-bar-right{margin-left:auto;font-size:11px;color:var(--text-muted)}
-@media(max-width:680px){#right-panel{display:none}#layer-bar{overflow-x:auto}#layer-bar-right{display:none}}
+@media(max-width:680px){#layer-bar{overflow-x:auto}#layer-bar-right{display:none}}
 
 /* ── Audit Checklist Drawer ─────────────────────────────────────────────── */
 #checklist-drawer{position:fixed;inset:2vh 2vw;background:var(--bg-panel);border:1px solid var(--border);border-radius:14px;z-index:1000;display:flex;flex-direction:column;transform:translateY(104%);transition:transform .32s cubic-bezier(.4,0,.2,1);box-shadow:0 12px 40px rgba(0,0,0,.25);overflow:hidden}
@@ -219,8 +232,8 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
 .ap-res-cite{font-size:8.5px;color:var(--text-muted);margin-top:8px;line-height:1.6;padding-top:6px;border-top:1px solid var(--border);font-style:italic}
 
 /* ── Atlas CTA button (floating on US map) ────────────────────────────── */
-#atlas-cta-btn{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);z-index:500;display:flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;padding:10px 22px;border-radius:24px;font-size:13px;font-family:var(--font);font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(0,158,125,.4);letter-spacing:.3px;transition:all .2s;white-space:nowrap}
-#atlas-cta-btn:hover{background:var(--accent-dim);box-shadow:0 6px 28px rgba(0,158,125,.5);transform:translateX(-50%) translateY(-2px)}
+#atlas-cta-btn{position:absolute;left:50%;bottom:28px;transform:translateX(-50%);z-index:650;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:48px;max-width:calc(100% - 44px);padding:12px 24px;border:1px solid rgba(255,255,255,.44);border-radius:999px;background:linear-gradient(135deg,#0f9d84 0%,#2563eb 100%);color:#fff;font-size:13px;font-family:var(--font);font-weight:800;cursor:pointer;box-shadow:0 18px 40px rgba(20,32,51,.24),0 8px 18px rgba(15,157,132,.2);letter-spacing:.02em;transition:transform .22s ease,box-shadow .22s ease,filter .22s ease;white-space:nowrap;backdrop-filter:blur(14px)}
+#atlas-cta-btn:hover{transform:translateX(-50%) translateY(-2px) scale(1.01);box-shadow:0 22px 44px rgba(20,32,51,.26),0 10px 22px rgba(37,99,235,.22);filter:saturate(1.04)}
 #atlas-cta-btn::before{content:'📍';font-size:15px}
 
 /* ── Atlas floating legend ───────────────────────────────────────────── */
@@ -339,6 +352,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
 .lp-stat-value{margin-top:6px;font-size:18px;font-weight:800;color:var(--text-primary)}
 .lp-stat-copy{margin-top:4px;font-size:11px;color:var(--text-secondary);line-height:1.45}
 .lp-note-card{padding:12px 14px;border-radius:14px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.18);font-size:11px;color:#1d4ed8;line-height:1.55}
+.lp-note-card + .profile-card{margin-top:14px}
 .lp-source-note{margin-top:10px;font-size:10px;color:var(--text-muted);line-height:1.7;border-top:1px solid var(--border);padding-top:8px}
 @media(max-width:980px){
   .lp-body{grid-template-columns:1fr}
@@ -366,7 +380,7 @@ body{position:relative;width:100vw;height:100vh;overflow:hidden}
   --bg-primary:#edf4f8;--bg-secondary:rgba(255,255,255,.88);--bg-panel:rgba(247,250,252,.94);--bg-card:rgba(255,255,255,.94);--bg-hover:#edf3f8;
   --border:rgba(148,163,184,.24);--border-light:rgba(100,116,139,.34);--accent:#0f9d84;--accent-dim:#0b7f6b;--accent-glow:rgba(15,157,132,.12);
   --text-primary:#102033;--text-secondary:#496176;--text-muted:#73879a;--font:'Manrope',system-ui,-apple-system,sans-serif;--font-display:'Space Grotesk',var(--font);
-  --panel-w:390px;--shadow-soft:0 20px 50px rgba(148,163,184,.16);--shadow-strong:0 28px 72px rgba(148,163,184,.24)
+  --panel-w:360px;--shadow-soft:0 20px 50px rgba(148,163,184,.16);--shadow-strong:0 28px 72px rgba(148,163,184,.24)
 }
 html,body{background:radial-gradient(circle at top left, rgba(15,157,132,.12), transparent 30%),radial-gradient(circle at top right, rgba(59,130,246,.14), transparent 28%),linear-gradient(180deg, #f5fafc 0%, #edf4f8 48%, #e6eef5 100%);color:var(--text-primary);font-family:var(--font)}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;background:linear-gradient(115deg, rgba(255,255,255,.66), transparent 24%),radial-gradient(circle at 18% 16%, rgba(15,157,132,.06), transparent 18%),radial-gradient(circle at 82% 0%, rgba(59,130,246,.07), transparent 22%);z-index:0}
@@ -387,39 +401,37 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:li
 #atlas-search-box{background:rgba(255,255,255,.9);border-color:var(--border)}
 #atlas-search-input{color:var(--text-primary)}
 #atlas-search-input::placeholder{color:var(--text-muted)}
-#atlas-panel,#right-panel{background:linear-gradient(180deg, rgba(251,253,255,.98), rgba(242,247,251,.96));border-left:1px solid var(--border);box-shadow:-24px 0 60px rgba(148,163,184,.18)}
-#right-panel{width:var(--panel-w)}
 #panel-section-overview,#panel-section-score,#panel-section-renewable,#panel-section-official,#panel-section-scenarios,#panel-section-actions,#panel-section-insights,#data-sources{padding:22px}
 #panel-section-overview .panel-label,#panel-section-score .panel-label,#panel-section-renewable .panel-label,#panel-section-official .panel-label,#panel-section-scenarios .panel-label,#panel-section-actions .panel-label,#panel-section-insights .panel-label,#data-sources .panel-label{color:#6d879a;letter-spacing:.22em;font-size:10px}
 .panel-divider{background:linear-gradient(90deg, transparent, rgba(148,163,184,.18), transparent)}
 #site-hero,#layer-brief,.signal-card,.scenario-card,.action-card,.metric-card,.insight-card{position:relative;overflow:hidden;border:1px solid rgba(148,163,184,.16);box-shadow:var(--shadow-soft)}
 #site-hero::before,#layer-brief::before,.signal-card::before,.scenario-card::before,.action-card::before,.metric-card::before,.insight-card::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg, rgba(255,255,255,.64), transparent 32%, transparent 70%, rgba(15,157,132,.05))}
-#site-hero{position:absolute;top:22px;left:22px;z-index:420;width:min(560px,calc(100% - 44px));padding:20px 22px;border-radius:28px;background:linear-gradient(135deg, rgba(255,255,255,.92), rgba(241,247,251,.9));transform-origin:top left;animation:cardFloat .9s cubic-bezier(.2,.8,.2,1)}
+#site-hero{position:absolute;top:18px;left:18px;z-index:420;width:min(480px,calc(100% - 36px));padding:16px 18px;border-radius:24px;background:linear-gradient(135deg, rgba(255,255,255,.9), rgba(241,247,251,.88));transform-origin:top left;animation:cardFloat .9s cubic-bezier(.2,.8,.2,1)}
 .hero-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;margin-bottom:16px;border-radius:999px;background:rgba(15,157,132,.1);color:#145b50;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
 .hero-eyebrow::before{content:'';width:8px;height:8px;border-radius:999px;background:var(--accent);box-shadow:0 0 14px rgba(15,157,132,.25)}
 .hero-topline{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
 .hero-copy{max-width:380px}
-.hero-title{font-family:var(--font-display);font-size:30px;line-height:1.05;letter-spacing:-.03em}
-.hero-subtitle{margin-top:10px;color:var(--text-secondary);font-size:14px;line-height:1.6}
-#hero-grade-pill{flex-shrink:0;min-width:84px;padding:16px 14px 14px;border-radius:22px;text-align:center;background:linear-gradient(160deg, rgba(15,157,132,.12), rgba(59,130,246,.12));border:1px solid rgba(148,163,184,.16)}
-#hero-grade-pill strong{display:block;font-family:var(--font-display);font-size:28px;line-height:1}
+.hero-title{font-family:var(--font-display);font-size:26px;line-height:1.06;letter-spacing:-.03em}
+.hero-subtitle{margin-top:8px;color:var(--text-secondary);font-size:13px;line-height:1.55}
+#hero-grade-pill{flex-shrink:0;min-width:76px;padding:14px 12px 12px;border-radius:20px;text-align:center;background:linear-gradient(160deg, rgba(15,157,132,.12), rgba(59,130,246,.12));border:1px solid rgba(148,163,184,.16)}
+#hero-grade-pill strong{display:block;font-family:var(--font-display);font-size:24px;line-height:1}
 #hero-grade-pill span{display:block;margin-top:6px;color:#4b6a7f;font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase}
-#hero-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:18px}
-.hero-kpi{padding:14px 14px 13px;border-radius:20px;background:rgba(255,255,255,.78);border:1px solid rgba(148,163,184,.12)}
+#hero-kpis{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.hero-kpi{padding:12px 12px 11px;border-radius:18px;background:rgba(255,255,255,.78);border:1px solid rgba(148,163,184,.12)}
 .hero-kpi-label{display:block;color:var(--text-muted);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
-.hero-kpi-value{display:block;margin-top:7px;font-size:20px;font-weight:800;color:var(--text-primary)}
-.hero-kpi-copy{margin-top:4px;color:var(--text-secondary);font-size:11px;line-height:1.45}
+.hero-kpi-value{display:block;margin-top:6px;font-size:18px;font-weight:800;color:var(--text-primary)}
+.hero-kpi-copy{margin-top:3px;color:var(--text-secondary);font-size:10px;line-height:1.4}
 #layer-brief{position:absolute;top:22px;right:22px;z-index:420;width:300px;padding:18px 18px 16px;border-radius:24px;background:linear-gradient(180deg, rgba(255,255,255,.94), rgba(244,248,251,.92));animation:cardFloat 1.1s cubic-bezier(.2,.8,.2,1)}
 #layer-brief-title{margin:4px 0 8px;font-family:var(--font-display);font-size:22px;line-height:1.1}
 #layer-brief-copy{color:var(--text-secondary);font-size:13px;line-height:1.6}
-.signal-card{padding:18px;border-radius:24px;background:linear-gradient(160deg, rgba(255,255,255,.92), rgba(241,247,251,.88))}
+.signal-card{padding:14px;border-radius:20px;background:linear-gradient(160deg, rgba(255,255,255,.92), rgba(241,247,251,.88))}
 .signal-badge{display:inline-flex;align-items:center;gap:8px;padding:5px 11px;border-radius:999px;background:rgba(15,157,132,.1);color:#145b50;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
-.signal-title{margin-top:14px;font-family:var(--font-display);font-size:24px;line-height:1.1}
-.signal-copy{margin-top:10px;color:var(--text-secondary);font-size:13px;line-height:1.65}
-.signal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}
-.signal-stat{padding:12px 13px;border-radius:18px;background:rgba(255,255,255,.82);border:1px solid rgba(148,163,184,.12)}
+.signal-title{margin-top:12px;font-family:var(--font-display);font-size:20px;line-height:1.12}
+.signal-copy{margin-top:8px;color:var(--text-secondary);font-size:12px;line-height:1.58}
+.signal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.signal-stat{padding:10px 11px;border-radius:16px;background:rgba(255,255,255,.82);border:1px solid rgba(148,163,184,.12)}
 .signal-stat-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.12em;font-weight:700}
-.signal-stat-value{margin-top:6px;font-size:17px;font-weight:800}
+.signal-stat-value{margin-top:5px;font-size:15px;font-weight:800}
 #gauge-container{margin-bottom:12px}
 #gauge-svg{width:194px}
 #gauge-track{stroke:rgba(148,163,184,.22)}
@@ -461,7 +473,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:li
 .insight-meta{font-size:9px;color:var(--text-muted);font-weight:700}
 .insight-text{margin-top:8px;color:var(--text-secondary)}
 #official-profile-note{color:var(--text-secondary);font-size:12px;line-height:1.6;margin-bottom:14px}
-.profile-card{position:relative;overflow:hidden;padding:16px;border-radius:22px;background:linear-gradient(160deg, rgba(255,255,255,.94), rgba(244,248,252,.92));border:1px solid rgba(148,163,184,.16);box-shadow:var(--shadow-soft);transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
+.profile-card{position:relative;overflow:hidden;padding:14px;border-radius:20px;background:linear-gradient(160deg, rgba(255,255,255,.94), rgba(244,248,252,.92));border:1px solid rgba(148,163,184,.16);box-shadow:var(--shadow-soft);transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
 .profile-card::before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(135deg, rgba(255,255,255,.64), transparent 35%, transparent 72%, rgba(15,157,132,.04))}
 .profile-card:hover{transform:translateY(-2px);border-color:rgba(148,163,184,.22);box-shadow:0 18px 44px rgba(148,163,184,.18)}
 .profile-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
@@ -474,7 +486,7 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:li
 .profile-stat{padding:10px 11px;border-radius:16px;background:rgba(255,255,255,.78);border:1px solid rgba(148,163,184,.12)}
 .profile-stat-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.11em;font-weight:700}
 .profile-stat-value{display:block;margin-top:5px;font-size:14px;font-weight:800;color:var(--text-primary);line-height:1.45}
-.profile-chart{margin-top:14px;padding:12px 12px 10px;border-radius:18px;background:rgba(244,248,251,.88);border:1px solid rgba(148,163,184,.12)}
+.profile-chart{margin-top:12px;padding:8px 10px 8px;border-radius:16px;background:rgba(244,248,251,.88);border:1px solid rgba(148,163,184,.12)}
 .profile-chart svg{display:block;width:100%;height:auto}
 .profile-month-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
 .profile-month{padding:8px 9px;border-radius:14px;background:rgba(255,255,255,.76);border:1px solid rgba(148,163,184,.12)}
@@ -492,13 +504,14 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:li
 .layer-btn.active{background:rgba(15,157,132,.1);border-color:rgba(15,157,132,.34);color:#145b50;box-shadow:0 0 0 4px rgba(15,157,132,.08)}
 #layer-bar-right{color:var(--text-secondary)}
 #active-layer-name{color:#153246;font-weight:700}
-#atlas-cta-btn,#case-study-btn,#audit-btn,#cl-export-btn{background:linear-gradient(135deg, rgba(15,157,132,.12), rgba(59,130,246,.12));border-color:rgba(15,157,132,.24);color:#145b50}
-#atlas-cta-btn:hover,#case-study-btn:hover,#audit-btn:hover,#cl-export-btn:hover{background:linear-gradient(135deg, rgba(15,157,132,.18), rgba(59,130,246,.16))}
+#case-study-btn,#audit-btn,#cl-export-btn{background:linear-gradient(135deg, rgba(15,157,132,.12), rgba(59,130,246,.12));border-color:rgba(15,157,132,.24);color:#145b50}
+#case-study-btn:hover,#audit-btn:hover,#cl-export-btn:hover{background:linear-gradient(135deg, rgba(15,157,132,.18), rgba(59,130,246,.16))}
 #back-btn{background:rgba(255,255,255,.76);border-color:rgba(148,163,184,.14)}
+@keyframes panelLift{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes cardFloat{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
-@media (max-width:1200px){:root{--panel-w:360px}#site-hero{width:min(500px,calc(100% - 44px))}#hero-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:980px){#layer-brief{display:none}}
-@media (max-width:760px){#site-hero{top:14px;left:14px;width:calc(100% - 28px);padding:18px}.hero-topline{flex-direction:column}#hero-grade-pill{align-self:flex-start}#hero-kpis{grid-template-columns:1fr}}
+@media (max-width:1200px){#site-hero{width:min(440px,calc(100% - 36px))}#hero-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:980px){#layer-brief{display:none}#atlas-cta-btn{left:18px;right:18px;bottom:18px;transform:none;max-width:none;white-space:normal;text-align:center}.case-scroll-shell{width:calc(100% - 28px)}}
+@media (max-width:760px){#case-view-tabs{padding:12px 14px;flex-wrap:wrap}#site-hero{top:14px;left:14px;width:calc(100% - 28px);padding:18px}.hero-topline{flex-direction:column}#hero-grade-pill{align-self:flex-start}#hero-kpis{grid-template-columns:1fr}.case-pane-actions{padding-bottom:14px}.portfolio-pane-export{width:100%;justify-content:center}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none !important;transition:none !important;scroll-behavior:auto !important}}
 </style>
 </head>
@@ -800,10 +813,16 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:li
       </div>
     </header>
 
+    <div id="case-view-tabs">
+      <button class="case-view-tab active" data-case-view="map" onclick="switchCasePanelTab('map')">Map</button>
+      <button class="case-view-tab" data-case-view="overview" onclick="switchCasePanelTab('overview')">Overview</button>
+      <button class="case-view-tab" data-case-view="thesis" onclick="switchCasePanelTab('thesis')">Investment Thesis</button>
+    </div>
+
     <!-- Main content -->
     <main id="main">
-      <!-- Map container -->
-      <div id="map-container">
+      <section id="case-pane-map" class="case-view-pane active">
+        <div id="map-container">
         <div id="map"></div>
         <div id="site-hero">
           <div class="hero-eyebrow">Portfolio Signal</div>
@@ -854,8 +873,51 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:li
         <div id="coords-display">28.2906°N, 82.2918°W · Elev ~31m</div>
       </div>
 
-      <!-- Right panel -->
-      <aside id="right-panel">
+      <div id="layer-bar">
+        <div id="layer-bar-label">LAYERS</div>
+        <div id="layer-toggles">
+          <button class="layer-btn active" data-layer="solar" aria-pressed="true">
+            <span class="layer-btn-dot" style="background:#f59e0b"></span>
+            Solar Irradiance
+          </button>
+          <button class="layer-btn" data-layer="wind" aria-pressed="false">
+            <span class="layer-btn-dot" style="background:#818cf8"></span>
+            Wind Speed
+          </button>
+          <button class="layer-btn" data-layer="soil" aria-pressed="false">
+            <span class="layer-btn-dot" style="background:#34d399"></span>
+            Soil Moisture
+          </button>
+          <button class="layer-btn" data-layer="esg" aria-pressed="false">
+            <span class="layer-btn-dot" style="background:#f87171"></span>
+            ESG Risk Zones
+          </button>
+        </div>
+        <div id="layer-bar-right">
+          <span id="active-layer-name">Solar Irradiance</span>
+        </div>
+      </div>
+      </section>
+
+      <section id="case-pane-overview" class="case-view-pane case-content-pane">
+        <div class="case-scroll-shell">
+          <div class="case-pane-actions">
+            <button class="portfolio-pane-export" onclick="exportPortfolioBrief()">Download PDF</button>
+          </div>
+          <div id="case-panel-overview" class="case-section-stack"></div>
+        </div>
+      </section>
+
+      <section id="case-pane-thesis" class="case-view-pane case-content-pane">
+        <div class="case-scroll-shell">
+          <div class="case-pane-actions">
+            <button class="portfolio-pane-export" onclick="exportPortfolioBrief()">Download PDF</button>
+          </div>
+          <div id="case-panel-thesis" class="case-section-stack"></div>
+        </div>
+      </section>
+
+      <div id="case-panel-source-bank" aria-hidden="true">
         <div id="panel-section-overview">
           <div class="panel-label">Investment Thesis</div>
           <div class="signal-card">
@@ -1026,34 +1088,8 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:li
             <span class="source-tag">EPA EnviroAtlas</span>
           </div>
         </div>
-      </aside>
+      </div>
     </main>
-
-    <!-- Bottom layer toggle bar -->
-    <div id="layer-bar">
-      <div id="layer-bar-label">LAYERS</div>
-      <div id="layer-toggles">
-        <button class="layer-btn active" data-layer="solar" aria-pressed="true">
-          <span class="layer-btn-dot" style="background:#f59e0b"></span>
-          Solar Irradiance
-        </button>
-        <button class="layer-btn" data-layer="wind" aria-pressed="false">
-          <span class="layer-btn-dot" style="background:#818cf8"></span>
-          Wind Speed
-        </button>
-        <button class="layer-btn" data-layer="soil" aria-pressed="false">
-          <span class="layer-btn-dot" style="background:#34d399"></span>
-          Soil Moisture
-        </button>
-        <button class="layer-btn" data-layer="esg" aria-pressed="false">
-          <span class="layer-btn-dot" style="background:#f87171"></span>
-          ESG Risk Zones
-        </button>
-      </div>
-      <div id="layer-bar-right">
-        <span id="active-layer-name">Solar Irradiance</span>
-      </div>
-    </div>
   </div>
 
   </div><!-- /app -->
@@ -1567,12 +1603,12 @@ function buildProfileMonthGrid(profile) {
 }
 
 function buildProfileChartSvg(profile) {
-  var width = 280;
-  var height = 136;
+  var width = 248;
+  var height = 106;
   var left = 8;
   var right = 8;
   var top = 8;
-  var bottom = 22;
+  var bottom = 18;
   var plotWidth = width - left - right;
   var plotHeight = height - top - bottom;
   var maxValue = Math.max.apply(null, profile.series);
@@ -1582,15 +1618,18 @@ function buildProfileChartSvg(profile) {
   var bars = '';
   var labels = '';
   var path = '';
+  var points = '';
 
   profile.series.forEach(function(value, index) {
+    var labelValue = value.toFixed(profile.precision) + ' ' + profile.unit;
     var x = left + index * step + (step - barWidth) / 2;
     var barHeight = (value / maxValue) * plotHeight;
     var y = top + plotHeight - barHeight;
     var centerX = x + barWidth / 2;
     var point = centerX.toFixed(1) + ',' + y.toFixed(1);
-    bars += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barWidth.toFixed(1) + '" height="' + barHeight.toFixed(1) + '" rx="7" fill="' + profile.accent + '" fill-opacity="' + (0.22 + (value / maxValue) * 0.58).toFixed(2) + '"></rect>';
-    labels += '<text x="' + centerX.toFixed(1) + '" y="' + (height - 6) + '" text-anchor="middle" fill="#7a94a8" font-size="9" font-family="Inter, sans-serif">' + PROFILE_MONTHS[index].charAt(0) + '</text>';
+    bars += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barWidth.toFixed(1) + '" height="' + barHeight.toFixed(1) + '" rx="7" fill="' + profile.accent + '" fill-opacity="' + (0.22 + (value / maxValue) * 0.58).toFixed(2) + '"><title>' + PROFILE_MONTHS[index] + ': ' + labelValue + '</title></rect>';
+    points += '<circle cx="' + centerX.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3.4" fill="' + profile.accent + '" stroke="#ffffff" stroke-width="1.2"><title>' + PROFILE_MONTHS[index] + ': ' + labelValue + '</title></circle>';
+    labels += '<text x="' + centerX.toFixed(1) + '" y="' + (height - 4) + '" text-anchor="middle" fill="#7a94a8" font-size="8.5" font-family="Inter, sans-serif">' + PROFILE_MONTHS[index].charAt(0) + '</text>';
     path += (index === 0 ? 'M ' : ' L ') + point;
   });
 
@@ -1600,6 +1639,7 @@ function buildProfileChartSvg(profile) {
     +   '<text x="' + (width - right) + '" y="' + (avgY - 4).toFixed(1) + '" text-anchor="end" fill="#6d879a" font-size="9" font-family="Inter, sans-serif">Annual ' + profile.annual.toFixed(profile.precision) + '</text>'
     +   bars
     +   '<path d="' + path + '" fill="none" stroke="' + profile.accent + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>'
+    +   points
     +   labels
     + '</svg>';
 }
@@ -2578,9 +2618,6 @@ function _showLatLonPanel(lat, lon, nasa, om, myGen) {
   if (lpWind) {
     lpWind.innerHTML = '<div class="lp-note-card"><strong>Official Monthly Series</strong><br/>NASA POWER monthly wind climatology for this clicked point (' + coverageShort + ').</div>' + lpWind.innerHTML;
   }
-  if (lpProfiles) {
-    lpProfiles.innerHTML = solarProfileCard + windProfileCard + lpProfiles.innerHTML;
-  }
   if (lpAnalysis) lpAnalysis.innerHTML = _buildPopupLocationAnalysisHtml();
 
   // Initial AI insights in sidenav (solar + wind from Phase 1, terrain loading placeholder)
@@ -2821,10 +2858,60 @@ var _clickMarker = null;
 var _dataGen = 0; // incremented each click to invalidate stale async callbacks
 var _popupMiniMap = null;
 var _popupMiniMarker = null;
+var _casePanelReady = false;
+
+function initCaseStudyPanel() {
+  if (_casePanelReady) return;
+  var overviewPane = document.getElementById('case-panel-overview');
+  var thesisPane = document.getElementById('case-panel-thesis');
+  if (!overviewPane || !thesisPane) return;
+
+  function moveSection(sectionId, targetPane, moveDivider) {
+    var section = document.getElementById(sectionId);
+    if (!section) return;
+    var divider = moveDivider && section.nextElementSibling && section.nextElementSibling.classList.contains('panel-divider')
+      ? section.nextElementSibling
+      : null;
+    targetPane.appendChild(section);
+    if (divider) targetPane.appendChild(divider);
+  }
+
+  moveSection('panel-section-score', overviewPane, true);
+  moveSection('panel-section-renewable', overviewPane, true);
+  moveSection('panel-section-official', overviewPane, true);
+  moveSection('panel-section-insights', overviewPane, true);
+  moveSection('data-sources', overviewPane, false);
+
+  moveSection('panel-section-overview', thesisPane, true);
+  moveSection('panel-section-scenarios', thesisPane, true);
+  moveSection('panel-section-actions', thesisPane, false);
+
+  _casePanelReady = true;
+}
+
+function switchCasePanelTab(tab) {
+  document.querySelectorAll('.case-view-tab').forEach(function(el) {
+    el.classList.toggle('active', el.dataset.caseView === tab);
+  });
+  ['map', 'overview', 'thesis'].forEach(function(key) {
+    var pane = document.getElementById('case-pane-' + key);
+    if (pane) pane.classList.toggle('active', key === tab);
+  });
+  if (tab === 'map' && _klMap) {
+    setTimeout(function() {
+      _klMap.invalidateSize({animate: false});
+    }, 60);
+  } else {
+    var pane = document.getElementById('case-pane-' + tab);
+    if (pane) pane.scrollTop = 0;
+  }
+}
 
 function showCaseStudy() {
   document.getElementById('view-atlas').classList.remove('active');
   document.getElementById('view-casestudy').classList.add('active');
+  initCaseStudyPanel();
+  switchCasePanelTab('map');
 
   if (!_klReady) {
     _klReady = true;
@@ -3501,6 +3588,187 @@ function exportChecklist() {
   }
 
   doc.save('LumoraExplorer_ESG_AuditReadiness_KingLake.pdf');
+}
+
+function exportPortfolioBrief() {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert('PDF library not loaded yet — please wait a moment and try again.');
+    return;
+  }
+
+  var jsPDF = window.jspdf.jsPDF;
+  var doc = new jsPDF({ orientation: 'portrait', unit: 'pt', format: 'letter' });
+  var pageW = doc.internal.pageSize.getWidth();
+  var pageH = doc.internal.pageSize.getHeight();
+  var margin = 40;
+  var contentW = pageW - margin * 2;
+  var dateStr = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  var esg = computeESG();
+  var checklist = getChecklistSnapshot();
+  var model = buildPortfolioModel(esg, checklist);
+  var actions = checklist.openItems.slice(0, 5);
+
+  function safeText(id, fallback) {
+    var el = document.getElementById(id);
+    return el ? el.textContent.trim() : fallback;
+  }
+
+  var signalRows = [
+    ['Signal', safeText('signal-badge', 'Proceed with Hybrid Phasing')],
+    ['Primary Build', safeText('signal-primary', '1 MW solar')],
+    ['Expansion Path', safeText('signal-expansion', '2 MW wind')],
+    ['Permitting Heat', safeText('signal-risk', 'Moderate')],
+    ['Checklist Open', safeText('signal-open', actions.length + ' items')]
+  ];
+
+  var resourceRows = [
+    ['Solar GHI', safeText('mv-solar', esg.solarAvg.toFixed(2)) + ' kWh/m2/day'],
+    ['Wind Speed', safeText('mv-wind', esg.windAvg.toFixed(2)) + ' m/s @ 80m'],
+    ['Soil Moisture', safeText('mv-soil', esg.soilAvg.toFixed(3)) + ' m3/m3'],
+    ['ESG Grade', esg.grade + ' (' + esg.total + '/100)'],
+    ['Readiness', checklist.readiness + '%']
+  ];
+
+  var scenarioRows = model.scenarios.map(function(item) {
+    return [item.title, item.size, item.output, item.risk, item.copy];
+  });
+
+  var actionRows = actions.map(function(item, index) {
+    return [(index + 1) + '.', item.section, statusLabel(item.status), item.title, trimCopy(item.desc, 120)];
+  });
+
+  var monthlyRows = PROFILE_MONTHS.map(function(month, index) {
+    return [
+      month,
+      OFFICIAL_PROFILES.solar.series[index].toFixed(2),
+      OFFICIAL_PROFILES.wind.series[index].toFixed(2)
+    ];
+  });
+
+  doc.setFillColor(15, 157, 132);
+  doc.rect(0, 0, pageW, 58, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(16);
+  doc.text('Lumora Explorer — King Lake Portfolio Brief', margin, 24);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.text('Pasco County, Florida · 28.2906N, 82.2918W · Generated ' + dateStr, margin, 41);
+
+  var curY = 82;
+  doc.setTextColor(20, 32, 51);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(22);
+  doc.text(safeText('signal-title', 'Solar should lead the first deployment tranche.'), margin, curY);
+  curY += 20;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  doc.setTextColor(73, 97, 118);
+  var summaryLines = doc.splitTextToSize(safeText('signal-copy', 'Resource quality is strongest on solar, ESG risk is manageable, and the open checklist shows a clear path to derisking permits and stakeholder work.'), contentW);
+  doc.text(summaryLines, margin, curY);
+  curY += summaryLines.length * 14 + 14;
+
+  doc.autoTable({
+    startY: curY,
+    head: [['Portfolio Signal', 'Current Value']],
+    body: signalRows,
+    theme: 'grid',
+    margin: { left: margin, right: margin },
+    headStyles: { fillColor: [15, 157, 132], textColor: [255, 255, 255], fontStyle: 'bold' },
+    styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak' },
+    columnStyles: { 0: { cellWidth: 140, fontStyle: 'bold' }, 1: { cellWidth: contentW - 140 } }
+  });
+  curY = doc.lastAutoTable.finalY + 16;
+
+  doc.autoTable({
+    startY: curY,
+    head: [['Resource Stack', 'Value']],
+    body: resourceRows,
+    theme: 'grid',
+    margin: { left: margin, right: margin },
+    headStyles: { fillColor: [59, 130, 246], textColor: [255, 255, 255], fontStyle: 'bold' },
+    styles: { fontSize: 9, cellPadding: 6, overflow: 'linebreak' },
+    columnStyles: { 0: { cellWidth: 140, fontStyle: 'bold' }, 1: { cellWidth: contentW - 140 } }
+  });
+  curY = doc.lastAutoTable.finalY + 16;
+
+  doc.autoTable({
+    startY: curY,
+    head: [['Scenario', 'Build', 'Output', 'Risk', 'Summary']],
+    body: scenarioRows,
+    theme: 'grid',
+    margin: { left: margin, right: margin },
+    headStyles: { fillColor: [17, 24, 39], textColor: [255, 255, 255], fontStyle: 'bold' },
+    styles: { fontSize: 8, cellPadding: 5, overflow: 'linebreak' },
+    columnStyles: {
+      0: { cellWidth: 110, fontStyle: 'bold' },
+      1: { cellWidth: 70 },
+      2: { cellWidth: 70 },
+      3: { cellWidth: 55 },
+      4: { cellWidth: contentW - 305 }
+    }
+  });
+  curY = doc.lastAutoTable.finalY + 16;
+
+  doc.autoTable({
+    startY: curY,
+    head: [['#', 'Section', 'Status', 'Action', 'Detail']],
+    body: actionRows,
+    theme: 'grid',
+    margin: { left: margin, right: margin },
+    headStyles: { fillColor: [124, 58, 237], textColor: [255, 255, 255], fontStyle: 'bold' },
+    styles: { fontSize: 8, cellPadding: 5, overflow: 'linebreak' },
+    columnStyles: {
+      0: { cellWidth: 24, halign: 'center' },
+      1: { cellWidth: 88, fontStyle: 'bold' },
+      2: { cellWidth: 62 },
+      3: { cellWidth: 126 },
+      4: { cellWidth: contentW - 300 }
+    }
+  });
+  curY = doc.lastAutoTable.finalY + 18;
+
+  if (curY > pageH - 220) {
+    doc.addPage();
+    curY = 54;
+  }
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(13);
+  doc.setTextColor(20, 32, 51);
+  doc.text('Official Monthly Profiles', margin, curY);
+  curY += 10;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(73, 97, 118);
+  doc.text('NASA POWER climatology for the King Lake site centroid (2001-2020).', margin, curY + 4);
+  curY += 14;
+
+  doc.autoTable({
+    startY: curY,
+    head: [['Month', 'Solar GHI (kWh/m2/day)', 'Wind @ 50m (m/s)']],
+    body: monthlyRows,
+    theme: 'grid',
+    margin: { left: margin, right: margin },
+    headStyles: { fillColor: [15, 157, 132], textColor: [255, 255, 255], fontStyle: 'bold' },
+    styles: { fontSize: 8.5, cellPadding: 5 },
+    columnStyles: { 0: { cellWidth: 70, fontStyle: 'bold' }, 1: { cellWidth: 170 }, 2: { cellWidth: contentW - 240 } }
+  });
+
+  var totalPages = doc.internal.getNumberOfPages();
+  for (var page = 1; page <= totalPages; page++) {
+    doc.setPage(page);
+    doc.setDrawColor(220, 228, 236);
+    doc.line(margin, pageH - 26, pageW - margin, pageH - 26);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(120, 133, 148);
+    doc.text('Lumora Explorer · Portfolio Brief · NASA POWER · NREL · ESG Readiness', margin, pageH - 12);
+    doc.text('Page ' + page + ' / ' + totalPages, pageW - margin, pageH - 12, { align: 'right' });
+  }
+
+  doc.save('LumoraExplorer_PortfolioBrief_KingLake.pdf');
 }
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
