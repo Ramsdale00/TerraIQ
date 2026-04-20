@@ -322,37 +322,6 @@ function renderBreakdown(env, soc, gov) {
   });
 }
 
-function renderMetrics(solarAvg, windAvg, soilAvg) {
-  function set(key, val, rating) {
-    var ve = document.getElementById('mv-' + key);
-    var re = document.getElementById('mr-' + key);
-    if (ve) ve.textContent = val;
-    if (re) {
-      re.textContent = rating;
-      re.className = 'metric-rating ' + (rating === 'Excellent' || rating === 'High' ? 'rating-excellent' : rating === 'Good' ? 'rating-good' : 'rating-fair');
-    }
-  }
-  set('solar', solarAvg.toFixed(2), solarAvg >= 5.2 ? 'Excellent' : 'Good');
-  set('wind',  windAvg.toFixed(2),  windAvg >= 5.5  ? 'Excellent' : windAvg >= 4.5 ? 'Good' : 'Moderate');
-  set('soil',  soilAvg.toFixed(3),  soilAvg >= 0.20 ? 'Good' : 'Moderate');
-}
-
-function renderInsights(esg) {
-  var texts = [
-    '☀️ At ' + esg.solarAvg.toFixed(2) + ' kWh/m²/day average GHI (NREL NSRDB), King Lake ranks in the top 25% of Florida solar sites. A 1 MW ground-mount array could generate ~' + Math.round(esg.solarAvg * 365 * 0.215 * 1000).toLocaleString() + ' kWh/year at an estimated LCOE of $0.043/kWh — well below Florida\'s $0.14/kWh retail rate.',
-    '💨 Wind speeds of ' + esg.windAvg.toFixed(2) + ' m/s at 80m hub height (Open-Meteo ERA5) represent an IEC Class 3 resource typical of Central Florida flatwoods. A 2 MW unit achieves ~25% capacity factor (~4,380,000 kWh/year). FDEP siting review and noise assessment required for turbines near residential areas.',
-    '🌱 Soil moisture averaging ' + esg.soilAvg.toFixed(3) + ' m³/m³ (NASA SMAP L3) reflects typical Myakka fine sand Spodosol profile in Pasco County. No EPA 303(d) impairment on King Lake. With ~8% FDEP-jurisdictional wetlands, ACOE Jacksonville District §404 avoidance design maintains the site\'s ' + esg.total + '/100 ESG rating.'
-  ];
-  texts.forEach(function(text, i) {
-    var card = document.getElementById('insight-' + i);
-    if (!card) return;
-    var p = card.querySelector('.insight-text');
-    setTimeout(function() {
-      if (p) { p.textContent = text; card.style.animation = 'fadeIn .5s ease'; }
-    }, i * 320);
-  });
-}
-
 // ─── LEGEND UPDATE ─────────────────────────────────────────────────────────
 
 function renderMetrics(esg) {
