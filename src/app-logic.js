@@ -385,7 +385,7 @@ function renderOfficialProfiles() {
     var peakIndex = profile.series.indexOf(maxValue);
     var lowIndex = profile.series.indexOf(minValue);
     return ''
-      + '<article class="profile-card">'
+      + '<article class="profile-card" data-profile-key="' + key + '">'
       +   '<div class="profile-head">'
       +     '<div>'
       +       '<div class="profile-kicker">' + profile.source + '</div>'
@@ -407,6 +407,7 @@ function renderOfficialProfiles() {
       +   '</div>'
       + '</article>';
   }).join('');
+  wireProfileChartTooltips(wrap);
 }
 
 function buildProfileMonthGrid(profile) {
@@ -421,21 +422,28 @@ function buildProfileMonthGrid(profile) {
 
 function buildProfileChartSvg(profile) {
   var width = 248;
-  var height = 106;
+  var height = 116;
   var left = 8;
   var right = 8;
-  var top = 8;
-  var bottom = 18;
+  var top = 10;
+  var bottom = 22;
   var plotWidth = width - left - right;
   var plotHeight = height - top - bottom;
   var maxValue = Math.max.apply(null, profile.series);
   var step = plotWidth / profile.series.length;
   var barWidth = step * 0.62;
   var avgY = top + plotHeight - (profile.annual / maxValue) * plotHeight;
+  var gradId = 'profileGrad_' + Math.random().toString(36).slice(2, 8);
+  var areaGradId = 'profileArea_' + Math.random().toString(36).slice(2, 8);
   var bars = '';
+  var hits = '';
   var labels = '';
-  var path = '';
+  var linePath = '';
+  var areaPath = '';
   var points = '';
+  var firstX = null;
+  var lastX = null;
+  var baselineY = top + plotHeight;
 
   profile.series.forEach(function(value, index) {
     var labelValue = value.toFixed(profile.precision) + ' ' + profile.unit;
@@ -444,21 +452,116 @@ function buildProfileChartSvg(profile) {
     var y = top + plotHeight - barHeight;
     var centerX = x + barWidth / 2;
     var point = centerX.toFixed(1) + ',' + y.toFixed(1);
-    bars += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barWidth.toFixed(1) + '" height="' + barHeight.toFixed(1) + '" rx="7" fill="' + profile.accent + '" fill-opacity="' + (0.22 + (value / maxValue) * 0.58).toFixed(2) + '"><title>' + PROFILE_MONTHS[index] + ': ' + labelValue + '</title></rect>';
-    points += '<circle cx="' + centerX.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3.4" fill="' + profile.accent + '" stroke="#ffffff" stroke-width="1.2"><title>' + PROFILE_MONTHS[index] + ': ' + labelValue + '</title></circle>';
-    labels += '<text x="' + centerX.toFixed(1) + '" y="' + (height - 4) + '" text-anchor="middle" fill="#7a94a8" font-size="8.5" font-family="Inter, sans-serif">' + PROFILE_MONTHS[index].charAt(0) + '</text>';
-    path += (index === 0 ? 'M ' : ' L ') + point;
+    if (firstX === null) firstX = centerX;
+    lastX = centerX;
+
+    bars += '<rect class="profile-bar" data-month-index="' + index + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barWidth.toFixed(1) + '" height="' + barHeight.toFixed(1) + '" rx="6" fill="url(#' + gradId + ')" fill-opacity="' + (0.55 + (value / maxValue) * 0.4).toFixed(2) + '"></rect>';
+    points += '<circle class="profile-point" data-month-index="' + index + '" cx="' + centerX.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3" fill="' + profile.accent + '" stroke="#ffffff" stroke-width="1.4"></circle>';
+    hits += '<rect class="profile-hit" data-month-index="' + index + '" data-month="' + PROFILE_MONTHS[index] + '" data-value="' + labelValue + '" x="' + (left + index * step).toFixed(1) + '" y="' + top + '" width="' + step.toFixed(1) + '" height="' + plotHeight.toFixed(1) + '" fill="transparent"></rect>';
+    labels += '<text x="' + centerX.toFixed(1) + '" y="' + (height - 6) + '" text-anchor="middle" fill="#7a94a8" font-size="8.5" font-family="Inter, sans-serif">' + PROFILE_MONTHS[index].charAt(0) + '</text>';
+    linePath += (index === 0 ? 'M ' : ' L ') + point;
+    areaPath += (index === 0 ? 'M ' : ' L ') + point;
   });
+  areaPath += ' L ' + lastX.toFixed(1) + ',' + baselineY.toFixed(1) + ' L ' + firstX.toFixed(1) + ',' + baselineY.toFixed(1) + ' Z';
 
   return ''
-    + '<svg viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="' + profile.title + ' monthly average chart">'
-    +   '<line x1="' + left + '" y1="' + avgY.toFixed(1) + '" x2="' + (width - right) + '" y2="' + avgY.toFixed(1) + '" stroke="' + profile.accent + '" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.75"></line>'
+    + '<svg class="profile-chart-svg" data-accent="' + profile.accent + '" viewBox="0 0 ' + width + ' ' + height + '" preserveAspectRatio="none" role="img" aria-label="' + profile.title + ' monthly average chart">'
+    +   '<defs>'
+    +     '<linearGradient id="' + gradId + '" x1="0" y1="0" x2="0" y2="1">'
+    +       '<stop offset="0%" stop-color="' + profile.accent + '" stop-opacity="0.95"/>'
+    +       '<stop offset="100%" stop-color="' + profile.accent + '" stop-opacity="0.45"/>'
+    +     '</linearGradient>'
+    +     '<linearGradient id="' + areaGradId + '" x1="0" y1="0" x2="0" y2="1">'
+    +       '<stop offset="0%" stop-color="' + profile.accent + '" stop-opacity="0.22"/>'
+    +       '<stop offset="100%" stop-color="' + profile.accent + '" stop-opacity="0"/>'
+    +     '</linearGradient>'
+    +   '</defs>'
+    +   '<path d="' + areaPath + '" fill="url(#' + areaGradId + ')"></path>'
+    +   '<line x1="' + left + '" y1="' + avgY.toFixed(1) + '" x2="' + (width - right) + '" y2="' + avgY.toFixed(1) + '" stroke="' + profile.accent + '" stroke-width="1.4" stroke-dasharray="4 4" opacity="0.7"></line>'
     +   '<text x="' + (width - right) + '" y="' + (avgY - 4).toFixed(1) + '" text-anchor="end" fill="#6d879a" font-size="9" font-family="Inter, sans-serif">Annual ' + profile.annual.toFixed(profile.precision) + '</text>'
     +   bars
-    +   '<path d="' + path + '" fill="none" stroke="' + profile.accent + '" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>'
+    +   '<path d="' + linePath + '" fill="none" stroke="' + profile.accent + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>'
     +   points
+    +   '<line class="profile-guide" x1="0" y1="' + top + '" x2="0" y2="' + (top + plotHeight) + '" stroke="' + profile.accent + '" stroke-width="1" stroke-dasharray="2 3" opacity="0"></line>'
     +   labels
+    +   hits
     + '</svg>';
+}
+
+function wireProfileChartTooltips(root) {
+  if (!root) return;
+  var tooltip = document.getElementById('profile-chart-tooltip');
+  if (!tooltip) {
+    tooltip = document.createElement('div');
+    tooltip.id = 'profile-chart-tooltip';
+    tooltip.className = 'profile-chart-tooltip';
+    tooltip.setAttribute('role', 'tooltip');
+    tooltip.style.opacity = '0';
+    document.body.appendChild(tooltip);
+  }
+  var charts = root.querySelectorAll('.profile-chart-svg');
+  charts.forEach(function(svg) {
+    if (svg.dataset.tooltipReady === '1') return;
+    svg.dataset.tooltipReady = '1';
+    var accent = svg.getAttribute('data-accent') || '#0f9d84';
+    var guide = svg.querySelector('.profile-guide');
+    var bars = svg.querySelectorAll('.profile-bar');
+    var points = svg.querySelectorAll('.profile-point');
+    var hits = svg.querySelectorAll('.profile-hit');
+
+    function clearActive() {
+      bars.forEach(function(b) { b.classList.remove('is-active'); });
+      points.forEach(function(p) { p.classList.remove('is-active'); });
+    }
+    function activate(idx) {
+      clearActive();
+      if (bars[idx]) bars[idx].classList.add('is-active');
+      if (points[idx]) points[idx].classList.add('is-active');
+      if (guide && bars[idx]) {
+        var bx = parseFloat(bars[idx].getAttribute('x'));
+        var bw = parseFloat(bars[idx].getAttribute('width'));
+        var cx = (bx + bw / 2).toFixed(1);
+        guide.setAttribute('x1', cx);
+        guide.setAttribute('x2', cx);
+        guide.setAttribute('opacity', '0.55');
+      }
+    }
+    function showTooltip(evt, hit) {
+      var month = hit.getAttribute('data-month') || '';
+      var value = hit.getAttribute('data-value') || '';
+      tooltip.innerHTML =
+        '<span class="pct-month" style="color:' + accent + '">' + month + '</span>' +
+        '<span class="pct-value">' + value + '</span>';
+      tooltip.style.opacity = '1';
+      var pad = 14;
+      var rect = tooltip.getBoundingClientRect();
+      var x = evt.clientX + pad;
+      var y = evt.clientY - rect.height - pad;
+      if (x + rect.width + 8 > window.innerWidth) x = evt.clientX - rect.width - pad;
+      if (y < 8) y = evt.clientY + pad;
+      tooltip.style.left = x + 'px';
+      tooltip.style.top = y + 'px';
+    }
+    function hideTooltip() {
+      tooltip.style.opacity = '0';
+      clearActive();
+      if (guide) guide.setAttribute('opacity', '0');
+    }
+
+    hits.forEach(function(hit) {
+      var idx = Number(hit.getAttribute('data-month-index'));
+      hit.addEventListener('mouseenter', function(e) { activate(idx); showTooltip(e, hit); });
+      hit.addEventListener('mousemove', function(e) { showTooltip(e, hit); });
+      hit.addEventListener('mouseleave', hideTooltip);
+      hit.addEventListener('focus', function() {
+        activate(idx);
+        var box = hit.getBoundingClientRect();
+        showTooltip({ clientX: box.left + box.width / 2, clientY: box.top }, hit);
+      });
+      hit.addEventListener('blur', hideTooltip);
+      hit.setAttribute('tabindex', '0');
+    });
+  });
 }
 
 function trimCopy(text, maxLen) {
@@ -1020,6 +1123,46 @@ function _getNasaMonthlySeries(nasa, key) {
   });
 }
 
+var _kingLakeProfilesLoaded = false;
+function refreshKingLakeProfiles() {
+  if (_kingLakeProfilesLoaded) return;
+  _kingLakeProfilesLoaded = true;
+  fetch(POWER_CLIMATOLOGY_ENDPOINT)
+    .then(function(r) { return r.json(); })
+    .then(function(nasa) {
+      var solarSeries = _getNasaMonthlySeries(nasa, 'ALLSKY_SFC_SW_DWN');
+      var windSeries = _getNasaMonthlySeries(nasa, 'WS50M');
+      function annualMean(series) {
+        var clean = series.filter(function(v) { return v != null && !isNaN(v); });
+        if (!clean.length) return null;
+        return clean.reduce(function(a, b) { return a + b; }, 0) / clean.length;
+      }
+      if (solarSeries.length === 12 && solarSeries.every(function(v){return v!=null;})) {
+        OFFICIAL_PROFILES.solar.series = solarSeries;
+        var sa = annualMean(solarSeries);
+        if (sa != null) OFFICIAL_PROFILES.solar.annual = sa;
+        var su = nasa && nasa.parameters && nasa.parameters.ALLSKY_SFC_SW_DWN ? nasa.parameters.ALLSKY_SFC_SW_DWN.units : null;
+        if (su) OFFICIAL_PROFILES.solar.unit = _cleanProfileUnit(su);
+      }
+      if (windSeries.length === 12 && windSeries.every(function(v){return v!=null;})) {
+        OFFICIAL_PROFILES.wind.series = windSeries;
+        var wa = annualMean(windSeries);
+        if (wa != null) OFFICIAL_PROFILES.wind.annual = wa;
+        var wu = nasa && nasa.parameters && nasa.parameters.WS50M ? nasa.parameters.WS50M.units : null;
+        if (wu) OFFICIAL_PROFILES.wind.unit = _cleanProfileUnit(wu);
+      }
+      var period = nasa && nasa.header && nasa.header.range
+        ? '20-year monthly climatology (' + nasa.header.range + ')'
+        : OFFICIAL_PROFILES.solar.period;
+      OFFICIAL_PROFILES.solar.period = period;
+      OFFICIAL_PROFILES.wind.period = period;
+      renderOfficialProfiles();
+    })
+    .catch(function() {
+      _kingLakeProfilesLoaded = false; // allow retry on next view
+    });
+}
+
 function _buildLocationProfileCard(lat, lon, profile) {
   if (!profile || !profile.series || !profile.series.length) return '';
 
@@ -1436,6 +1579,8 @@ function _showLatLonPanel(lat, lon, nasa, om, myGen) {
     lpWind.innerHTML = '<div class="lp-note-card"><strong>Official Monthly Series</strong><br/>NASA POWER monthly wind climatology for this clicked point (' + coverageShort + ').</div>' + lpWind.innerHTML;
   }
   if (lpAnalysis) lpAnalysis.innerHTML = _buildPopupLocationAnalysisHtml();
+  var locationPopup = document.getElementById('location-popup');
+  if (locationPopup) wireProfileChartTooltips(locationPopup);
 
   // Initial AI insights in sidenav (solar + wind from Phase 1, terrain loading placeholder)
   var alocAI = document.getElementById('aloc-ai-insights');
@@ -1750,6 +1895,7 @@ function showCaseStudy() {
         renderBreakdown(esg.env, esg.soc, esg.gov);
         renderMetrics(esg);
         renderOfficialProfiles();
+        refreshKingLakeProfiles();
         renderExecutiveSummary(esg);
         updateLayerBrief('solar');
       }, 350);

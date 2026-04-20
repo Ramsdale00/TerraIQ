@@ -470,8 +470,17 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;background:li
 .profile-stat{padding:10px 11px;border-radius:16px;background:rgba(255,255,255,.78);border:1px solid rgba(148,163,184,.12)}
 .profile-stat-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.11em;font-weight:700}
 .profile-stat-value{display:block;margin-top:5px;font-size:14px;font-weight:800;color:var(--text-primary);line-height:1.45}
-.profile-chart{margin-top:12px;padding:8px 10px 8px;border-radius:16px;background:rgba(244,248,251,.88);border:1px solid rgba(148,163,184,.12)}
+.profile-chart{position:relative;margin-top:12px;padding:8px 10px 8px;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.78),rgba(244,248,251,.88));border:1px solid rgba(148,163,184,.14)}
 .profile-chart svg{display:block;width:100%;height:auto}
+.profile-bar{transition:fill-opacity .15s ease,filter .15s ease;cursor:pointer}
+.profile-bar.is-active{fill-opacity:1 !important;filter:drop-shadow(0 4px 10px rgba(15,23,42,.18))}
+.profile-point{transition:r .15s ease,filter .15s ease;pointer-events:none}
+.profile-point.is-active{r:4.4;filter:drop-shadow(0 2px 6px rgba(15,23,42,.25))}
+.profile-hit{cursor:crosshair;outline:none}
+.profile-hit:focus-visible{stroke:rgba(15,157,132,.55);stroke-width:1;stroke-dasharray:2 2}
+.profile-chart-tooltip{position:fixed;z-index:10000;display:flex;align-items:baseline;gap:8px;padding:8px 11px;border-radius:10px;background:rgba(15,23,42,.94);color:#fff;font-family:var(--font-display, 'Space Grotesk', system-ui, sans-serif);font-size:12px;font-weight:600;letter-spacing:.02em;box-shadow:0 10px 30px rgba(15,23,42,.28);pointer-events:none;transition:opacity .12s ease;backdrop-filter:blur(6px);left:0;top:0}
+.profile-chart-tooltip .pct-month{text-transform:uppercase;letter-spacing:.12em;font-size:10px;font-weight:800}
+.profile-chart-tooltip .pct-value{font-size:14px;font-weight:800;color:#fff}
 .profile-month-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px}
 .profile-month{padding:8px 9px;border-radius:14px;background:rgba(255,255,255,.76);border:1px solid rgba(148,163,184,.12)}
 .profile-month-label{display:block;font-size:10px;color:var(--text-muted);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
