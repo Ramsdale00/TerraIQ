@@ -177,6 +177,10 @@ function summaryFromTotal(total) {
   return 'Meaningful ESG friction requires a conservative project path.';
 }
 
+function buildScoreHelpText(esg) {
+  return 'Composite score: ' + esg.total + '/100, weighted 40% Environmental (' + esg.env + '), 30% Social (' + esg.soc + '), and 30% Governance (' + esg.gov + '). Strong water quality, localized wetland exposure, and a supportive permitting context lift the score, while community engagement and documentation work keep the site below the top tier.';
+}
+
 // ─── COLOUR HELPERS ────────────────────────────────────────────────────────
 
 var PROFILE_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -663,6 +667,14 @@ function renderExecutiveSummary(esg) {
   if (scoreHeadline) scoreHeadline.textContent = esg.summary;
   var scoreSubcopy = document.getElementById('score-subcopy');
   if (scoreSubcopy) scoreSubcopy.textContent = 'Environmental and governance strength keep the site investable, while social and documentation tasks define the next unlocks.';
+  var scoreHelpCopy = document.getElementById('score-help-copy');
+  var scoreHelpTrigger = document.getElementById('score-help-trigger');
+  var scoreHelpText = buildScoreHelpText(esg);
+  if (scoreHelpCopy) scoreHelpCopy.textContent = scoreHelpText;
+  if (scoreHelpTrigger) {
+    scoreHelpTrigger.setAttribute('aria-label', scoreHelpText);
+    scoreHelpTrigger.setAttribute('title', scoreHelpText);
+  }
 
   var heroGrade = document.getElementById('hero-grade');
   if (heroGrade) heroGrade.textContent = model.grade;
@@ -896,10 +908,11 @@ function initAtlasMap() {
     iconSize: [32, 32],
     iconAnchor: [16, 16]
   });
+  var portfolioScore = computeESG().total;
   var klMarker = L.marker([28.2906, -82.2918], {icon: klIcon, zIndexOffset: 1000});
   klMarker.bindTooltip(
     '<strong>King Lake, Florida</strong><br/>' +
-    'ESG Score: 79/100 &nbsp;&middot;&nbsp; GHI: 5.35 kWh/m²/day<br/>' +
+    'ESG Score: ' + portfolioScore + '/100 &nbsp;&middot;&nbsp; GHI: 5.35 kWh/m²/day<br/>' +
     '<span style="color:#009e7d;font-weight:600">Click to open Portfolio Assessment →</span>',
     {direction: 'top', offset: [0, -10]}
   );
@@ -1153,6 +1166,18 @@ function _popupSection(title, body, extraClass) {
     '<div class="aip-section-title">' + title + '</div>' + body + '</div>';
 }
 
+function _popupKpiGrid(items, extraClass) {
+  return '<div class="lp-compare-grid lp-kpi-grid' + (extraClass ? ' ' + extraClass : '') + '">' +
+    items.map(function(item) {
+      return '<div class="lp-stat-tile' + (item.tone ? ' lp-stat-' + item.tone : '') + '">' +
+        '<div class="lp-stat-label">' + item.label + '</div>' +
+        '<div class="lp-stat-value">' + item.value + '</div>' +
+        '<div class="lp-stat-copy">' + item.copy + '</div>' +
+      '</div>';
+    }).join('') +
+  '</div>';
+}
+
 function _popupSourceNote(lines) {
   return '<div class="lp-source-note"><strong style="color:var(--text-secondary);font-size:10px">Data Sources</strong><br/>' +
     lines.join('<br/>') + '</div>';
@@ -1314,7 +1339,8 @@ function _renderAiSectionContent(elev, slope, subData) {
 }
 
 function _buildPopupLocationAnalysisHtml() {
-  return '<div id="lp-loc-terrain" class="lp-section-card">' +
+  return '<div id="lp-location-kpis"></div>' +
+    '<div id="lp-loc-terrain" class="lp-section-card">' +
       _buildLoadingBlock('🏔️ Terrain Analysis (USGS 3DEP)', 'Fetching elevation data…') +
     '</div>' +
     '<div id="lp-loc-substation" class="lp-section-card">' +
@@ -1566,8 +1592,37 @@ function _showLatLonPanel(lat, lon, nasa, om, myGen) {
   var lpWind = document.getElementById('lp-wind');
   var lpAnalysis = document.getElementById('lp-analysis');
   var lpProfiles = document.getElementById('lp-profiles');
+  var lpSolarKpis = _popupKpiGrid([
+    { label:'Solar GHI', value:fmtV(ghi, 2), copy:'Primary irradiance signal · kWh/m2/day', tone:'solar' },
+    { label:'PV Yield P50', value:pvoutDaily, copy:'Median daily production · kWh/kWp/day', tone:'solar' },
+    { label:'PV Yield P90', value:pvP90daily ? pvP90daily.toFixed(2) : 'â€”', copy:'Conservative bankable case', tone:'solar' },
+    { label:'Solar CF', value:(solarCF || 'â€”') + '%', copy:iecSolar !== 'â€”' ? iecSolar : 'Capacity factor estimate', tone:'solar' }
+  ], 'lp-kpi-grid-solar');
+  var lpWindKpis = _popupKpiGrid([
+    { label:'Wind @ 80 m', value:ws80Label, copy:'Primary hub-height signal · m/s', tone:'wind' },
+    { label:'Wind @ 80 m P90', value:ws80P90 ? ws80P90.toFixed(2) : 'â€”', copy:'Conservative bankable case', tone:'wind' },
+    { label:'Wind CF', value:(windCF || 'â€”') + '%', copy:iecWind !== 'â€”' ? iecWind : 'Capacity factor estimate', tone:'wind' },
+    { label:'Direction', value:_dirToCard(wdirF), copy:wdirF != null ? Math.round(wdirF) + ' degrees at 10 m' : 'Direction not available', tone:'wind' }
+  ], 'lp-kpi-grid-wind');
+  var lpCombinedKpis = _popupKpiGrid([
+    { label:'Solar GHI', value:fmtV(ghi, 2), copy:'Primary irradiance signal · kWh/m2/day', tone:'solar' },
+    { label:'PV Yield P50 / P90', value:pvoutDaily + ' / ' + (pvP90daily ? pvP90daily.toFixed(2) : 'â€”'), copy:'Daily solar production range', tone:'solar' },
+    { label:'Wind @ 80 m', value:ws80Label + ' / ' + (ws80P90 ? ws80P90.toFixed(2) : 'â€”'), copy:'P50 and P90 wind speed · m/s', tone:'wind' },
+    { label:'Capacity Factors', value:'S ' + (solarCF || 'â€”') + '% Â· W ' + (windCF || 'â€”') + '%', copy:'Quick hybrid viability snapshot', tone:'neutral' },
+    { label:'Coverage', value:coverageShort, copy:'NASA POWER monthly climatology window', tone:'neutral' },
+    { label:'Resource Mix', value:(iecSolar !== 'â€”' ? iecSolar : 'Solar') + ' Â· ' + (iecWind !== 'â€”' ? iecWind : 'Wind'), copy:'High-signal project screening summary', tone:'neutral' }
+  ], 'lp-kpi-grid-combined');
+  var lpAnalysisKpis = _popupKpiGrid([
+    { label:'Solar GHI', value:fmtV(ghi, 2), copy:'Resource baseline for this point', tone:'solar' },
+    { label:'Wind @ 80 m', value:ws80Label, copy:'Hub-height wind screening signal', tone:'wind' },
+    { label:'PV Yield P50', value:pvoutDaily, copy:'Median solar production per kWp', tone:'solar' },
+    { label:'Capacity Factors', value:'S ' + (solarCF || 'â€”') + '% Â· W ' + (windCF || 'â€”') + '%', copy:'Quick site performance summary', tone:'neutral' }
+  ], 'lp-kpi-grid-analysis');
   if (lpSolar) {
     lpSolar.innerHTML =
+      lpSolarKpis +
+      '<div class="lp-note-card"><strong>Monthly profile first.</strong><br/>Use the official NASA POWER monthly climatology below to check seasonality before reviewing supporting diagnostics.</div>' +
+      solarProfileCard +
       _popupSection('☀️ Solar Irradiance (NASA POWER · 1984–2022 avg)',
         _row('GHI (P50)', fmtV(ghi, 2), ' kWh/m²/day') +
         _row('Annual GHI', ghiAnnual, ' kWh/m²/yr') +
@@ -1592,11 +1647,11 @@ function _showLatLonPanel(lat, lon, nasa, om, myGen) {
         '⚡ PV output derived with PR = 0.75 and fixed-tilt assumptions'
       ]);
   }
-  if (lpSolar) {
-    lpSolar.innerHTML = solarProfileCard + lpSolar.innerHTML;
-  }
   if (lpWind) {
     lpWind.innerHTML =
+      lpWindKpis +
+      '<div class="lp-note-card"><strong>Monthly profile first.</strong><br/>Review the official monthly wind climatology below, then use the height and bankability details as supporting context.</div>' +
+      windProfileCard +
       _popupSection('💨 Wind Profile',
         _row('10 m (surface)', ws10Label + ' m/s', '') +
         _row('50 m', ws50Label + ' m/s', ' (NASA POWER annual)') +
@@ -1614,17 +1669,16 @@ function _showLatLonPanel(lat, lon, nasa, om, myGen) {
       ]);
   }
   if (lpWind) {
-    lpWind.innerHTML = windProfileCard + lpWind.innerHTML;
     lpWind.innerHTML = lpWind.innerHTML.replace(
       'ðŸ“ Higher hub heights extrapolated with Hellmann power law Î± = 0.143 when direct measurements are unavailable',
       'ðŸ“ NASA monthly wind profile from NASA POWER climatology Â· ' + coverageShort + '<br/>ðŸ“ Higher hub heights extrapolated with Hellmann power law Î± = 0.143 when direct measurements are unavailable'
     );
   }
-  if (lpSolar) {
-    lpSolar.innerHTML = '<div class="lp-note-card"><strong>Official Monthly Series</strong><br/>NASA POWER monthly climatology for this clicked point (' + coverageShort + ').</div>' + lpSolar.innerHTML;
-  }
   if (lpProfiles) {
     lpProfiles.innerHTML =
+      lpCombinedKpis +
+      '<div class="lp-note-card"><strong>Monthly profiles first.</strong><br/>These official monthly curves are the main seasonality view for comparing solar and wind at this clicked point.</div>' +
+      '<div class="lp-profile-grid">' + solarProfileCard + windProfileCard + '</div>' +
       '<div class="lp-compare-grid">' +
         '<div class="lp-stat-tile"><div class="lp-stat-label">Solar Yield</div><div class="lp-stat-value">' + pvoutDaily + '</div><div class="lp-stat-copy">P50 daily yield · P90 ' + (pvP90daily ? pvP90daily.toFixed(2) : '—') + ' kWh/kWp/day</div></div>' +
         '<div class="lp-stat-tile"><div class="lp-stat-label">Wind @ 80 m</div><div class="lp-stat-value">' + ws80Label + '</div><div class="lp-stat-copy">P50 wind speed · P90 ' + (ws80P90 ? ws80P90.toFixed(2) : '—') + ' m/s</div></div>' +
@@ -1639,10 +1693,11 @@ function _showLatLonPanel(lat, lon, nasa, om, myGen) {
       ) +
       '<div class="lp-note-card"><strong>P50 vs P90</strong><br/>P50 is the median expected outcome. P90 is the more conservative production case often used for downside and lender-side checks.</div>';
   }
-  if (lpWind) {
-    lpWind.innerHTML = '<div class="lp-note-card"><strong>Official Monthly Series</strong><br/>NASA POWER monthly wind climatology for this clicked point (' + coverageShort + ').</div>' + lpWind.innerHTML;
+  if (lpAnalysis) {
+    lpAnalysis.innerHTML = _buildPopupLocationAnalysisHtml();
+    var lpLocationKpis = document.getElementById('lp-location-kpis');
+    if (lpLocationKpis) lpLocationKpis.innerHTML = lpAnalysisKpis;
   }
-  if (lpAnalysis) lpAnalysis.innerHTML = _buildPopupLocationAnalysisHtml();
   var locationPopup = document.getElementById('location-popup');
   if (locationPopup) wireProfileChartTooltips(locationPopup);
 
@@ -2808,6 +2863,7 @@ export function initAtlasApp() {
 if (typeof window !== 'undefined') {
   window.showCaseStudy = showCaseStudy;
   window.showAtlas = showAtlas;
+  window.getPortfolioESG = computeESG;
   window.toggleAtlasWind = toggleAtlasWind;
   window.switchResTab = switchResTab;
   window.switchCasePanelTab = switchCasePanelTab;

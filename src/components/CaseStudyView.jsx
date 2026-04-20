@@ -202,7 +202,23 @@ export default function CaseStudyView() {
             <div className="panel-divider"></div>
 
             <div id="panel-section-score">
-              <div className="panel-label">ESG Score</div>
+              <div className="panel-label panel-label-help">
+                <span>ESG Score</span>
+                <span className="score-help">
+                  <button
+                    id="score-help-trigger"
+                    type="button"
+                    className="score-help-trigger"
+                    aria-label="How this ESG score was calculated"
+                    aria-describedby="score-help-copy"
+                  >
+                    ?
+                  </button>
+                  <span id="score-help-copy" role="tooltip" className="score-help-tooltip">
+                    Composite score details will appear here.
+                  </span>
+                </span>
+              </div>
               <div id="score-summary">
                 <div id="score-summary-copy">
                   <div id="score-headline">Balanced ESG profile with focused permitting work still ahead.</div>

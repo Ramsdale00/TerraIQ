@@ -2,6 +2,11 @@ import React from 'react';
 import PreviewTabButton from './PreviewTabButton.jsx';
 
 export default function AtlasView() {
+  const portfolioScore =
+    typeof window !== 'undefined' && typeof window.getPortfolioESG === 'function'
+      ? window.getPortfolioESG().total
+      : 78;
+
   return (
     <div id="view-atlas" className="view active">
       <div id="atlas-app">
@@ -209,7 +214,7 @@ export default function AtlasView() {
                   <div className="ap-case-dot"></div>
                   <div className="ap-case-body">
                     <div className="ap-case-name">King Lake, Florida</div>
-                    <div className="ap-case-meta">ESG Score: 79/100 &middot; GHI: 5.35 kWh/m&sup2;/day</div>
+                    <div className="ap-case-meta">ESG Score: {portfolioScore}/100 &middot; GHI: 5.35 kWh/m&sup2;/day</div>
                   </div>
                   <div className="ap-case-arrow">&rarr;</div>
                 </div>

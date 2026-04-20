@@ -52,6 +52,13 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg-primary);co
 #case-panel-source-bank{display:none}
 #panel-section-score,#panel-section-renewable,#panel-section-insights,#data-sources{padding:16px 18px}
 .panel-label{font-size:10px;font-weight:700;letter-spacing:1.8px;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase}
+.panel-label-help{display:flex;align-items:center;gap:8px}
+.score-help{position:relative;display:inline-flex;align-items:center}
+.score-help-trigger{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:1px solid rgba(15,157,132,.24);border-radius:999px;background:rgba(15,157,132,.08);color:#145b50;font-size:11px;font-weight:800;cursor:help;transition:transform .2s ease,border-color .2s ease,background .2s ease}
+.score-help-trigger:hover,.score-help-trigger:focus-visible{transform:translateY(-1px);border-color:rgba(15,157,132,.4);background:rgba(15,157,132,.14);outline:none}
+.score-help-tooltip{position:absolute;top:calc(100% + 10px);left:50%;width:min(320px,70vw);padding:10px 12px;border-radius:14px;background:#102033;color:#f8fbfd;font-size:11px;font-weight:500;line-height:1.5;letter-spacing:normal;text-transform:none;box-shadow:0 16px 36px rgba(15,23,42,.22);opacity:0;pointer-events:none;transform:translate(-50%,6px);transition:opacity .2s ease,transform .2s ease;z-index:20}
+.score-help-tooltip::before{content:'';position:absolute;bottom:100%;left:50%;width:10px;height:10px;background:#102033;transform:translate(-50%,50%) rotate(45deg)}
+.score-help:hover .score-help-tooltip,.score-help-trigger:hover + .score-help-tooltip,.score-help-trigger:focus-visible + .score-help-tooltip{opacity:1;transform:translate(-50%,0)}
 .panel-divider{height:1px;background:var(--border)}
 #gauge-container{width:100%;display:flex;justify-content:center;margin-bottom:4px}
 #gauge-svg{width:170px;height:auto;overflow:visible}
@@ -1262,6 +1269,36 @@ body::before,
   }
   .tab-preview-tooltip{
     width:210px;
+  }
+}
+
+.lp-kpi-grid{
+  margin-bottom:14px;
+}
+.lp-profile-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:14px;
+  margin-bottom:14px;
+}
+.lp-profile-grid .profile-card{
+  margin:0;
+}
+.lp-stat-tile.lp-stat-solar{
+  background:#fff8eb !important;
+  border-color:#f1cb8f !important;
+}
+.lp-stat-tile.lp-stat-wind{
+  background:#f4f6ff !important;
+  border-color:#c7d0ff !important;
+}
+.lp-stat-tile.lp-stat-neutral{
+  background:#f8fbfd !important;
+  border-color:#d8e1e8 !important;
+}
+@media (max-width:760px){
+  .lp-profile-grid{
+    grid-template-columns:1fr;
   }
 }
 
