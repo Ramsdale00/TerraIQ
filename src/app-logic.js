@@ -378,6 +378,7 @@ function statusLabel(status) {
 function renderOfficialProfiles() {
   var wrap = document.getElementById('official-profiles');
   if (!wrap) return;
+  renderOfficialProfileKpis();
   wrap.innerHTML = Object.keys(OFFICIAL_PROFILES).map(function(key) {
     var profile = OFFICIAL_PROFILES[key];
     var maxValue = Math.max.apply(null, profile.series);
@@ -394,12 +395,14 @@ function renderOfficialProfiles() {
       +     '<div class="profile-annual">' + profile.annual.toFixed(profile.precision) + '<span>Annual</span></div>'
       +   '</div>'
       +   '<p class="profile-subtitle">' + profile.variable + ' (' + profile.unit + ')</p>'
-      +   '<div class="profile-stat-grid">'
-      +     '<div class="profile-stat"><span class="profile-stat-label">Peak Month</span><strong class="profile-stat-value">' + PROFILE_MONTHS[peakIndex] + ' ' + maxValue.toFixed(profile.precision) + '</strong></div>'
-      +     '<div class="profile-stat"><span class="profile-stat-label">Low Month</span><strong class="profile-stat-value">' + PROFILE_MONTHS[lowIndex] + ' ' + minValue.toFixed(profile.precision) + '</strong></div>'
-      +     '<div class="profile-stat"><span class="profile-stat-label">Coverage</span><strong class="profile-stat-value">2001-2020</strong></div>'
+      +   '<div class="profile-graph-row">'
+      +     '<div class="profile-chart">' + buildProfileChartSvg(profile) + '</div>'
+      +     '<div class="profile-inline-stats">'
+      +       '<div class="profile-stat"><span class="profile-stat-label">Peak</span><strong class="profile-stat-value">' + PROFILE_MONTHS[peakIndex] + ' ' + maxValue.toFixed(profile.precision) + '</strong></div>'
+      +       '<div class="profile-stat"><span class="profile-stat-label">Low</span><strong class="profile-stat-value">' + PROFILE_MONTHS[lowIndex] + ' ' + minValue.toFixed(profile.precision) + '</strong></div>'
+      +       '<div class="profile-stat"><span class="profile-stat-label">Coverage</span><strong class="profile-stat-value">2001-2020</strong></div>'
+      +     '</div>'
       +   '</div>'
-      +   '<div class="profile-chart">' + buildProfileChartSvg(profile) + '</div>'
       +   '<div class="profile-month-grid">' + buildProfileMonthGrid(profile) + '</div>'
       +   '<div class="profile-footer">'
       +     '<div class="profile-period">Official source at 28.2906N, 82.2918W.<br>' + profile.period + '.</div>'
@@ -408,6 +411,47 @@ function renderOfficialProfiles() {
       + '</article>';
   }).join('');
   wireProfileChartTooltips(wrap);
+}
+
+function renderOfficialProfileKpis() {
+  var wrap = document.getElementById('official-profile-kpis');
+  if (!wrap) return;
+
+  var cards = Object.keys(OFFICIAL_PROFILES).map(function(key) {
+    var profile = OFFICIAL_PROFILES[key];
+    var maxValue = Math.max.apply(null, profile.series);
+    var peakIndex = profile.series.indexOf(maxValue);
+    return [
+      {
+        tone: key,
+        label: profile.title + ' annual',
+        value: profile.annual.toFixed(profile.precision) + ' ' + profile.unit,
+        copy: '12-month average signal'
+      },
+      {
+        tone: key,
+        label: profile.title + ' peak',
+        value: PROFILE_MONTHS[peakIndex] + ' ' + maxValue.toFixed(profile.precision),
+        copy: 'strongest month in the cycle'
+      }
+    ];
+  }).flat();
+
+  cards.push({
+    tone: 'neutral',
+    label: 'Coverage',
+    value: _profileCoverageShort(OFFICIAL_PROFILES.solar.period),
+    copy: 'official climatology window'
+  });
+
+  wrap.innerHTML = cards.map(function(card) {
+    return ''
+      + '<button class="profile-kpi-button profile-kpi-' + card.tone + '" type="button" tabindex="-1">'
+      +   '<span class="profile-kpi-label">' + card.label + '</span>'
+      +   '<strong class="profile-kpi-value">' + card.value + '</strong>'
+      +   '<span class="profile-kpi-copy">' + card.copy + '</span>'
+      + '</button>';
+  }).join('');
 }
 
 function buildProfileMonthGrid(profile) {
@@ -1202,12 +1246,14 @@ function _buildLocationProfileCard(lat, lon, profile) {
     +     '<div class="profile-annual">' + profile.annual.toFixed(profile.precision) + '<span>Annual</span></div>'
     +   '</div>'
     +   '<p class="profile-subtitle">' + profile.variable + ' (' + profile.unit + ')</p>'
-    +   '<div class="profile-stat-grid">'
-    +     '<div class="profile-stat"><span class="profile-stat-label">Peak Month</span><strong class="profile-stat-value">' + PROFILE_MONTHS[peakIndex] + ' ' + maxValue.toFixed(profile.precision) + '</strong></div>'
-    +     '<div class="profile-stat"><span class="profile-stat-label">Low Month</span><strong class="profile-stat-value">' + PROFILE_MONTHS[lowIndex] + ' ' + minValue.toFixed(profile.precision) + '</strong></div>'
-    +     '<div class="profile-stat"><span class="profile-stat-label">Coverage</span><strong class="profile-stat-value">' + profile.coverageShort + '</strong></div>'
+    +   '<div class="profile-graph-row">'
+    +     '<div class="profile-chart">' + buildProfileChartSvg(profile) + '</div>'
+    +     '<div class="profile-inline-stats">'
+    +       '<div class="profile-stat"><span class="profile-stat-label">Peak</span><strong class="profile-stat-value">' + PROFILE_MONTHS[peakIndex] + ' ' + maxValue.toFixed(profile.precision) + '</strong></div>'
+    +       '<div class="profile-stat"><span class="profile-stat-label">Low</span><strong class="profile-stat-value">' + PROFILE_MONTHS[lowIndex] + ' ' + minValue.toFixed(profile.precision) + '</strong></div>'
+    +       '<div class="profile-stat"><span class="profile-stat-label">Coverage</span><strong class="profile-stat-value">' + profile.coverageShort + '</strong></div>'
+    +     '</div>'
     +   '</div>'
-    +   '<div class="profile-chart">' + buildProfileChartSvg(profile) + '</div>'
     +   '<div class="profile-month-grid">' + buildProfileMonthGrid(profile) + '</div>'
     +   '<div class="profile-footer">'
     +     '<div class="profile-period">Official source at ' + Math.abs(lat).toFixed(4) + (lat >= 0 ? 'N' : 'S') + ', ' + Math.abs(lon).toFixed(4) + (lon < 0 ? 'W' : 'E') + '.<br>' + profile.period + '.</div>'

@@ -1,4 +1,5 @@
 import React from 'react';
+import PreviewTabButton from './PreviewTabButton.jsx';
 
 export default function CaseStudyView() {
   return (
@@ -43,9 +44,36 @@ export default function CaseStudyView() {
         </header>
 
         <div id="case-view-tabs">
-          <button className="case-view-tab active" data-case-view="map" onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('map')}>Map</button>
-          <button className="case-view-tab" data-case-view="overview" onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('overview')}>Overview</button>
-          <button className="case-view-tab" data-case-view="thesis" onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('thesis')}>Investment Thesis</button>
+          <PreviewTabButton
+            className="case-view-tab active"
+            data-case-view="map"
+            previewVariant="map"
+            previewTitle="Map workspace"
+            previewCopy="Live site layers, hero signal, and active resource overlay."
+            onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('map')}
+          >
+            Map
+          </PreviewTabButton>
+          <PreviewTabButton
+            className="case-view-tab"
+            data-case-view="overview"
+            previewVariant="dashboard"
+            previewTitle="Overview dashboard"
+            previewCopy="Core scorecards, KPI blocks, and monthly resource profiles."
+            onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('overview')}
+          >
+            Overview
+          </PreviewTabButton>
+          <PreviewTabButton
+            className="case-view-tab"
+            data-case-view="thesis"
+            previewVariant="thesis"
+            previewTitle="Investment thesis"
+            previewCopy="Recommendation, scenarios, and near-term action path."
+            onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('thesis')}
+          >
+            Investment Thesis
+          </PreviewTabButton>
         </div>
 
         <main id="main">
@@ -257,6 +285,7 @@ export default function CaseStudyView() {
             <div id="panel-section-official">
               <div className="panel-label">Official Monthly Profiles</div>
               <p id="official-profile-note">Official site-centroid monthly climatology rendered from NASA POWER data. Use these charts for seasonal trend checks alongside the project-area map layers.</p>
+              <div id="official-profile-kpis"></div>
               <div id="official-profiles"></div>
             </div>
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import PreviewTabButton from './PreviewTabButton.jsx';
 
 export default function ChecklistDrawer() {
   return (
@@ -33,10 +34,46 @@ export default function ChecklistDrawer() {
             </div>
           </div>
           <div id="cl-tabs">
-            <button className="cl-tab active" data-tab="env" onClick={() => window.switchTab && window.switchTab('env')}>Environmental</button>
-            <button className="cl-tab" data-tab="soc" onClick={() => window.switchTab && window.switchTab('soc')}>Social</button>
-            <button className="cl-tab" data-tab="gov" onClick={() => window.switchTab && window.switchTab('gov')}>Governance</button>
-            <button className="cl-tab" data-tab="doc" onClick={() => window.switchTab && window.switchTab('doc')}>Documentation</button>
+            <PreviewTabButton
+              className="cl-tab active"
+              data-tab="env"
+              previewVariant="list"
+              previewTitle="Environmental checklist"
+              previewCopy="Resource, wetlands, habitat, and compliance readiness items."
+              onClick={() => window.switchTab && window.switchTab('env')}
+            >
+              Environmental
+            </PreviewTabButton>
+            <PreviewTabButton
+              className="cl-tab"
+              data-tab="soc"
+              previewVariant="list"
+              previewTitle="Social checklist"
+              previewCopy="Community impact, jobs, safety, and engagement workstream."
+              onClick={() => window.switchTab && window.switchTab('soc')}
+            >
+              Social
+            </PreviewTabButton>
+            <PreviewTabButton
+              className="cl-tab"
+              data-tab="gov"
+              previewVariant="list"
+              previewTitle="Governance checklist"
+              previewCopy="Permits, interconnection, title, insurance, and controls."
+              onClick={() => window.switchTab && window.switchTab('gov')}
+            >
+              Governance
+            </PreviewTabButton>
+            <PreviewTabButton
+              className="cl-tab"
+              data-tab="doc"
+              previewVariant="analysis"
+              previewTitle="Documentation checklist"
+              previewCopy="Disclosure, studies, audit prep, and reporting deliverables."
+              onClick={() => window.switchTab && window.switchTab('doc')}
+            >
+              Documentation
+            </PreviewTabButton>
           </div>
         </div>
         <div id="cl-body"></div>
