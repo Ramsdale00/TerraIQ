@@ -421,15 +421,16 @@ function buildProfileMonthGrid(profile) {
 }
 
 function buildProfileChartSvg(profile) {
-  var width = 248;
-  var height = 116;
-  var left = 8;
-  var right = 8;
-  var top = 10;
+  var width = 320;
+  var height = 110;
+  var left = 26;
+  var right = 10;
+  var top = 14;
   var bottom = 22;
   var plotWidth = width - left - right;
   var plotHeight = height - top - bottom;
   var maxValue = Math.max.apply(null, profile.series);
+  var minValue = Math.min.apply(null, profile.series);
   var step = plotWidth / profile.series.length;
   var barWidth = step * 0.62;
   var avgY = top + plotHeight - (profile.annual / maxValue) * plotHeight;
@@ -445,6 +446,16 @@ function buildProfileChartSvg(profile) {
   var lastX = null;
   var baselineY = top + plotHeight;
 
+  // y-axis ticks (3): max, mid, min-of-zero baseline
+  var ticks = [maxValue, maxValue / 2, 0];
+  var gridLines = '';
+  var tickLabels = '';
+  ticks.forEach(function(tv) {
+    var ty = top + plotHeight - (tv / maxValue) * plotHeight;
+    gridLines += '<line x1="' + left + '" y1="' + ty.toFixed(1) + '" x2="' + (width - right) + '" y2="' + ty.toFixed(1) + '" stroke="rgba(148,163,184,0.18)" stroke-width="0.6" stroke-dasharray="2 3"></line>';
+    tickLabels += '<text x="' + (left - 4) + '" y="' + (ty + 3).toFixed(1) + '" text-anchor="end" fill="#7a94a8" font-size="7.5" font-family="Inter, sans-serif">' + tv.toFixed(profile.precision) + '</text>';
+  });
+
   profile.series.forEach(function(value, index) {
     var labelValue = value.toFixed(profile.precision) + ' ' + profile.unit;
     var x = left + index * step + (step - barWidth) / 2;
@@ -455,32 +466,39 @@ function buildProfileChartSvg(profile) {
     if (firstX === null) firstX = centerX;
     lastX = centerX;
 
-    bars += '<rect class="profile-bar" data-month-index="' + index + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barWidth.toFixed(1) + '" height="' + barHeight.toFixed(1) + '" rx="6" fill="url(#' + gradId + ')" fill-opacity="' + (0.55 + (value / maxValue) * 0.4).toFixed(2) + '"></rect>';
-    points += '<circle class="profile-point" data-month-index="' + index + '" cx="' + centerX.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="3" fill="' + profile.accent + '" stroke="#ffffff" stroke-width="1.4"></circle>';
+    var isPeak = value === maxValue;
+    var isLow = value === minValue;
+    var pointR = (isPeak || isLow) ? 3.4 : 2.4;
+    var ringClass = isPeak ? ' is-peak' : isLow ? ' is-low' : '';
+
+    bars += '<rect class="profile-bar" data-month-index="' + index + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + barWidth.toFixed(1) + '" height="' + barHeight.toFixed(1) + '" rx="3" fill="url(#' + gradId + ')" fill-opacity="' + (0.55 + (value / maxValue) * 0.4).toFixed(2) + '"></rect>';
+    points += '<circle class="profile-point' + ringClass + '" data-month-index="' + index + '" cx="' + centerX.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + pointR + '" fill="' + profile.accent + '" stroke="#ffffff" stroke-width="1.4"></circle>';
     hits += '<rect class="profile-hit" data-month-index="' + index + '" data-month="' + PROFILE_MONTHS[index] + '" data-value="' + labelValue + '" x="' + (left + index * step).toFixed(1) + '" y="' + top + '" width="' + step.toFixed(1) + '" height="' + plotHeight.toFixed(1) + '" fill="transparent"></rect>';
-    labels += '<text x="' + centerX.toFixed(1) + '" y="' + (height - 6) + '" text-anchor="middle" fill="#7a94a8" font-size="8.5" font-family="Inter, sans-serif">' + PROFILE_MONTHS[index].charAt(0) + '</text>';
+    labels += '<text x="' + centerX.toFixed(1) + '" y="' + (height - 6) + '" text-anchor="middle" fill="#7a94a8" font-size="8" font-family="Inter, sans-serif">' + PROFILE_MONTHS[index].charAt(0) + '</text>';
     linePath += (index === 0 ? 'M ' : ' L ') + point;
     areaPath += (index === 0 ? 'M ' : ' L ') + point;
   });
   areaPath += ' L ' + lastX.toFixed(1) + ',' + baselineY.toFixed(1) + ' L ' + firstX.toFixed(1) + ',' + baselineY.toFixed(1) + ' Z';
 
   return ''
-    + '<svg class="profile-chart-svg" data-accent="' + profile.accent + '" viewBox="0 0 ' + width + ' ' + height + '" preserveAspectRatio="none" role="img" aria-label="' + profile.title + ' monthly average chart">'
+    + '<svg class="profile-chart-svg" data-accent="' + profile.accent + '" viewBox="0 0 ' + width + ' ' + height + '" role="img" aria-label="' + profile.title + ' monthly average chart">'
     +   '<defs>'
     +     '<linearGradient id="' + gradId + '" x1="0" y1="0" x2="0" y2="1">'
     +       '<stop offset="0%" stop-color="' + profile.accent + '" stop-opacity="0.95"/>'
-    +       '<stop offset="100%" stop-color="' + profile.accent + '" stop-opacity="0.45"/>'
+    +       '<stop offset="100%" stop-color="' + profile.accent + '" stop-opacity="0.4"/>'
     +     '</linearGradient>'
     +     '<linearGradient id="' + areaGradId + '" x1="0" y1="0" x2="0" y2="1">'
-    +       '<stop offset="0%" stop-color="' + profile.accent + '" stop-opacity="0.22"/>'
+    +       '<stop offset="0%" stop-color="' + profile.accent + '" stop-opacity="0.18"/>'
     +       '<stop offset="100%" stop-color="' + profile.accent + '" stop-opacity="0"/>'
     +     '</linearGradient>'
     +   '</defs>'
+    +   gridLines
+    +   tickLabels
     +   '<path d="' + areaPath + '" fill="url(#' + areaGradId + ')"></path>'
-    +   '<line x1="' + left + '" y1="' + avgY.toFixed(1) + '" x2="' + (width - right) + '" y2="' + avgY.toFixed(1) + '" stroke="' + profile.accent + '" stroke-width="1.4" stroke-dasharray="4 4" opacity="0.7"></line>'
-    +   '<text x="' + (width - right) + '" y="' + (avgY - 4).toFixed(1) + '" text-anchor="end" fill="#6d879a" font-size="9" font-family="Inter, sans-serif">Annual ' + profile.annual.toFixed(profile.precision) + '</text>'
+    +   '<line x1="' + left + '" y1="' + avgY.toFixed(1) + '" x2="' + (width - right) + '" y2="' + avgY.toFixed(1) + '" stroke="' + profile.accent + '" stroke-width="1" stroke-dasharray="3 3" opacity="0.6"></line>'
+    +   '<text x="' + (width - right) + '" y="' + (avgY - 3).toFixed(1) + '" text-anchor="end" fill="' + profile.accent + '" font-size="8" font-weight="700" font-family="Inter, sans-serif" opacity="0.85">avg ' + profile.annual.toFixed(profile.precision) + '</text>'
     +   bars
-    +   '<path d="' + linePath + '" fill="none" stroke="' + profile.accent + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path>'
+    +   '<path d="' + linePath + '" fill="none" stroke="' + profile.accent + '" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>'
     +   points
     +   '<line class="profile-guide" x1="0" y1="' + top + '" x2="0" y2="' + (top + plotHeight) + '" stroke="' + profile.accent + '" stroke-width="1" stroke-dasharray="2 3" opacity="0"></line>'
     +   labels
