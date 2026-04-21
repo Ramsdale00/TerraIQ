@@ -38,6 +38,9 @@ export default function ChecklistDrawer() {
               className="cl-tab active"
               data-tab="env"
               previewVariant="list"
+              previewTarget="#cl-body"
+              previewSourceWidth={560}
+              previewSourceHeight={340}
               previewTitle="Environmental checklist"
               previewCopy="Resource, wetlands, habitat, and compliance readiness items."
               onClick={() => window.switchTab && window.switchTab('env')}
@@ -48,6 +51,9 @@ export default function ChecklistDrawer() {
               className="cl-tab"
               data-tab="soc"
               previewVariant="list"
+              previewTarget="#cl-body"
+              previewSourceWidth={560}
+              previewSourceHeight={340}
               previewTitle="Social checklist"
               previewCopy="Community impact, jobs, safety, and engagement workstream."
               onClick={() => window.switchTab && window.switchTab('soc')}
@@ -58,6 +64,9 @@ export default function ChecklistDrawer() {
               className="cl-tab"
               data-tab="gov"
               previewVariant="list"
+              previewTarget="#cl-body"
+              previewSourceWidth={560}
+              previewSourceHeight={340}
               previewTitle="Governance checklist"
               previewCopy="Permits, interconnection, title, insurance, and controls."
               onClick={() => window.switchTab && window.switchTab('gov')}
@@ -68,6 +77,9 @@ export default function ChecklistDrawer() {
               className="cl-tab"
               data-tab="doc"
               previewVariant="analysis"
+              previewTarget="#cl-body"
+              previewSourceWidth={560}
+              previewSourceHeight={340}
               previewTitle="Documentation checklist"
               previewCopy="Disclosure, studies, audit prep, and reporting deliverables."
               onClick={() => window.switchTab && window.switchTab('doc')}

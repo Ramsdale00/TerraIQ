@@ -98,6 +98,9 @@ export default function AtlasView() {
                   className="ap-res-tab active"
                   id="tab-solar"
                   previewVariant="bars"
+                  previewTarget="#ap-res-solar"
+                  previewSourceWidth={420}
+                  previewSourceHeight={230}
                   previewTitle="Solar ranking"
                   previewCopy="State-by-state irradiance and installed capacity view."
                   onClick={() => window.switchResTab && window.switchResTab('solar')}
@@ -108,6 +111,9 @@ export default function AtlasView() {
                   className="ap-res-tab"
                   id="tab-wind"
                   previewVariant="bars"
+                  previewTarget="#ap-res-wind"
+                  previewSourceWidth={420}
+                  previewSourceHeight={230}
                   previewTitle="Wind ranking"
                   previewCopy="Hub-height wind speeds and installed capacity comparison."
                   onClick={() => window.switchResTab && window.switchResTab('wind')}
@@ -276,6 +282,9 @@ export default function AtlasView() {
                 className="lp-tab active"
                 data-lp-tab="solar"
                 previewVariant="chart"
+                previewTarget="#lp-solar"
+                previewSourceWidth={540}
+                previewSourceHeight={310}
                 previewTitle="Solar profile"
                 previewCopy="Monthly irradiance curve and solar takeaways for the selected point."
                 onClick={() => window.switchLocationPopupTab && window.switchLocationPopupTab('solar')}
@@ -286,6 +295,9 @@ export default function AtlasView() {
                 className="lp-tab"
                 data-lp-tab="wind"
                 previewVariant="chart"
+                previewTarget="#lp-wind"
+                previewSourceWidth={540}
+                previewSourceHeight={310}
                 previewTitle="Wind profile"
                 previewCopy="Monthly wind pattern and hub-height signal at this location."
                 onClick={() => window.switchLocationPopupTab && window.switchLocationPopupTab('wind')}
@@ -296,6 +308,9 @@ export default function AtlasView() {
                 className="lp-tab"
                 data-lp-tab="profiles"
                 previewVariant="split-chart"
+                previewTarget="#lp-profiles"
+                previewSourceWidth={540}
+                previewSourceHeight={310}
                 previewTitle="Combined profiles"
                 previewCopy="Side-by-side solar and wind seasonality comparison."
                 onClick={() => window.switchLocationPopupTab && window.switchLocationPopupTab('profiles')}
@@ -306,6 +321,9 @@ export default function AtlasView() {
                 className="lp-tab"
                 data-lp-tab="analysis"
                 previewVariant="analysis"
+                previewTarget="#lp-analysis"
+                previewSourceWidth={540}
+                previewSourceHeight={310}
                 previewTitle="Location analysis"
                 previewCopy="Key metrics, grid context, and site interpretation."
                 onClick={() => window.switchLocationPopupTab && window.switchLocationPopupTab('analysis')}

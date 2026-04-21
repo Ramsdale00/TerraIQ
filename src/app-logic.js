@@ -742,15 +742,46 @@ function updateLayerBrief(key) {
 
 function renderInsights(esg) {
   var cards = [
-    { title:'Revenue Story', meta:'Solar economics', text:'At ' + esg.solarAvg.toFixed(2) + ' kWh/m2/day average GHI, the site can support a bankable solar-first phase that starts generating value while broader hybrid decisions mature.' },
-    { title:'Wind Fit', meta:'Phase-two upside', text:'Wind speeds near ' + esg.windAvg.toFixed(2) + ' m/s keep the hybrid option alive, but turbine siting, setbacks, and community process should be treated as the second-step unlock.' },
-    { title:'ESG Constraint', meta:'Permitting watchlist', text:'Soil moisture at ' + esg.soilAvg.toFixed(3) + ' m3/m3 and the mapped wetland buffer keep the site investable, but the layout should be designed around exclusion zones to preserve the current ESG score.' }
+    {
+      title:'Revenue Story',
+      meta:'Solar economics',
+      action:'Approve solar phase',
+      tone:'positive',
+      highlights:['Fund scoping', 'Start interconnection', 'Open permits'],
+      text:'Lead with <span class="insight-inline-emphasis">solar-first deployment</span>. At ' + esg.solarAvg.toFixed(2) + ' kWh/m2/day, the resource supports a <span class="insight-inline-emphasis">bankable near-term move</span>.'
+    },
+    {
+      title:'Wind Fit',
+      meta:'Phase-two upside',
+      action:'Gate wind later',
+      tone:'caution',
+      highlights:['Keep hybrid option', 'Validate setbacks', 'Complete siting proof'],
+      text:'Keep wind in the case, but treat it as a <span class="insight-inline-emphasis">phase-two unlock</span>. Speeds near ' + esg.windAvg.toFixed(2) + ' m/s are promising, yet <span class="insight-inline-emphasis">siting and community proof</span> still matter.'
+    },
+    {
+      title:'ESG Constraint',
+      meta:'Permitting watchlist',
+      action:'Protect buffers',
+      tone:'focus',
+      highlights:['Respect exclusions', 'Document wetlands', 'Preserve ESG score'],
+      text:'The site stays investable if layout decisions stay <span class="insight-inline-emphasis">outside wetland and riparian constraints</span>. Soil moisture at ' + esg.soilAvg.toFixed(3) + ' m3/m3 reinforces the need for <span class="insight-inline-emphasis">clear exclusion-led design</span>.'
+    }
   ];
   cards.forEach(function(item, i) {
     var card = document.getElementById('insight-' + i);
     if (!card) return;
     setTimeout(function() {
-      card.innerHTML = '<div class="insight-card-head"><div class="insight-title">' + item.title + '</div><div class="insight-meta">' + item.meta + '</div></div><p class="insight-text">' + item.text + '</p>';
+      var chips = '<div class="insight-chip-block"><div class="insight-chip-label">Key moves</div><div class="insight-chip-row">' + item.highlights.map(function(label) {
+        return '<span class="insight-chip insight-chip-' + item.tone + '">' + label + '</span>';
+      }).join('') + '</div></div>';
+      card.className = 'insight-card insight-card-signal insight-card-' + item.tone;
+      card.innerHTML =
+        '<div class="insight-card-head">' +
+          '<div class="insight-heading"><div class="insight-title">' + item.title + '</div><div class="insight-meta">' + item.meta + '</div></div>' +
+          '<div class="insight-action insight-action-' + item.tone + '">' + item.action + '</div>' +
+        '</div>' +
+        chips +
+        '<p class="insight-text">' + item.text + '</p>';
       card.style.animation = 'none';
       card.offsetHeight;
       card.style.animation = 'fadeIn .5s ease';
@@ -848,7 +879,7 @@ function initAtlasMap() {
     center: [20, 0],
     zoom: 2,
     minZoom: 2,
-    maxZoom: 8,
+    maxZoom: ATLAS_LOCATION_FOCUS_ZOOM,
     zoomControl: true,
     attributionControl: true
   });
@@ -858,14 +889,15 @@ function initAtlasMap() {
     'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     {
       attribution: 'Tiles &copy; <a href="https://www.esri.com/">Esri</a> &mdash; Esri, USGS, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, GIS User Community',
-      maxZoom: 19
+      maxZoom: ATLAS_LOCATION_FOCUS_ZOOM,
+      maxNativeZoom: ATLAS_LOCATION_FOCUS_ZOOM
     }
   ).addTo(map);
 
   // Hybrid label overlay for state names, cities, roads
   L.tileLayer(
     'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-    { maxZoom: 19, opacity: 0.75 }
+    { maxZoom: ATLAS_LOCATION_FOCUS_ZOOM, maxNativeZoom: ATLAS_LOCATION_FOCUS_ZOOM, opacity: 0.75 }
   ).addTo(map);
 
   // Zone rectangles removed — map click fires _fetchLocationData for live lat/lon data
@@ -873,6 +905,7 @@ function initAtlasMap() {
   // Live lat/lon click handler — place pin marker and fetch real solar + wind data
   map.on('click', function(e) {
     var lat = e.latlng.lat, lon = e.latlng.lng;
+    map.flyTo([lat, lon], ATLAS_LOCATION_FOCUS_ZOOM, { animate: true, duration: 0.7 });
     // Remove previous pin
     if (_clickMarker) { map.removeLayer(_clickMarker); _clickMarker = null; }
     // Place new teal pin marker
@@ -1593,30 +1626,30 @@ function _showLatLonPanel(lat, lon, nasa, om, myGen) {
   var lpAnalysis = document.getElementById('lp-analysis');
   var lpProfiles = document.getElementById('lp-profiles');
   var lpSolarKpis = _popupKpiGrid([
-    { label:'Solar GHI', value:fmtV(ghi, 2), copy:'Primary irradiance signal · kWh/m2/day', tone:'solar' },
-    { label:'PV Yield P50', value:pvoutDaily, copy:'Median daily production · kWh/kWp/day', tone:'solar' },
-    { label:'PV Yield P90', value:pvP90daily ? pvP90daily.toFixed(2) : 'â€”', copy:'Conservative bankable case', tone:'solar' },
-    { label:'Solar CF', value:(solarCF || 'â€”') + '%', copy:iecSolar !== 'â€”' ? iecSolar : 'Capacity factor estimate', tone:'solar' }
+    { label:'Solar GHI', value:fmtV(ghi, 2), copy:'Primary irradiance signal | kWh/m2/day', tone:'solar' },
+    { label:'PV Yield P50', value:pvoutDaily, copy:'Median daily production | kWh/kWp/day', tone:'solar' },
+    { label:'PV Yield P90', value:pvP90daily ? pvP90daily.toFixed(2) : '--', copy:'Conservative bankable case', tone:'solar' },
+    { label:'Solar CF', value:(solarCF ? solarCF + '%' : '--'), copy:iecSolar !== '—' ? iecSolar : 'Capacity factor estimate', tone:'solar' }
   ], 'lp-kpi-grid-solar');
   var lpWindKpis = _popupKpiGrid([
-    { label:'Wind @ 80 m', value:ws80Label, copy:'Primary hub-height signal · m/s', tone:'wind' },
-    { label:'Wind @ 80 m P90', value:ws80P90 ? ws80P90.toFixed(2) : 'â€”', copy:'Conservative bankable case', tone:'wind' },
-    { label:'Wind CF', value:(windCF || 'â€”') + '%', copy:iecWind !== 'â€”' ? iecWind : 'Capacity factor estimate', tone:'wind' },
+    { label:'Wind @ 80 m', value:ws80Label, copy:'Primary hub-height signal | m/s', tone:'wind' },
+    { label:'Wind @ 80 m P90', value:ws80P90 ? ws80P90.toFixed(2) : '--', copy:'Conservative bankable case', tone:'wind' },
+    { label:'Wind CF', value:(windCF ? windCF + '%' : '--'), copy:iecWind !== '—' ? iecWind : 'Capacity factor estimate', tone:'wind' },
     { label:'Direction', value:_dirToCard(wdirF), copy:wdirF != null ? Math.round(wdirF) + ' degrees at 10 m' : 'Direction not available', tone:'wind' }
   ], 'lp-kpi-grid-wind');
   var lpCombinedKpis = _popupKpiGrid([
-    { label:'Solar GHI', value:fmtV(ghi, 2), copy:'Primary irradiance signal · kWh/m2/day', tone:'solar' },
-    { label:'PV Yield P50 / P90', value:pvoutDaily + ' / ' + (pvP90daily ? pvP90daily.toFixed(2) : 'â€”'), copy:'Daily solar production range', tone:'solar' },
-    { label:'Wind @ 80 m', value:ws80Label + ' / ' + (ws80P90 ? ws80P90.toFixed(2) : 'â€”'), copy:'P50 and P90 wind speed · m/s', tone:'wind' },
-    { label:'Capacity Factors', value:'S ' + (solarCF || 'â€”') + '% Â· W ' + (windCF || 'â€”') + '%', copy:'Quick hybrid viability snapshot', tone:'neutral' },
+    { label:'Solar GHI', value:fmtV(ghi, 2), copy:'Primary irradiance signal | kWh/m2/day', tone:'solar' },
+    { label:'PV Yield P50 / P90', value:pvoutDaily + ' / ' + (pvP90daily ? pvP90daily.toFixed(2) : '--'), copy:'Daily solar production range', tone:'solar' },
+    { label:'Wind @ 80 m', value:ws80Label + ' / ' + (ws80P90 ? ws80P90.toFixed(2) : '--'), copy:'P50 and P90 wind speed | m/s', tone:'wind' },
+    { label:'Capacity Factors', value:'S ' + (solarCF ? solarCF + '%' : '--') + ' | W ' + (windCF ? windCF + '%' : '--'), copy:'Quick hybrid viability snapshot', tone:'neutral' },
     { label:'Coverage', value:coverageShort, copy:'NASA POWER monthly climatology window', tone:'neutral' },
-    { label:'Resource Mix', value:(iecSolar !== 'â€”' ? iecSolar : 'Solar') + ' Â· ' + (iecWind !== 'â€”' ? iecWind : 'Wind'), copy:'High-signal project screening summary', tone:'neutral' }
+    { label:'Resource Mix', value:(iecSolar !== '—' ? iecSolar : 'Solar') + ' | ' + (iecWind !== '—' ? iecWind : 'Wind'), copy:'High-signal project screening summary', tone:'neutral' }
   ], 'lp-kpi-grid-combined');
   var lpAnalysisKpis = _popupKpiGrid([
     { label:'Solar GHI', value:fmtV(ghi, 2), copy:'Resource baseline for this point', tone:'solar' },
     { label:'Wind @ 80 m', value:ws80Label, copy:'Hub-height wind screening signal', tone:'wind' },
     { label:'PV Yield P50', value:pvoutDaily, copy:'Median solar production per kWp', tone:'solar' },
-    { label:'Capacity Factors', value:'S ' + (solarCF || 'â€”') + '% Â· W ' + (windCF || 'â€”') + '%', copy:'Quick site performance summary', tone:'neutral' }
+    { label:'Capacity Factors', value:'S ' + (solarCF ? solarCF + '%' : '--') + ' | W ' + (windCF ? windCF + '%' : '--'), copy:'Quick site performance summary', tone:'neutral' }
   ], 'lp-kpi-grid-analysis');
   if (lpSolar) {
     lpSolar.innerHTML =
@@ -1664,15 +1697,10 @@ function _showLatLonPanel(lat, lon, nasa, om, myGen) {
         (windCF ? _row('Est. Wind CF', windCF, '%') : '')
       ) +
       _popupSourceNote([
-        '💨 Open-Meteo ERA5-Seamless current wind feed',
-        '📐 Higher hub heights extrapolated with Hellmann power law α = 0.143 when direct measurements are unavailable'
+        'Wind | Open-Meteo ERA5-Seamless current wind feed',
+        'NASA monthly wind profile from NASA POWER climatology | ' + coverageShort,
+        'Higher hub heights extrapolated with Hellmann power law alpha = 0.143 when direct measurements are unavailable'
       ]);
-  }
-  if (lpWind) {
-    lpWind.innerHTML = lpWind.innerHTML.replace(
-      'ðŸ“ Higher hub heights extrapolated with Hellmann power law Î± = 0.143 when direct measurements are unavailable',
-      'ðŸ“ NASA monthly wind profile from NASA POWER climatology Â· ' + coverageShort + '<br/>ðŸ“ Higher hub heights extrapolated with Hellmann power law Î± = 0.143 when direct measurements are unavailable'
-    );
   }
   if (lpProfiles) {
     lpProfiles.innerHTML =
@@ -1900,6 +1928,7 @@ var US_WIND_ZONES = [
 
 var _atlasWindLayer = null;
 var _windShowing = false;
+var ATLAS_LOCATION_FOCUS_ZOOM = 17;
 
 function toggleAtlasWind() {
   var btn = document.getElementById('atlas-wind-toggle');
@@ -1974,10 +2003,13 @@ function switchCasePanelTab(tab) {
   document.querySelectorAll('.case-view-tab').forEach(function(el) {
     el.classList.toggle('active', el.dataset.caseView === tab);
   });
-  ['map', 'overview', 'thesis'].forEach(function(key) {
+  ['map', 'analysis', 'overview', 'thesis'].forEach(function(key) {
     var pane = document.getElementById('case-pane-' + key);
     if (pane) pane.classList.toggle('active', key === tab);
   });
+  if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+    window.dispatchEvent(new CustomEvent('lumora:case-tab-change', { detail: { tab: tab } }));
+  }
   if (tab === 'map' && _klMap) {
     setTimeout(function() {
       _klMap.invalidateSize({animate: false});
@@ -2096,7 +2128,7 @@ function initAtlasSearch(map) {
         results.querySelectorAll('.asr-item').forEach(function(el) {
           el.addEventListener('click', function() {
             var lat = +el.dataset.lat, lon = +el.dataset.lon;
-            map.setView([lat, lon], 6, {animate: true});
+            map.flyTo([lat, lon], ATLAS_LOCATION_FOCUS_ZOOM, { animate: true, duration: 0.7 });
             if (_marker) map.removeLayer(_marker);
             _marker = L.circleMarker([lat, lon], {
               radius: 7, fillColor: '#009e7d', fillOpacity: 0.9, color: '#fff', weight: 2
@@ -2186,12 +2218,15 @@ function initGlobalFilters() {
 function renderResourceRows(continent, country) {
   var dataset = GLOBAL_RESOURCE_DB[continent] && GLOBAL_RESOURCE_DB[continent].countries[country];
   if (!dataset) return;
+  function escAttr(value) {
+    return String(value).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
   function rowsFor(type) {
     var arr = dataset[type] || [];
     var maxVal = Math.max.apply(null, arr.map(function(r){return r[1];}));
     return arr.map(function(r){
       var w = ((r[1] / maxVal) * 100).toFixed(1);
-      return '<div class="ap-res-row"><span class="ap-res-state">'+r[0]+'</span><div class="ap-res-bar-wrap"><div class="'+(type==='solar'?'ap-res-bar-solar':'ap-res-bar-wind')+'" style="width:'+w+'%"></div></div><span class="ap-res-val">'+r[1].toFixed(2)+'</span><span class="ap-res-cap">'+r[2]+'</span></div>';
+      return '<div class="ap-res-row"><span class="ap-res-state" title="' + escAttr(r[0]) + '">' + r[0] + '</span><div class="ap-res-bar-wrap"><div class="'+(type==='solar'?'ap-res-bar-solar':'ap-res-bar-wind')+'" style="width:'+w+'%"></div></div><span class="ap-res-val">'+r[1].toFixed(2)+'</span><span class="ap-res-cap">'+r[2]+'</span></div>';
     }).join('');
   }
   var solar = document.getElementById('ap-res-solar');
@@ -2238,14 +2273,14 @@ function renderPopupMiniMap(lat, lon) {
     });
     L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-      { maxZoom: 19 }
+      { maxZoom: ATLAS_LOCATION_FOCUS_ZOOM, maxNativeZoom: ATLAS_LOCATION_FOCUS_ZOOM }
     ).addTo(_popupMiniMap);
     L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
-      { maxZoom: 19, opacity: 0.8 }
+      { maxZoom: ATLAS_LOCATION_FOCUS_ZOOM, maxNativeZoom: ATLAS_LOCATION_FOCUS_ZOOM, opacity: 0.8 }
     ).addTo(_popupMiniMap);
   }
-  _popupMiniMap.setView([lat, lon], 6, { animate: false });
+  _popupMiniMap.setView([lat, lon], ATLAS_LOCATION_FOCUS_ZOOM, { animate: false });
   if (_popupMiniMarker) _popupMiniMap.removeLayer(_popupMiniMarker);
   _popupMiniMarker = L.circleMarker([lat, lon], { radius: 7, fillColor: '#00d4aa', fillOpacity: 0.95, color: '#fff', weight: 2 }).addTo(_popupMiniMap);
   setTimeout(function(){ if (_popupMiniMap) _popupMiniMap.invalidateSize({ animate:false }); }, 60);

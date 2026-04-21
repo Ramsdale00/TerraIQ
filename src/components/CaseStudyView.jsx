@@ -1,4 +1,5 @@
 import React from 'react';
+import AnalysisMapPane from './AnalysisMapPane.jsx';
 import PreviewTabButton from './PreviewTabButton.jsx';
 
 export default function CaseStudyView() {
@@ -48,6 +49,9 @@ export default function CaseStudyView() {
             className="case-view-tab active"
             data-case-view="map"
             previewVariant="map"
+            previewTarget="#map-container"
+            previewSourceWidth={560}
+            previewSourceHeight={316}
             previewTitle="Map workspace"
             previewCopy="Live site layers, hero signal, and active resource overlay."
             onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('map')}
@@ -56,8 +60,24 @@ export default function CaseStudyView() {
           </PreviewTabButton>
           <PreviewTabButton
             className="case-view-tab"
+            data-case-view="analysis"
+            previewVariant="analysis"
+            previewTarget="#case-pane-analysis"
+            previewSourceWidth={680}
+            previewSourceHeight={440}
+            previewTitle="Earth Engine analysis"
+            previewCopy="Multi-layer raster overlays, shoreline masks, and aquatic vegetation trend monitoring."
+            onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('analysis')}
+          >
+            Analysis Map
+          </PreviewTabButton>
+          <PreviewTabButton
+            className="case-view-tab"
             data-case-view="overview"
             previewVariant="dashboard"
+            previewTarget="#case-pane-overview"
+            previewSourceWidth={640}
+            previewSourceHeight={380}
             previewTitle="Overview dashboard"
             previewCopy="Core scorecards, KPI blocks, and monthly resource profiles."
             onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('overview')}
@@ -68,6 +88,9 @@ export default function CaseStudyView() {
             className="case-view-tab"
             data-case-view="thesis"
             previewVariant="thesis"
+            previewTarget="#case-pane-thesis"
+            previewSourceWidth={640}
+            previewSourceHeight={380}
             previewTitle="Investment thesis"
             previewCopy="Recommendation, scenarios, and near-term action path."
             onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('thesis')}
@@ -151,6 +174,10 @@ export default function CaseStudyView() {
                 <span id="active-layer-name">Solar Irradiance</span>
               </div>
             </div>
+          </section>
+
+          <section id="case-pane-analysis" className="case-view-pane case-content-pane">
+            <AnalysisMapPane />
           </section>
 
           <section id="case-pane-overview" className="case-view-pane case-content-pane">
