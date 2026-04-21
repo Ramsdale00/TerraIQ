@@ -1,4 +1,6 @@
 import React from 'react';
+import AnalysisMapPane from './AnalysisMapPane.jsx';
+import PreviewTabButton from './PreviewTabButton.jsx';
 
 export default function CaseStudyView() {
   return (
@@ -43,9 +45,58 @@ export default function CaseStudyView() {
         </header>
 
         <div id="case-view-tabs">
-          <button className="case-view-tab active" data-case-view="map" onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('map')}>Map</button>
-          <button className="case-view-tab" data-case-view="overview" onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('overview')}>Overview</button>
-          <button className="case-view-tab" data-case-view="thesis" onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('thesis')}>Investment Thesis</button>
+          <PreviewTabButton
+            className="case-view-tab active"
+            data-case-view="map"
+            previewVariant="map"
+            previewTarget="#map-container"
+            previewSourceWidth={560}
+            previewSourceHeight={316}
+            previewTitle="Map workspace"
+            previewCopy="Live site layers, hero signal, and active resource overlay."
+            onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('map')}
+          >
+            Map
+          </PreviewTabButton>
+          <PreviewTabButton
+            className="case-view-tab"
+            data-case-view="analysis"
+            previewVariant="analysis"
+            previewTarget="#case-pane-analysis"
+            previewSourceWidth={680}
+            previewSourceHeight={440}
+            previewTitle="Earth Engine analysis"
+            previewCopy="Multi-layer raster overlays, shoreline masks, and aquatic vegetation trend monitoring."
+            onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('analysis')}
+          >
+            Analysis Map
+          </PreviewTabButton>
+          <PreviewTabButton
+            className="case-view-tab"
+            data-case-view="overview"
+            previewVariant="dashboard"
+            previewTarget="#case-pane-overview"
+            previewSourceWidth={640}
+            previewSourceHeight={380}
+            previewTitle="Overview dashboard"
+            previewCopy="Core scorecards, KPI blocks, and monthly resource profiles."
+            onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('overview')}
+          >
+            Overview
+          </PreviewTabButton>
+          <PreviewTabButton
+            className="case-view-tab"
+            data-case-view="thesis"
+            previewVariant="thesis"
+            previewTarget="#case-pane-thesis"
+            previewSourceWidth={640}
+            previewSourceHeight={380}
+            previewTitle="Investment thesis"
+            previewCopy="Recommendation, scenarios, and near-term action path."
+            onClick={() => window.switchCasePanelTab && window.switchCasePanelTab('thesis')}
+          >
+            Investment Thesis
+          </PreviewTabButton>
         </div>
 
         <main id="main">
@@ -125,6 +176,10 @@ export default function CaseStudyView() {
             </div>
           </section>
 
+          <section id="case-pane-analysis" className="case-view-pane case-content-pane">
+            <AnalysisMapPane />
+          </section>
+
           <section id="case-pane-overview" className="case-view-pane case-content-pane">
             <div className="case-scroll-shell">
               <div className="case-pane-actions">
@@ -174,7 +229,23 @@ export default function CaseStudyView() {
             <div className="panel-divider"></div>
 
             <div id="panel-section-score">
-              <div className="panel-label">ESG Score</div>
+              <div className="panel-label panel-label-help">
+                <span>ESG Score</span>
+                <span className="score-help">
+                  <button
+                    id="score-help-trigger"
+                    type="button"
+                    className="score-help-trigger"
+                    aria-label="How this ESG score was calculated"
+                    aria-describedby="score-help-copy"
+                  >
+                    ?
+                  </button>
+                  <span id="score-help-copy" role="tooltip" className="score-help-tooltip">
+                    Composite score details will appear here.
+                  </span>
+                </span>
+              </div>
               <div id="score-summary">
                 <div id="score-summary-copy">
                   <div id="score-headline">Balanced ESG profile with focused permitting work still ahead.</div>
@@ -257,6 +328,7 @@ export default function CaseStudyView() {
             <div id="panel-section-official">
               <div className="panel-label">Official Monthly Profiles</div>
               <p id="official-profile-note">Official site-centroid monthly climatology rendered from NASA POWER data. Use these charts for seasonal trend checks alongside the project-area map layers.</p>
+              <div id="official-profile-kpis"></div>
               <div id="official-profiles"></div>
             </div>
 

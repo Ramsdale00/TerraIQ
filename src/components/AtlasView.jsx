@@ -1,13 +1,15 @@
 import React from 'react';
+import PreviewTabButton from './PreviewTabButton.jsx';
 
-// View 1 — Lumora Explorer (USA / Global Solar Atlas)
-// Preserves original DOM IDs/classes so the embedded JS (see src/app-logic.js)
-// can keep driving the Leaflet map, search bar, and right-panel updates.
 export default function AtlasView() {
+  const portfolioScore =
+    typeof window !== 'undefined' && typeof window.getPortfolioESG === 'function'
+      ? window.getPortfolioESG().total
+      : 78;
+
   return (
     <div id="view-atlas" className="view active">
       <div id="atlas-app">
-        {/* Atlas Header */}
         <header id="atlas-header">
           <div id="logo">
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
@@ -38,28 +40,25 @@ export default function AtlasView() {
           </div>
         </header>
 
-        {/* Atlas Main */}
         <div id="atlas-main">
-          {/* US Map */}
           <div id="us-map-container">
             <div id="us-map"></div>
-            {/* Search bar overlay */}
             <div id="atlas-search-wrap">
               <div id="atlas-search-box">
                 <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0, color: 'var(--text-muted)' }}>
                   <circle cx="6.5" cy="6.5" r="4.5" stroke="currentColor" strokeWidth="1.5" />
                   <path d="M10 10l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
                 </svg>
-                <input id="atlas-search-input" type="text" placeholder="Search city, address, or coordinates…" autoComplete="off" spellCheck="false" />
-                <button id="atlas-search-clear" style={{ display: 'none' }} title="Clear search">&#x2715;</button>
+                <input id="atlas-search-input" type="text" placeholder="Search city, address, or coordinates..." autoComplete="off" spellCheck="false" />
+                <button id="atlas-search-clear" style={{ display: 'none' }} title="Clear search">
+                  &#x2715;
+                </button>
               </div>
               <div id="atlas-search-results"></div>
             </div>
-            {/* Floating CTA */}
             <button id="atlas-cta-btn" onClick={() => window.showCaseStudy && window.showCaseStudy()}>
               View King Lake Portfolio Assessment &rarr;
             </button>
-            {/* Floating legend */}
             <div id="atlas-legend-overlay">
               <div className="legend-title">Solar GHI + Wind Resource</div>
               <div id="atlas-legend-items"></div>
@@ -67,18 +66,18 @@ export default function AtlasView() {
                 Source: NREL NSRDB
               </div>
             </div>
-            {/* Region info panel */}
             <div id="atlas-info-panel"></div>
           </div>
 
-          {/* Atlas Right Panel */}
           <aside id="atlas-panel">
-            {/* Selected Location — shown on map click */}
             <div id="atlas-location-section">
               <div className="ap-section">
                 <div className="panel-label">SELECTED LOCATION</div>
                 <div id="aloc-name">
-                  <span className="aloc-loading"><span className="aip-spinner"></span>Locating…</span>
+                  <span className="aloc-loading">
+                    <span className="aip-spinner"></span>
+                    Locating...
+                  </span>
                 </div>
                 <div id="aloc-coords"></div>
                 <div id="aloc-key-metrics"></div>
@@ -88,20 +87,41 @@ export default function AtlasView() {
               <div className="panel-divider"></div>
             </div>
 
-            {/* Global Renewable Resources — tabbed solar / wind by region */}
             <div className="ap-section">
               <div className="panel-label">GLOBAL RENEWABLE RESOURCES</div>
               <div id="resource-filters" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
                 <select id="continent-filter" style={{ padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg-card)', fontSize: 11 }}></select>
                 <select id="country-filter" style={{ padding: '6px 8px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg-card)', fontSize: 11 }}></select>
               </div>
-              {/* Tab bar */}
               <div className="ap-res-tabs">
-                <button className="ap-res-tab active" id="tab-solar" onClick={() => window.switchResTab && window.switchResTab('solar')}>☀️ Solar GHI</button>
-                <button className="ap-res-tab" id="tab-wind" onClick={() => window.switchResTab && window.switchResTab('wind')}>💨 Wind @ 80m</button>
+                <PreviewTabButton
+                  className="ap-res-tab active"
+                  id="tab-solar"
+                  previewVariant="bars"
+                  previewTarget="#ap-res-solar"
+                  previewSourceWidth={420}
+                  previewSourceHeight={230}
+                  previewTitle="Solar ranking"
+                  previewCopy="State-by-state irradiance and installed capacity view."
+                  onClick={() => window.switchResTab && window.switchResTab('solar')}
+                >
+                  Solar GHI
+                </PreviewTabButton>
+                <PreviewTabButton
+                  className="ap-res-tab"
+                  id="tab-wind"
+                  previewVariant="bars"
+                  previewTarget="#ap-res-wind"
+                  previewSourceWidth={420}
+                  previewSourceHeight={230}
+                  previewTitle="Wind ranking"
+                  previewCopy="Hub-height wind speeds and installed capacity comparison."
+                  onClick={() => window.switchResTab && window.switchResTab('wind')}
+                >
+                  Wind @ 80m
+                </PreviewTabButton>
               </div>
 
-              {/* Solar panel */}
               <div id="ap-res-solar">
                 <div className="ap-res-header-row">
                   <span className="ap-res-col-state">State</span>
@@ -146,7 +166,6 @@ export default function AtlasView() {
                 </div>
               </div>
 
-              {/* Wind panel */}
               <div id="ap-res-wind" style={{ display: 'none' }}>
                 <div className="ap-res-header-row">
                   <span className="ap-res-col-state">State</span>
@@ -185,7 +204,7 @@ export default function AtlasView() {
                   <span className="ap-res-cap">43.0 GW</span>
                 </div>
                 <div className="ap-res-cite">
-                  Wind speed: NREL Wind Toolkit (WTK), 80m hub height, 2014–2022 avg
+                  Wind speed: NREL Wind Toolkit (WTK), 80m hub height, 2014-2022 avg
                   <br />
                   Installed capacity: EIA Electric Power Monthly, Feb 2025
                 </div>
@@ -201,7 +220,7 @@ export default function AtlasView() {
                   <div className="ap-case-dot"></div>
                   <div className="ap-case-body">
                     <div className="ap-case-name">King Lake, Florida</div>
-                    <div className="ap-case-meta">ESG Score: 79/100 &middot; GHI: 5.35 kWh/m&sup2;/day</div>
+                    <div className="ap-case-meta">ESG Score: {portfolioScore}/100 &middot; GHI: 5.35 kWh/m&sup2;/day</div>
                   </div>
                   <div className="ap-case-arrow">&rarr;</div>
                 </div>
@@ -224,7 +243,6 @@ export default function AtlasView() {
           </aside>
         </div>
 
-        {/* Atlas Bottom Bar */}
         <div id="atlas-bar">
           <span id="layer-bar-label">SOLAR &amp; WIND RESOURCE</span>
           <button id="atlas-wind-toggle" onClick={() => window.toggleAtlasWind && window.toggleAtlasWind()}>
@@ -239,7 +257,6 @@ export default function AtlasView() {
         </div>
       </div>
 
-      {/* Location popup */}
       <div id="location-popup-overlay" onClick={() => window.closeLocationPopup && window.closeLocationPopup()}></div>
       <div id="location-popup" role="dialog" aria-modal="true" aria-label="Location analysis popup">
         <div className="lp-header">
@@ -247,20 +264,72 @@ export default function AtlasView() {
             <div className="lp-title" id="lp-title">Location analysis</div>
             <div className="lp-sub" id="lp-sub">Select a point on the map to load details.</div>
           </div>
-          <button className="lp-close" onClick={() => window.closeLocationPopup && window.closeLocationPopup()}>✕</button>
+          <button className="lp-close" onClick={() => window.closeLocationPopup && window.closeLocationPopup()}>
+            &#10005;
+          </button>
         </div>
         <div className="lp-body">
           <div className="lp-left">
             <div className="lp-left-label">Selected Point</div>
-            <div id="lp-coords" style={{ fontFamily: 'monospace', fontSize: 12, marginTop: 6 }}>—</div>
+            <div id="lp-coords" style={{ fontFamily: 'monospace', fontSize: 12, marginTop: 6 }}>
+              —
+            </div>
             <div id="lp-mini-map" aria-label="Selected location map snapshot"></div>
           </div>
           <div className="lp-right">
             <div className="lp-tabs">
-              <button className="lp-tab active" data-lp-tab="solar" onClick={() => window.switchLocationPopupTab && window.switchLocationPopupTab('solar')}>Solar Profile</button>
-              <button className="lp-tab" data-lp-tab="wind" onClick={() => window.switchLocationPopupTab && window.switchLocationPopupTab('wind')}>Wind Profile</button>
-              <button className="lp-tab" data-lp-tab="profiles" onClick={() => window.switchLocationPopupTab && window.switchLocationPopupTab('profiles')}>Wind & Solar Profiles</button>
-              <button className="lp-tab" data-lp-tab="analysis" onClick={() => window.switchLocationPopupTab && window.switchLocationPopupTab('analysis')}>Location Analysis</button>
+              <PreviewTabButton
+                className="lp-tab active"
+                data-lp-tab="solar"
+                previewVariant="chart"
+                previewTarget="#lp-solar"
+                previewSourceWidth={540}
+                previewSourceHeight={310}
+                previewTitle="Solar profile"
+                previewCopy="Monthly irradiance curve and solar takeaways for the selected point."
+                onClick={() => window.switchLocationPopupTab && window.switchLocationPopupTab('solar')}
+              >
+                Solar Profile
+              </PreviewTabButton>
+              <PreviewTabButton
+                className="lp-tab"
+                data-lp-tab="wind"
+                previewVariant="chart"
+                previewTarget="#lp-wind"
+                previewSourceWidth={540}
+                previewSourceHeight={310}
+                previewTitle="Wind profile"
+                previewCopy="Monthly wind pattern and hub-height signal at this location."
+                onClick={() => window.switchLocationPopupTab && window.switchLocationPopupTab('wind')}
+              >
+                Wind Profile
+              </PreviewTabButton>
+              <PreviewTabButton
+                className="lp-tab"
+                data-lp-tab="profiles"
+                previewVariant="split-chart"
+                previewTarget="#lp-profiles"
+                previewSourceWidth={540}
+                previewSourceHeight={310}
+                previewTitle="Combined profiles"
+                previewCopy="Side-by-side solar and wind seasonality comparison."
+                onClick={() => window.switchLocationPopupTab && window.switchLocationPopupTab('profiles')}
+              >
+                Wind &amp; Solar Profiles
+              </PreviewTabButton>
+              <PreviewTabButton
+                className="lp-tab"
+                data-lp-tab="analysis"
+                previewVariant="analysis"
+                previewTarget="#lp-analysis"
+                previewSourceWidth={540}
+                previewSourceHeight={310}
+                previewTitle="Location analysis"
+                previewCopy="Key metrics, grid context, and site interpretation."
+                onClick={() => window.switchLocationPopupTab && window.switchLocationPopupTab('analysis')}
+              >
+                Location Analysis
+              </PreviewTabButton>
             </div>
             <div id="lp-solar" className="lp-panel active"></div>
             <div id="lp-wind" className="lp-panel"></div>

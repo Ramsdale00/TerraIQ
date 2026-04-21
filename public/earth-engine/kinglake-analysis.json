@@ -1,0 +1,570 @@
+{
+  "scene": {
+    "name": "King Lake",
+    "subtitle": "Earth Engine aquatic vegetation analysis",
+    "center": [
+      28.2906,
+      -82.2918
+    ],
+    "bounds": [
+      -82.30705992911021,
+      28.277078681985884,
+      -82.27651720945015,
+      28.304117972037883
+    ],
+    "location": "Pasco County, Florida",
+    "acquisitionWindow": "2023-01 to 2026-03"
+  },
+  "layers": [
+    {
+      "id": "rgb",
+      "group": "base",
+      "label": "RGB Composite",
+      "shortLabel": "RGB",
+      "image": "/earth-engine/rasters/kinglake_rgb.png",
+      "bounds": [
+        -82.30705992911021,
+        28.277078681985884,
+        -82.27651720945015,
+        28.304117972037883
+      ],
+      "defaultOpacity": 1,
+      "visibleByDefault": true,
+      "description": "Sentinel-2 true-color composite from B4/B3/B2 for visual context around the King Lake shoreline.",
+      "sourceFiles": [
+        "kinglake_rgb_b4_b3_b2.tif"
+      ],
+      "legend": {
+        "type": "gradient",
+        "unit": "Reflectance",
+        "minLabel": "Low",
+        "maxLabel": "High",
+        "stops": [
+          "#0b1220",
+          "#205072",
+          "#70a9a1",
+          "#f2d0a9"
+        ]
+      },
+      "stats": [
+        {
+          "min": 0.005581,
+          "max": 0.3589,
+          "mean": 0.081072,
+          "p2": 0.008072,
+          "p98": 0.215557
+        },
+        {
+          "min": 0.007753,
+          "max": 0.3796,
+          "mean": 0.083148,
+          "p2": 0.009556,
+          "p98": 0.198
+        },
+        {
+          "min": 0.00865,
+          "max": 0.4054,
+          "mean": 0.06026,
+          "p2": 0.010759,
+          "p98": 0.169444
+        }
+      ]
+    },
+    {
+      "id": "ndvi",
+      "group": "base",
+      "label": "NDVI",
+      "shortLabel": "NDVI",
+      "image": "/earth-engine/rasters/kinglake_ndvi.png",
+      "bounds": [
+        -82.30705992911021,
+        28.277078681985884,
+        -82.27651720945015,
+        28.304117972037883
+      ],
+      "defaultOpacity": 0.9,
+      "visibleByDefault": false,
+      "description": "Normalized Difference Vegetation Index highlighting vegetated patches and shoreline biomass intensity.",
+      "sourceFiles": [
+        "kinglake_ndvi.tif",
+        "kinglake_ndvi_viz.tif"
+      ],
+      "legend": {
+        "type": "gradient",
+        "unit": "Index",
+        "minLabel": "-0.46",
+        "maxLabel": "0.88",
+        "stops": [
+          "#5b2a86",
+          "#a64d79",
+          "#efb366",
+          "#7cb342",
+          "#1b5e20"
+        ]
+      },
+      "stats": [
+        {
+          "min": -0.458122,
+          "max": 0.879453,
+          "mean": 0.44578,
+          "p2": -0.037811,
+          "p98": 0.795703
+        }
+      ]
+    },
+    {
+      "id": "fai",
+      "group": "base",
+      "label": "FAI",
+      "shortLabel": "FAI",
+      "image": "/earth-engine/rasters/kinglake_fai.png",
+      "bounds": [
+        -82.30705992911021,
+        28.277078681985884,
+        -82.27651720945015,
+        28.304117972037883
+      ],
+      "defaultOpacity": 0.92,
+      "visibleByDefault": false,
+      "description": "Floating Algae Index used to emphasize surface bloom signatures and floating vegetation activity.",
+      "sourceFiles": [
+        "kinglake_fai.tif",
+        "kinglake_fai_viz.tif"
+      ],
+      "legend": {
+        "type": "gradient",
+        "unit": "Index",
+        "minLabel": "-0.03",
+        "maxLabel": "0.32",
+        "stops": [
+          "#122033",
+          "#3b4cc0",
+          "#76c893",
+          "#ffd166",
+          "#ef476f"
+        ]
+      },
+      "stats": [
+        {
+          "min": -0.029815,
+          "max": 0.31922,
+          "mean": 0.115393,
+          "p2": -0.005344,
+          "p98": 0.243496
+        }
+      ]
+    },
+    {
+      "id": "mndwi",
+      "group": "base",
+      "label": "MNDWI",
+      "shortLabel": "MNDWI",
+      "image": "/earth-engine/rasters/kinglake_mndwi.png",
+      "bounds": [
+        -82.30705992911021,
+        28.277078681985884,
+        -82.27651720945015,
+        28.304117972037883
+      ],
+      "defaultOpacity": 0.88,
+      "visibleByDefault": false,
+      "description": "Modified Normalized Difference Water Index separating open water from surrounding land and emergent vegetation.",
+      "sourceFiles": [
+        "kinglake_mndwi.tif"
+      ],
+      "legend": {
+        "type": "gradient",
+        "unit": "Index",
+        "minLabel": "-0.75",
+        "maxLabel": "0.64",
+        "stops": [
+          "#2b174d",
+          "#5b4b8a",
+          "#7dd3fc",
+          "#34d399",
+          "#d9f99d"
+        ]
+      },
+      "stats": [
+        {
+          "min": -0.75321,
+          "max": 0.637046,
+          "mean": -0.388869,
+          "p2": -0.637137,
+          "p98": 0.03705
+        }
+      ]
+    },
+    {
+      "id": "nir",
+      "group": "base",
+      "label": "NIR Band 8",
+      "shortLabel": "NIR",
+      "image": "/earth-engine/rasters/kinglake_nir.png",
+      "bounds": [
+        -82.30705992911021,
+        28.277078681985884,
+        -82.27651720945015,
+        28.304117972037883
+      ],
+      "defaultOpacity": 0.85,
+      "visibleByDefault": false,
+      "description": "Near-infrared reflectance surface useful for identifying plant vigor and bright vegetative returns.",
+      "sourceFiles": [
+        "kinglake_nir_b8.tif"
+      ],
+      "legend": {
+        "type": "gradient",
+        "unit": "Reflectance",
+        "minLabel": "0.00",
+        "maxLabel": "0.44",
+        "stops": [
+          "#140f2d",
+          "#3d1c56",
+          "#7c3aed",
+          "#f59e0b",
+          "#fef3c7"
+        ]
+      },
+      "stats": [
+        {
+          "min": 0.00434,
+          "max": 0.439714,
+          "mean": 0.229629,
+          "p2": 0.00686,
+          "p98": 0.3596
+        }
+      ]
+    },
+    {
+      "id": "swir1",
+      "group": "base",
+      "label": "SWIR1 Band 11",
+      "shortLabel": "SWIR1",
+      "image": "/earth-engine/rasters/kinglake_swir1.png",
+      "bounds": [
+        -82.30705992911021,
+        28.276988850457474,
+        -82.27651720945015,
+        28.304117972037883
+      ],
+      "defaultOpacity": 0.85,
+      "visibleByDefault": false,
+      "description": "Short-wave infrared reflectance emphasizing moisture contrast and exposed material across the lake edge.",
+      "sourceFiles": [
+        "kinglake_swir1_b11.tif"
+      ],
+      "legend": {
+        "type": "gradient",
+        "unit": "Reflectance",
+        "minLabel": "0.01",
+        "maxLabel": "0.51",
+        "stops": [
+          "#0f172a",
+          "#7c2d12",
+          "#ea580c",
+          "#fb923c",
+          "#ffedd5"
+        ]
+      },
+      "stats": [
+        {
+          "min": 0.008417,
+          "max": 0.509967,
+          "mean": 0.20748,
+          "p2": 0.009726,
+          "p98": 0.399276
+        }
+      ]
+    },
+    {
+      "id": "aquaticveg",
+      "group": "overlay",
+      "label": "Aquatic Vegetation",
+      "shortLabel": "Vegetation",
+      "image": "/earth-engine/rasters/kinglake_aquaticveg.png",
+      "bounds": [
+        -82.30705992911021,
+        28.277078681985884,
+        -82.27651720945015,
+        28.304117972037883
+      ],
+      "defaultOpacity": 0.9,
+      "visibleByDefault": true,
+      "description": "Binary aquatic vegetation detection layer showing the small active vegetation footprint in the current export.",
+      "sourceFiles": [
+        "kinglake_aquaticveg.tif",
+        "kinglake_aquaticveg_viz.tif"
+      ],
+      "legend": {
+        "type": "categorical",
+        "unit": "",
+        "items": [
+          {
+            "label": "Aquatic vegetation",
+            "color": "#22c55e"
+          }
+        ]
+      },
+      "stats": [
+        {
+          "min": 0.0,
+          "max": 1.0,
+          "mean": 0.000225,
+          "p2": 0.0,
+          "p98": 0.0
+        }
+      ]
+    },
+    {
+      "id": "watermask",
+      "group": "overlay",
+      "label": "Water Mask",
+      "shortLabel": "Water",
+      "image": "/earth-engine/rasters/kinglake_watermask.png",
+      "bounds": [
+        -82.30705992911021,
+        28.277078681985884,
+        -82.27651720945015,
+        28.304117972037883
+      ],
+      "defaultOpacity": 0.72,
+      "visibleByDefault": true,
+      "description": "Binary water classification clipped to the Earth Engine export window for shoreline validation.",
+      "sourceFiles": [
+        "kinglake_watermask.tif"
+      ],
+      "legend": {
+        "type": "categorical",
+        "unit": "",
+        "items": [
+          {
+            "label": "Water",
+            "color": "#38bdf8"
+          }
+        ]
+      },
+      "stats": [
+        {
+          "min": 0.0,
+          "max": 1.0,
+          "mean": 0.000235,
+          "p2": 0.0,
+          "p98": 0.0
+        }
+      ]
+    }
+  ],
+  "chart": {
+    "title": "King Lake - Monthly Aquatic Vegetation Area (m?)",
+    "rows": [
+      {
+        "date": "2023-01",
+        "vegM2": 0.0,
+        "label": "2023 01"
+      },
+      {
+        "date": "2023-02",
+        "vegM2": 1228.21,
+        "label": "2023 02"
+      },
+      {
+        "date": "2023-03",
+        "vegM2": 4561.978,
+        "label": "2023 03"
+      },
+      {
+        "date": "2023-04",
+        "vegM2": 3684.661,
+        "label": "2023 04"
+      },
+      {
+        "date": "2023-05",
+        "vegM2": 1403.684,
+        "label": "2023 05"
+      },
+      {
+        "date": "2023-06",
+        "vegM2": 1754.625,
+        "label": "2023 06"
+      },
+      {
+        "date": "2023-08",
+        "vegM2": 9562.598,
+        "label": "2023 08"
+      },
+      {
+        "date": "2023-09",
+        "vegM2": 113260.921,
+        "label": "2023 09"
+      },
+      {
+        "date": "2023-10",
+        "vegM2": 97733.181,
+        "label": "2023 10"
+      },
+      {
+        "date": "2023-11",
+        "vegM2": 107734.608,
+        "label": "2023 11"
+      },
+      {
+        "date": "2023-12",
+        "vegM2": 10089.116,
+        "label": "2023 12"
+      },
+      {
+        "date": "2024-02",
+        "vegM2": 7895.777,
+        "label": "2024 02"
+      },
+      {
+        "date": "2024-03",
+        "vegM2": 5790.158,
+        "label": "2024 03"
+      },
+      {
+        "date": "2024-04",
+        "vegM2": 5439.217,
+        "label": "2024 04"
+      },
+      {
+        "date": "2024-05",
+        "vegM2": 1491.424,
+        "label": "2024 05"
+      },
+      {
+        "date": "2024-06",
+        "vegM2": 19915.055,
+        "label": "2024 06"
+      },
+      {
+        "date": "2024-07",
+        "vegM2": 7106.08,
+        "label": "2024 07"
+      },
+      {
+        "date": "2024-08",
+        "vegM2": 66149.871,
+        "label": "2024 08"
+      },
+      {
+        "date": "2024-09",
+        "vegM2": 176865.827,
+        "label": "2024 09"
+      },
+      {
+        "date": "2024-10",
+        "vegM2": 78080.467,
+        "label": "2024 10"
+      },
+      {
+        "date": "2024-11",
+        "vegM2": 39040.204,
+        "label": "2024 11"
+      },
+      {
+        "date": "2024-12",
+        "vegM2": 34916.805,
+        "label": "2024 12"
+      },
+      {
+        "date": "2025-01",
+        "vegM2": 3772.423,
+        "label": "2025 01"
+      },
+      {
+        "date": "2025-02",
+        "vegM2": 10352.241,
+        "label": "2025 02"
+      },
+      {
+        "date": "2025-03",
+        "vegM2": 20967.44,
+        "label": "2025 03"
+      },
+      {
+        "date": "2025-04",
+        "vegM2": 11404.794,
+        "label": "2025 04"
+      },
+      {
+        "date": "2025-05",
+        "vegM2": 7457.019,
+        "label": "2025 05"
+      },
+      {
+        "date": "2025-07",
+        "vegM2": 3947.795,
+        "label": "2025 07"
+      },
+      {
+        "date": "2025-08",
+        "vegM2": 7456.954,
+        "label": "2025 08"
+      },
+      {
+        "date": "2025-09",
+        "vegM2": 6842.944,
+        "label": "2025 09"
+      },
+      {
+        "date": "2025-10",
+        "vegM2": 2895.052,
+        "label": "2025 10"
+      },
+      {
+        "date": "2025-11",
+        "vegM2": 2368.679,
+        "label": "2025 11"
+      },
+      {
+        "date": "2025-12",
+        "vegM2": 877.293,
+        "label": "2025 12"
+      },
+      {
+        "date": "2026-01",
+        "vegM2": 16931.911,
+        "label": "2026 01"
+      },
+      {
+        "date": "2026-02",
+        "vegM2": 42636.652,
+        "label": "2026 02"
+      },
+      {
+        "date": "2026-03",
+        "vegM2": 19651.295,
+        "label": "2026 03"
+      }
+    ],
+    "summary": {
+      "seriesCount": 36,
+      "activeMonths": 35,
+      "peakDate": "2024-09",
+      "peakVegM2": 176865.827,
+      "latestDate": "2026-03",
+      "latestVegM2": 19651.295
+    },
+    "sourceFiles": [
+      "ee-chart.csv",
+      "kinglake_monthly_aquaticveg_area.csv"
+    ]
+  },
+  "sourceFiles": [
+    "kinglake_aquaticveg.tif",
+    "kinglake_aquaticveg_viz.tif",
+    "kinglake_fai.tif",
+    "kinglake_fai_viz.tif",
+    "kinglake_mndwi.tif",
+    "kinglake_monthly_aquaticveg_area.csv",
+    "kinglake_ndvi.tif",
+    "kinglake_ndvi_viz.tif",
+    "kinglake_nir_b8.tif",
+    "kinglake_rgb_b4_b3_b2.tif",
+    "kinglake_swir1_b11.tif",
+    "kinglake_watermask.tif",
+    "ee-chart.csv"
+  ]
+}
